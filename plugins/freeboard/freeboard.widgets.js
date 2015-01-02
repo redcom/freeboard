@@ -11,42 +11,42 @@
 	var SPARKLINE_HISTORY_LENGTH = 100;
 	var SPARKLINE_COLORS = ["#FF9900", "#FFFFFF", "#B3B4B4", "#6B6B6B", "#28DE28", "#13F7F9", "#E6EE18", "#C41204", "#CA3CB8", "#0B1CFB"];
 
-    function easeTransitionText(newValue, textElement, duration) {
+	function easeTransitionText(newValue, textElement, duration) {
 
 		var currentValue = $(textElement).text();
 
-        if (currentValue == newValue)
-            return;
+		if (currentValue == newValue)
+			return;
 
-        if ($.isNumeric(newValue) && $.isNumeric(currentValue)) {
-            var numParts = newValue.toString().split('.');
-            var endingPrecision = 0;
+		if ($.isNumeric(newValue) && $.isNumeric(currentValue)) {
+			var numParts = newValue.toString().split('.');
+			var endingPrecision = 0;
 
-            if (numParts.length > 1) {
-                endingPrecision = numParts[1].length;
-            }
+			if (numParts.length > 1) {
+				endingPrecision = numParts[1].length;
+			}
 
-            numParts = currentValue.toString().split('.');
-            var startingPrecision = 0;
+			numParts = currentValue.toString().split('.');
+			var startingPrecision = 0;
 
-            if (numParts.length > 1) {
-                startingPrecision = numParts[1].length;
-            }
+			if (numParts.length > 1) {
+				startingPrecision = numParts[1].length;
+			}
 
-            jQuery({transitionValue: Number(currentValue), precisionValue: startingPrecision}).animate({transitionValue: Number(newValue), precisionValue: endingPrecision}, {
-                duration: duration,
-                step: function () {
-                    $(textElement).text(this.transitionValue.toFixed(this.precisionValue));
-                },
-                done: function () {
-                    $(textElement).text(newValue);
-                }
-            });
-        }
-        else {
-            $(textElement).text(newValue);
-        }
-    }
+			jQuery({transitionValue: Number(currentValue), precisionValue: startingPrecision}).animate({transitionValue: Number(newValue), precisionValue: endingPrecision}, {
+				duration: duration,
+				step: function () {
+					$(textElement).text(this.transitionValue.toFixed(this.precisionValue));
+				},
+				done: function () {
+					$(textElement).text(newValue);
+				}
+			});
+		}
+		else {
+			$(textElement).text(newValue);
+		}
+	}
 
 	function addValueToSparkline(element, value) {
 		var values = $(element).data().values;
@@ -145,16 +145,16 @@
 	freeboard.addStyle('.tw-sparkline',
 		'height:20px;');
 
-    var textWidget = function (settings) {
+	var textWidget = function (settings) {
 
-        var self = this;
+		var self = this;
 
-        var currentSettings = settings;
+		var currentSettings = settings;
 		var displayElement = $('<div class="tw-display"></div>');
 		var titleElement = $('<h2 class="section-title tw-title tw-td"></h2>');
-        var valueElement = $('<div class="tw-value"></div>');
-        var unitsElement = $('<div class="tw-unit"></div>');
-        var sparklineElement = $('<div class="tw-sparkline tw-td"></div>');
+		var valueElement = $('<div class="tw-value"></div>');
+		var unitsElement = $('<div class="tw-unit"></div>');
+		var sparklineElement = $('<div class="tw-sparkline tw-td"></div>');
 
 		function updateValueSizing()
 		{
@@ -168,7 +168,7 @@
 			}
 		}
 
-        this.render = function (element) {
+		this.render = function (element) {
 			$(element).empty();
 
 			$(displayElement)
@@ -179,10 +179,10 @@
 			$(element).append(displayElement);
 
 			updateValueSizing();
-        }
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            currentSettings = newSettings;
+		this.onSettingsChanged = function (newSettings) {
+			currentSettings = newSettings;
 
 			var shouldDisplayTitle = (!_.isUndefined(newSettings.title) && newSettings.title != "");
 			var shouldDisplayUnits = (!_.isUndefined(newSettings.units) && newSettings.units != "");
@@ -235,754 +235,777 @@
 			valueElement.css({"font-size" : valueFontSize + "px"});
 
 			updateValueSizing();
-        }
+		}
 
 		this.onSizeChanged = function()
 		{
 			updateValueSizing();
 		}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (settingName == "value") {
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (settingName == "value") {
 
-                if (currentSettings.animate) {
-                    easeTransitionText(newValue, valueElement, 500);
-                }
-                else {
-                    valueElement.text(newValue);
-                }
+				if (currentSettings.animate) {
+					easeTransitionText(newValue, valueElement, 500);
+				}
+				else {
+					valueElement.text(newValue);
+				}
 
-                if (currentSettings.sparkline) {
-                    addValueToSparkline(sparklineElement, newValue);
-                }
-            }
-        }
+				if (currentSettings.sparkline) {
+					addValueToSparkline(sparklineElement, newValue);
+				}
+			}
+		}
 
-        this.onDispose = function () {
+		this.onDispose = function () {
 
-        }
+		}
 
-        this.getHeight = function () {
-            if (currentSettings.size == "big" || currentSettings.sparkline) {
-                return 2;
-            }
-            else {
-                return 1;
-            }
-        }
+		this.getHeight = function () {
+			if (currentSettings.size == "big" || currentSettings.sparkline) {
+				return 2;
+			}
+			else {
+				return 1;
+			}
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        type_name: "text_widget",
-        display_name: "Text",
-        "external_scripts" : [
-            "plugins/thirdparty/jquery.sparkline.min.js"
-        ],
-        settings: [
-            {
-                name: "title",
-                display_name: "Title",
-                type: "text"
-            },
-            {
-                name: "size",
-                display_name: "Size",
-                type: "option",
-                options: [
-                    {
-                        name: "Regular",
-                        value: "regular"
-                    },
-                    {
-                        name: "Big",
-                        value: "big"
-                    }
-                ]
-            },
-            {
-                name: "value",
-                display_name: "Value",
-                type: "calculated"
-            },
-            {
-                name: "sparkline",
-                display_name: "Include Sparkline",
-                type: "boolean"
-            },
-            {
-                name: "animate",
-                display_name: "Animate Value Changes",
-                type: "boolean",
-                default_value: true
-            },
-            {
-                name: "units",
-                display_name: "Units",
-                type: "text"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new textWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		type_name: "text_widget",
+		display_name: "テキスト",
+		"external_scripts" : [
+			"plugins/thirdparty/jquery.sparkline.min.js"
+		],
+		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
+			{
+				name: "size",
+				display_name: "サイズ",
+				type: "option",
+				options: [
+					{
+						name: "レギュラー",
+						value: "regular"
+					},
+					{
+						name: "ビッグ",
+						value: "big"
+					}
+				]
+			},
+			{
+				name: "value",
+				display_name: "値",
+				type: "calculated"
+			},
+			{
+				name: "sparkline",
+				display_name: "スパークラインを含む",
+				type: "boolean"
+			},
+			{
+				name: "animate",
+				display_name: "値変化アニメーション",
+				type: "boolean",
+				default_value: true
+			},
+			{
+				name: "units",
+				display_name: "単位",
+				type: "text"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new textWidget(settings));
+		}
+	});
 
-    var gaugeID = 0;
+	var gaugeID = 0;
 	freeboard.addStyle('.gauge-widget-wrapper', "width: 100%;text-align: center;");
-	freeboard.addStyle('.gauge-widget', "width:200px;height:160px;display:inline-block;");
+	freeboard.addStyle('.gauge-widget', "width:200px;height:150px;display:inline-block;");
 
-    var gaugeWidget = function (settings) {
-        var self = this;
+	var gaugeWidget = function (settings) {
+		var self = this;
 
-        var thisGaugeID = "gauge-" + gaugeID++;
-        var titleElement = $('<h2 class="section-title"></h2>');
-        var gaugeElement = $('<div class="gauge-widget" id="' + thisGaugeID + '"></div>');
+		var thisGaugeID = "gauge-" + gaugeID++;
+		var titleElement = $('<h2 class="section-title"></h2>');
+		var gaugeElement = $('<div class="gauge-widget" id="' + thisGaugeID + '"></div>');
 
-        var gaugeObject;
-        var rendered = false;
+		var gaugeObject;
+		var rendered = false;
 
-        var currentSettings = settings;
+		var currentSettings = settings;
 
-        function createGauge() {
-            if (!rendered) {
-                return;
-            }
+		function createGauge() {
+			if (!rendered) {
+				return;
+			}
 
-            gaugeElement.empty();
+			currentSettings.shape = parseInt(currentSettings.shape);
 
-            gaugeObject = new JustGage({
-                id: thisGaugeID,
-                value: (_.isUndefined(currentSettings.min_value) ? 0 : currentSettings.min_value),
-                min: (_.isUndefined(currentSettings.min_value) ? 0 : currentSettings.min_value),
-                max: (_.isUndefined(currentSettings.max_value) ? 0 : currentSettings.max_value),
-                label: currentSettings.units,
-                showInnerShadow: false,
-                valueFontColor: "#d3d4d4"
-            });
-        }
+			gaugeElement.empty();
 
-        this.render = function (element) {
-            rendered = true;
-            $(element).append(titleElement).append($('<div class="gauge-widget-wrapper"></div>').append(gaugeElement));
-            createGauge();
-        }
+			gaugeObject = new JustGage({
+				id: thisGaugeID,
+				value: (_.isUndefined(currentSettings.min_value) ? 0 : currentSettings.min_value),
+				min: (_.isUndefined(currentSettings.min_value) ? 0 : currentSettings.min_value),
+				max: (_.isUndefined(currentSettings.max_value) ? 0 : currentSettings.max_value),
+				label: currentSettings.units,
+				showInnerShadow: false,
+				shape: currentSettings.shape,
+				valueFontColor: "#d3d4d4",
+			});
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            if (newSettings.min_value != currentSettings.min_value || newSettings.max_value != currentSettings.max_value || newSettings.units != currentSettings.units) {
-                currentSettings = newSettings;
-                createGauge();
-            }
-            else {
-                currentSettings = newSettings;
-            }
+		this.render = function (element) {
+			rendered = true;
+			$(element).append(titleElement).append($('<div class="gauge-widget-wrapper"></div>').append(gaugeElement));
+			createGauge();
+		}
 
-            titleElement.html(newSettings.title);
-        }
+		this.onSettingsChanged = function (newSettings) {
+			if (newSettings.min_value != currentSettings.min_value || newSettings.max_value != currentSettings.max_value || newSettings.units != currentSettings.units || newSettings.shape != currentSettings.shape) {
+				currentSettings = newSettings;
+				createGauge();
+			}
+			else {
+				currentSettings = newSettings;
+			}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (!_.isUndefined(gaugeObject)) {
-                gaugeObject.refresh(Number(newValue));
-            }
-        }
+			titleElement.html(newSettings.title);
+		}
 
-        this.onDispose = function () {
-        }
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (!_.isUndefined(gaugeObject)) {
+				gaugeObject.refresh(Number(newValue));
+			}
+		}
 
-        this.getHeight = function () {
-            return 3;
-        }
+		this.onDispose = function () {
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.getHeight = function () {
+			return 3;
+		}
 
-    freeboard.loadWidgetPlugin({
-        type_name: "gauge",
-        display_name: "Gauge",
-        "external_scripts" : [
-            "plugins/thirdparty/raphael.2.1.0.min.js",
-            "plugins/thirdparty/justgage.1.0.1.js"
-        ],
-        settings: [
-            {
-                name: "title",
-                display_name: "Title",
-                type: "text"
-            },
-            {
-                name: "value",
-                display_name: "Value",
-                type: "calculated"
-            },
-            {
-                name: "units",
-                display_name: "Units",
-                type: "text"
-            },
-            {
-                name: "min_value",
-                display_name: "Minimum",
-                type: "text",
-                default_value: 0
-            },
-            {
-                name: "max_value",
-                display_name: "Maximum",
-                type: "text",
-                default_value: 100
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new gaugeWidget(settings));
-        }
-    });
+		this.onSettingsChanged(settings);
+	};
+
+	freeboard.loadWidgetPlugin({
+		type_name: "gauge",
+		display_name: "ゲージ",
+		"external_scripts" : [
+			"plugins/thirdparty/raphael.2.1.0.min.js",
+			// "plugins/thirdparty/justgage.1.0.1.js"
+			"plugins/thirdparty/justgage.1.0.2.js"
+		],
+		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
+			{
+				name: "value",
+				display_name: "値",
+				type: "calculated"
+			},
+			{
+				name: "units",
+				display_name: "単位",
+				type: "text"
+			},
+			{
+				name: "min_value",
+				display_name: "最小値",
+				type: "text",
+				default_value: 0
+			},
+			{
+				name: "max_value",
+				display_name: "最大値",
+				type: "text",
+				default_value: 100
+			},
+			{
+				name: "shape",
+				display_name: "型",
+				type: "option",
+				options: [
+					{
+						name: "ハーフ",
+						value: 0
+					},
+					{
+						name: "ファン",
+						value: 1
+					},
+					{
+						name: "ドーナッツ",
+						value: 2
+					}
+				]
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new gaugeWidget(settings));
+		}
+	});
 
 
 	freeboard.addStyle('.sparkline', "width:100%;height: 75px;");
-    var sparklineWidget = function (settings) {
-        var self = this;
+	var sparklineWidget = function (settings) {
+		var self = this;
 
-        var titleElement = $('<h2 class="section-title"></h2>');
-        var sparklineElement = $('<div class="sparkline"></div>');
+		var titleElement = $('<h2 class="section-title"></h2>');
+		var sparklineElement = $('<div class="sparkline"></div>');
 
-        this.render = function (element) {
-            $(element).append(titleElement).append(sparklineElement);
-        }
+		this.render = function (element) {
+			$(element).append(titleElement).append(sparklineElement);
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            titleElement.html((_.isUndefined(newSettings.title) ? "" : newSettings.title));
-        }
+		this.onSettingsChanged = function (newSettings) {
+			titleElement.html((_.isUndefined(newSettings.title) ? "" : newSettings.title));
+		}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            addValueToSparkline(sparklineElement, newValue);
-        }
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			addValueToSparkline(sparklineElement, newValue);
+		}
 
-        this.onDispose = function () {
-        }
+		this.onDispose = function () {
+		}
 
-        this.getHeight = function () {
-            return 2;
-        }
+		this.getHeight = function () {
+			return 2;
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        type_name: "sparkline",
-        display_name: "Sparkline",
-        "external_scripts" : [
-            "plugins/thirdparty/jquery.sparkline.min.js"
-        ],
-        settings: [
-            {
-                name: "title",
-                display_name: "Title",
-                type: "text"
-            },
-            {
-                name: "value",
-                display_name: "Value",
-                type: "calculated"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new sparklineWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		type_name: "sparkline",
+		display_name: "スパークラインチャート",
+		"external_scripts" : [
+			"plugins/thirdparty/jquery.sparkline.min.js"
+		],
+		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
+			{
+				name: "value",
+				display_name: "値",
+				type: "calculated"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new sparklineWidget(settings));
+		}
+	});
 
 	freeboard.addStyle('div.pointer-value', "position:absolute;height:95px;margin: auto;top: 0px;bottom: 0px;width: 100%;text-align:center;");
-    var pointerWidget = function (settings) {
-        var self = this;
-        var paper;
-        var strokeWidth = 3;
-        var triangle;
-        var width, height;
-        var currentValue = 0;
-        var valueDiv = $('<div class="widget-big-text"></div>');
-        var unitsDiv = $('<div></div>');
+	var pointerWidget = function (settings) {
+		var self = this;
+		var paper;
+		var strokeWidth = 3;
+		var triangle;
+		var width, height;
+		var currentValue = 0;
+		var valueDiv = $('<div class="widget-big-text"></div>');
+		var unitsDiv = $('<div></div>');
 
-        function polygonPath(points) {
-            if (!points || points.length < 2)
-                return [];
-            var path = []; //will use path object type
-            path.push(['m', points[0], points[1]]);
-            for (var i = 2; i < points.length; i += 2) {
-                path.push(['l', points[i], points[i + 1]]);
-            }
-            path.push(['z']);
-            return path;
-        }
+		function polygonPath(points) {
+			if (!points || points.length < 2)
+				return [];
+			var path = []; //will use path object type
+			path.push(['m', points[0], points[1]]);
+			for (var i = 2; i < points.length; i += 2) {
+				path.push(['l', points[i], points[i + 1]]);
+			}
+			path.push(['z']);
+			return path;
+		}
 
-        this.render = function (element) {
-            width = $(element).width();
-            height = $(element).height();
+		this.render = function (element) {
+			width = $(element).width();
+			height = $(element).height();
 
-            var radius = Math.min(width, height) / 2 - strokeWidth * 2;
+			var radius = Math.min(width, height) / 2 - strokeWidth * 2;
 
-            paper = Raphael($(element).get()[0], width, height);
-            var circle = paper.circle(width / 2, height / 2, radius);
-            circle.attr("stroke", "#FF9900");
-            circle.attr("stroke-width", strokeWidth);
+			paper = Raphael($(element).get()[0], width, height);
+			var circle = paper.circle(width / 2, height / 2, radius);
+			circle.attr("stroke", "#FF9900");
+			circle.attr("stroke-width", strokeWidth);
 
-            triangle = paper.path(polygonPath([width / 2, (height / 2) - radius + strokeWidth, 15, 20, -30, 0]));
-            triangle.attr("stroke-width", 0);
-            triangle.attr("fill", "#fff");
+			triangle = paper.path(polygonPath([width / 2, (height / 2) - radius + strokeWidth, 15, 20, -30, 0]));
+			triangle.attr("stroke-width", 0);
+			triangle.attr("fill", "#fff");
 
-            $(element).append($('<div class="pointer-value"></div>').append(valueDiv).append(unitsDiv));
-        }
+			$(element).append($('<div class="pointer-value"></div>').append(valueDiv).append(unitsDiv));
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            unitsDiv.html(newSettings.units);
-        }
+		this.onSettingsChanged = function (newSettings) {
+			unitsDiv.html(newSettings.units);
+		}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (settingName == "direction") {
-                if (!_.isUndefined(triangle)) {
-                    var direction = "r";
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (settingName == "direction") {
+				if (!_.isUndefined(triangle)) {
+					var direction = "r";
 
-                    var oppositeCurrent = currentValue + 180;
+					var oppositeCurrent = currentValue + 180;
 
-                    if (oppositeCurrent < newValue) {
-                        //direction = "l";
-                    }
+					if (oppositeCurrent < newValue) {
+						//direction = "l";
+					}
 
-                    triangle.animate({transform: "r" + newValue + "," + (width / 2) + "," + (height / 2)}, 250, "bounce");
-                }
+					triangle.animate({transform: "r" + newValue + "," + (width / 2) + "," + (height / 2)}, 250, "bounce");
+				}
 
-                currentValue = newValue;
-            }
-            else if (settingName == "value_text") {
-                valueDiv.html(newValue);
-            }
-        }
+				currentValue = newValue;
+			}
+			else if (settingName == "value_text") {
+				valueDiv.html(newValue);
+			}
+		}
 
-        this.onDispose = function () {
-        }
+		this.onDispose = function () {
+		}
 
-        this.getHeight = function () {
-            return 4;
-        }
+		this.getHeight = function () {
+			return 4;
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        type_name: "pointer",
-        display_name: "Pointer",
-        "external_scripts" : [
-            "plugins/thirdparty/raphael.2.1.0.min.js"
-        ],
-        settings: [
-            {
-                name: "direction",
-                display_name: "Direction",
-                type: "calculated",
-                description: "In degrees"
-            },
-            {
-                name: "value_text",
-                display_name: "Value Text",
-                type: "calculated"
-            },
-            {
-                name: "units",
-                display_name: "Units",
-                type: "text"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new pointerWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		type_name: "pointer",
+		display_name: "ポインタ",
+		"external_scripts" : [
+			"plugins/thirdparty/raphael.2.1.0.min.js"
+		],
+		settings: [
+			{
+				name: "direction",
+				display_name: "方向",
+				type: "calculated",
+				description: "角度"
+			},
+			{
+				name: "value_text",
+				display_name: "値テキスト",
+				type: "calculated"
+			},
+			{
+				name: "units",
+				display_name: "単位",
+				type: "text"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new pointerWidget(settings));
+		}
+	});
 
-    var pictureWidget = function(settings)
-    {
-        var self = this;
-        var widgetElement;
-        var timer;
-        var imageURL;
+	var pictureWidget = function(settings)
+	{
+		var self = this;
+		var widgetElement;
+		var timer;
+		var imageURL;
 
-        function stopTimer()
-        {
-            if(timer)
-            {
-                clearInterval(timer);
-                timer = null;
-            }
-        }
+		function stopTimer()
+		{
+			if(timer)
+			{
+				clearInterval(timer);
+				timer = null;
+			}
+		}
 
-        function updateImage()
-        {
-            if(widgetElement && imageURL)
-            {
-                var cacheBreakerURL = imageURL + (imageURL.indexOf("?") == -1 ? "?" : "&") + Date.now();
+		function updateImage()
+		{
+			if(widgetElement && imageURL)
+			{
+				var cacheBreakerURL = imageURL + (imageURL.indexOf("?") == -1 ? "?" : "&") + Date.now();
 
-                $(widgetElement).css({
-                    "background-image" :  "url(" + cacheBreakerURL + ")"
-                });
-            }
-        }
+				$(widgetElement).css({
+					"background-image" :  "url(" + cacheBreakerURL + ")"
+				});
+			}
+		}
 
-        this.render = function(element)
-        {
-            $(element).css({
-                width : "100%",
-                height: "100%",
-                "background-size" : "cover",
-                "background-position" : "center"
-            });
+		this.render = function(element)
+		{
+			$(element).css({
+				width : "100%",
+				height: "100%",
+				"background-size" : "cover",
+				"background-position" : "center"
+			});
 
-            widgetElement = element;
-        }
+			widgetElement = element;
+		}
 
-        this.onSettingsChanged = function(newSettings)
-        {
-            stopTimer();
+		this.onSettingsChanged = function(newSettings)
+		{
+			stopTimer();
 
-            if(newSettings.refresh && newSettings.refresh > 0)
-            {
-                timer = setInterval(updateImage, Number(newSettings.refresh) * 1000);
-            }
-        }
+			if(newSettings.refresh && newSettings.refresh > 0)
+			{
+				timer = setInterval(updateImage, Number(newSettings.refresh) * 1000);
+			}
+		}
 
-        this.onCalculatedValueChanged = function(settingName, newValue)
-        {
-            if(settingName == "src")
-            {
-                imageURL = newValue;
-            }
+		this.onCalculatedValueChanged = function(settingName, newValue)
+		{
+			if(settingName == "src")
+			{
+				imageURL = newValue;
+			}
 
-            updateImage();
-        }
+			updateImage();
+		}
 
-        this.onDispose = function()
-        {
-            stopTimer();
-        }
+		this.onDispose = function()
+		{
+			stopTimer();
+		}
 
-        this.getHeight = function()
-        {
-            return 4;
-        }
+		this.getHeight = function()
+		{
+			return 4;
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        type_name: "picture",
-        display_name: "Picture",
-        fill_size: true,
-        settings: [
-            {
-                name: "src",
-                display_name: "Image URL",
-                type: "calculated"
-            },
-            {
-                "type": "number",
-                "display_name": "Refresh every",
-                "name": "refresh",
-                "suffix": "seconds",
-                "description":"Leave blank if the image doesn't need to be refreshed"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new pictureWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		type_name: "picture",
+		display_name: "画像",
+		fill_size: true,
+		settings: [
+			{
+				name: "src",
+				display_name: "画像URL",
+				type: "calculated"
+			},
+			{
+				"type": "number",
+				"display_name": "更新頻度",
+				"name": "refresh",
+				"suffix": "秒",
+				"description":"更新する必要がない場合は空白のまま"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new pictureWidget(settings));
+		}
+	});
 
 	freeboard.addStyle('.indicator-light', "border-radius:50%;width:22px;height:22px;border:2px solid #3d3d3d;margin-top:5px;float:left;background-color:#222;margin-right:10px;");
 	freeboard.addStyle('.indicator-light.on', "background-color:#FFC773;box-shadow: 0px 0px 15px #FF9900;border-color:#FDF1DF;");
 	freeboard.addStyle('.indicator-text', "margin-top:10px;");
-    var indicatorWidget = function (settings) {
-        var self = this;
-        var titleElement = $('<h2 class="section-title"></h2>');
-        var stateElement = $('<div class="indicator-text"></div>');
-        var indicatorElement = $('<div class="indicator-light"></div>');
-        var currentSettings = settings;
-        var isOn = false;
+	var indicatorWidget = function (settings) {
+		var self = this;
+		var titleElement = $('<h2 class="section-title"></h2>');
+		var stateElement = $('<div class="indicator-text"></div>');
+		var indicatorElement = $('<div class="indicator-light"></div>');
+		var currentSettings = settings;
+		var isOn = false;
 
-        function updateState() {
-            indicatorElement.toggleClass("on", isOn);
+		function updateState() {
+			indicatorElement.toggleClass("on", isOn);
 
-            if (isOn) {
-                stateElement.text((_.isUndefined(currentSettings.on_text) ? "" : currentSettings.on_text));
-            }
-            else {
-                stateElement.text((_.isUndefined(currentSettings.off_text) ? "" : currentSettings.off_text));
-            }
-        }
+			if (isOn) {
+				stateElement.text((_.isUndefined(currentSettings.on_text) ? "" : currentSettings.on_text));
+			}
+			else {
+				stateElement.text((_.isUndefined(currentSettings.off_text) ? "" : currentSettings.off_text));
+			}
+		}
 
-        this.render = function (element) {
-            $(element).append(titleElement).append(indicatorElement).append(stateElement);
-        }
+		this.render = function (element) {
+			$(element).append(titleElement).append(indicatorElement).append(stateElement);
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            currentSettings = newSettings;
-            titleElement.html((_.isUndefined(newSettings.title) ? "" : newSettings.title));
-            updateState();
-        }
+		this.onSettingsChanged = function (newSettings) {
+			currentSettings = newSettings;
+			titleElement.html((_.isUndefined(newSettings.title) ? "" : newSettings.title));
+			updateState();
+		}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (settingName == "value") {
-                isOn = Boolean(newValue);
-            }
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (settingName == "value") {
+				isOn = Boolean(newValue);
+			}
 
-            updateState();
-        }
+			updateState();
+		}
 
-        this.onDispose = function () {
-        }
+		this.onDispose = function () {
+		}
 
-        this.getHeight = function () {
-            return 1;
-        }
+		this.getHeight = function () {
+			return 1;
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        type_name: "indicator",
-        display_name: "Indicator Light",
-        settings: [
-            {
-                name: "title",
-                display_name: "Title",
-                type: "text"
-            },
-            {
-                name: "value",
-                display_name: "Value",
-                type: "calculated"
-            },
-            {
-                name: "on_text",
-                display_name: "On Text",
-                type: "calculated"
-            },
-            {
-                name: "off_text",
-                display_name: "Off Text",
-                type: "calculated"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new indicatorWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		type_name: "indicator",
+		display_name: "インジケータライト",
+		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
+			{
+				name: "value",
+				display_name: "値",
+				type: "calculated"
+			},
+			{
+				name: "on_text",
+				display_name: "ON時テキスト",
+				type: "calculated"
+			},
+			{
+				name: "off_text",
+				display_name: "OFF時テキスト",
+				type: "calculated"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new indicatorWidget(settings));
+		}
+	});
 
-    freeboard.addStyle('.gm-style-cc a', "text-shadow:none;");
+	freeboard.addStyle('.gm-style-cc a', "text-shadow:none;");
 
-    var googleMapWidget = function (settings) {
-        var self = this;
-        var currentSettings = settings;
-        var map;
-        var marker;
-        var currentPosition = {};
+	var googleMapWidget = function (settings) {
+		var self = this;
+		var currentSettings = settings;
+		var map;
+		var marker;
+		var currentPosition = {};
 
-        function updatePosition() {
-            if (map && marker && currentPosition.lat && currentPosition.lon) {
-                var newLatLon = new google.maps.LatLng(currentPosition.lat, currentPosition.lon);
-                marker.setPosition(newLatLon);
-                map.panTo(newLatLon);
-            }
-        }
+		function updatePosition() {
+			if (map && marker && currentPosition.lat && currentPosition.lon) {
+				var newLatLon = new google.maps.LatLng(currentPosition.lat, currentPosition.lon);
+				marker.setPosition(newLatLon);
+				map.panTo(newLatLon);
+			}
+		}
 
-        this.render = function (element) {
-            function initializeMap() {
-                var mapOptions = {
-                    zoom: 13,
-                    center: new google.maps.LatLng(37.235, -115.811111),
-                    disableDefaultUI: true,
-                    draggable: false,
-                    styles: [
-                        {"featureType": "water", "elementType": "geometry", "stylers": [
-                            {"color": "#2a2a2a"}
-                        ]},
-                        {"featureType": "landscape", "elementType": "geometry", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 20}
-                        ]},
-                        {"featureType": "road.highway", "elementType": "geometry.fill", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 17}
-                        ]},
-                        {"featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 29},
-                            {"weight": 0.2}
-                        ]},
-                        {"featureType": "road.arterial", "elementType": "geometry", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 18}
-                        ]},
-                        {"featureType": "road.local", "elementType": "geometry", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 16}
-                        ]},
-                        {"featureType": "poi", "elementType": "geometry", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 21}
-                        ]},
-                        {"elementType": "labels.text.stroke", "stylers": [
-                            {"visibility": "on"},
-                            {"color": "#000000"},
-                            {"lightness": 16}
-                        ]},
-                        {"elementType": "labels.text.fill", "stylers": [
-                            {"saturation": 36},
-                            {"color": "#000000"},
-                            {"lightness": 40}
-                        ]},
-                        {"elementType": "labels.icon", "stylers": [
-                            {"visibility": "off"}
-                        ]},
-                        {"featureType": "transit", "elementType": "geometry", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 19}
-                        ]},
-                        {"featureType": "administrative", "elementType": "geometry.fill", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 20}
-                        ]},
-                        {"featureType": "administrative", "elementType": "geometry.stroke", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 17},
-                            {"weight": 1.2}
-                        ]}
-                    ]
-                };
+		this.render = function (element) {
+			function initializeMap() {
+				var mapOptions = {
+					zoom: 13,
+					center: new google.maps.LatLng(37.235, -115.811111),
+					disableDefaultUI: true,
+					draggable: false,
+					styles: [
+						{"featureType": "water", "elementType": "geometry", "stylers": [
+							{"color": "#2a2a2a"}
+						]},
+						{"featureType": "landscape", "elementType": "geometry", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 20}
+						]},
+						{"featureType": "road.highway", "elementType": "geometry.fill", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 17}
+						]},
+						{"featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 29},
+							{"weight": 0.2}
+						]},
+						{"featureType": "road.arterial", "elementType": "geometry", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 18}
+						]},
+						{"featureType": "road.local", "elementType": "geometry", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 16}
+						]},
+						{"featureType": "poi", "elementType": "geometry", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 21}
+						]},
+						{"elementType": "labels.text.stroke", "stylers": [
+							{"visibility": "on"},
+							{"color": "#000000"},
+							{"lightness": 16}
+						]},
+						{"elementType": "labels.text.fill", "stylers": [
+							{"saturation": 36},
+							{"color": "#000000"},
+							{"lightness": 40}
+						]},
+						{"elementType": "labels.icon", "stylers": [
+							{"visibility": "off"}
+						]},
+						{"featureType": "transit", "elementType": "geometry", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 19}
+						]},
+						{"featureType": "administrative", "elementType": "geometry.fill", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 20}
+						]},
+						{"featureType": "administrative", "elementType": "geometry.stroke", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 17},
+							{"weight": 1.2}
+						]}
+					]
+				};
 
-                map = new google.maps.Map(element, mapOptions);
+				map = new google.maps.Map(element, mapOptions);
 
-                google.maps.event.addDomListener(element, 'mouseenter', function (e) {
-                    e.cancelBubble = true;
-                    if (!map.hover) {
-                        map.hover = true;
-                        map.setOptions({zoomControl: true});
-                    }
-                });
+				google.maps.event.addDomListener(element, 'mouseenter', function (e) {
+					e.cancelBubble = true;
+					if (!map.hover) {
+						map.hover = true;
+						map.setOptions({zoomControl: true});
+					}
+				});
 
-                google.maps.event.addDomListener(element, 'mouseleave', function (e) {
-                    if (map.hover) {
-                        map.setOptions({zoomControl: false});
-                        map.hover = false;
-                    }
-                });
+				google.maps.event.addDomListener(element, 'mouseleave', function (e) {
+					if (map.hover) {
+						map.setOptions({zoomControl: false});
+						map.hover = false;
+					}
+				});
 
-                marker = new google.maps.Marker({map: map});
+				marker = new google.maps.Marker({map: map});
 
-                updatePosition();
-            }
+				updatePosition();
+			}
 
-            if (window.google && window.google.maps) {
-                initializeMap();
-            }
-            else {
-                window.gmap_initialize = initializeMap;
-                head.js("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&callback=gmap_initialize");
-            }
-        }
+			if (window.google && window.google.maps) {
+				initializeMap();
+			}
+			else {
+				window.gmap_initialize = initializeMap;
+				head.js("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&callback=gmap_initialize");
+			}
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            currentSettings = newSettings;
-        }
+		this.onSettingsChanged = function (newSettings) {
+			currentSettings = newSettings;
+		}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (settingName == "lat") {
-                currentPosition.lat = newValue;
-            }
-            else if (settingName == "lon") {
-                currentPosition.lon = newValue;
-            }
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (settingName == "lat") {
+				currentPosition.lat = newValue;
+			}
+			else if (settingName == "lon") {
+				currentPosition.lon = newValue;
+			}
 
-            updatePosition();
-        }
+			updatePosition();
+		}
 
-        this.onDispose = function () {
-        }
+		this.onDispose = function () {
+		}
 
-        this.getHeight = function () {
-            return 4;
-        }
+		this.getHeight = function () {
+			return 4;
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        type_name: "google_map",
-        display_name: "Google Map",
-        fill_size: true,
-        settings: [
-            {
-                name: "lat",
-                display_name: "Latitude",
-                type: "calculated"
-            },
-            {
-                name: "lon",
-                display_name: "Longitude",
-                type: "calculated"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new googleMapWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		type_name: "google_map",
+		display_name: "Google Map",
+		fill_size: true,
+		settings: [
+			{
+				name: "lat",
+				display_name: "緯度",
+				type: "calculated"
+			},
+			{
+				name: "lon",
+				display_name: "経度",
+				type: "calculated"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new googleMapWidget(settings));
+		}
+	});
 
-    freeboard.addStyle('.html-widget', "white-space:normal;width:100%;height:100%");
+	freeboard.addStyle('.html-widget', "white-space:normal;width:100%;height:100%");
 
-    var htmlWidget = function (settings) {
-        var self = this;
-        var htmlElement = $('<div class="html-widget"></div>');
-        var currentSettings = settings;
+	var htmlWidget = function (settings) {
+		var self = this;
+		var htmlElement = $('<div class="html-widget"></div>');
+		var currentSettings = settings;
 
-        this.render = function (element) {
-            $(element).append(htmlElement);
-        }
+		this.render = function (element) {
+			$(element).append(htmlElement);
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            currentSettings = newSettings;
-        }
+		this.onSettingsChanged = function (newSettings) {
+			currentSettings = newSettings;
+		}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (settingName == "html") {
-                htmlElement.html(newValue);
-            }
-        }
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (settingName == "html") {
+				htmlElement.html(newValue);
+			}
+		}
 
-        this.onDispose = function () {
-        }
+		this.onDispose = function () {
+		}
 
-        this.getHeight = function () {
-            return Number(currentSettings.height);
-        }
+		this.getHeight = function () {
+			return Number(currentSettings.height);
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        "type_name": "html",
-        "display_name": "HTML",
-        "fill_size": true,
-        "settings": [
-            {
-                "name": "html",
-                "display_name": "HTML",
-                "type": "calculated",
-                "description": "Can be literal HTML, or javascript that outputs HTML."
-            },
-            {
-                "name": "height",
-                "display_name": "Height Blocks",
-                "type": "number",
-                "default_value": 4,
-                "description": "A height block is around 60 pixels"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new htmlWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		"type_name": "html",
+		"display_name": "HTML",
+		"fill_size": true,
+		"settings": [
+			{
+				"name": "html",
+				"display_name": "HTML",
+				"type": "calculated",
+				"description": "HTML文字列かjavascriptが使用できます。"
+			},
+			{
+				"name": "height",
+				"display_name": "ブロック高さ",
+				"type": "number",
+				"default_value": 4,
+				"description": "1ブロック高さは約60pixel"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new htmlWidget(settings));
+		}
+	});
 
 }());

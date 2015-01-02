@@ -117,14 +117,14 @@
 			},
 			{
 				name: "refresh",
-				display_name: "Refresh Every",
+				display_name: "更新頻度",
 				type: "number",
-				suffix: "seconds",
+				suffix: "秒",
 				default_value: 5
 			},
 			{
 				name: "method",
-				display_name: "Method",
+				display_name: "メソッド",
 				type: "option",
 				options: [
 					{
@@ -149,21 +149,21 @@
 				name: "body",
 				display_name: "Body",
 				type: "text",
-				description: "The body of the request. Normally only used if method is POST"
+				description: "リクエスト本文。通常はPOSTメソッド時に使用される。"
 			},
 			{
 				name: "headers",
-				display_name: "Headers",
+				display_name: "Header",
 				type: "array",
 				settings: [
 					{
 						name: "name",
-						display_name: "Name",
+						display_name: "名前",
 						type: "text"
 					},
 					{
 						name: "value",
-						display_name: "Value",
+						display_name: "値",
 						type: "text"
 					}
 				]
@@ -242,31 +242,31 @@
 		settings: [
 			{
 				name: "location",
-				display_name: "Location",
+				display_name: "場所",
 				type: "text",
-				description: "Example: London, UK"
+				description: "例: London, UK"
 			},
 			{
 				name: "units",
-				display_name: "Units",
+				display_name: "単位",
 				type: "option",
-				default: "imperial",
+				default: "metric",
 				options: [
 					{
-						name: "Imperial",
-						value: "imperial"
+						name: "メトリック",
+						value: "metric"
 					},
 					{
-						name: "Metric",
-						value: "metric"
+						name: "インペリアル",
+						value: "imperial"
 					}
 				]
 			},
 			{
 				name: "refresh",
-				display_name: "Refresh Every",
+				display_name: "更新頻度",
 				type: "number",
-				suffix: "seconds",
+				suffix: "秒",
 				default_value: 5
 			}
 		],
@@ -320,8 +320,8 @@
 		"settings": [
 			{
 				name: "thing_id",
-				display_name: "Thing Name",
-				"description": "Example: salty-dog-1",
+				display_name: "物の名前",
+				"description": "例: ソルティドッグ1",
 				type: "text"
 			}
 		],
@@ -406,26 +406,26 @@
 		"settings": [
 			{
 				"name": "datafile",
-				"display_name": "Data File URL",
+				"display_name": "データファイルURL",
 				"type": "text",
-				"description": "A link to a JSON array of data."
+				"description": "JSON配列データへのリンク"
 			},
 			{
 				name: "is_jsonp",
-				display_name: "Is JSONP",
+				display_name: "JSONP使用",
 				type: "boolean"
 			},
 			{
 				"name": "loop",
-				"display_name": "Loop",
+				"display_name": "ループ再生",
 				"type": "boolean",
-				"description": "Rewind and loop when finished"
+				"description": "巻戻しとループ再生時終了"
 			},
 			{
 				"name": "refresh",
-				"display_name": "Refresh Every",
+				"display_name": "更新頻度",
 				"type": "number",
-				"suffix": "seconds",
+				"suffix": "秒",
 				"default_value": 5
 			}
 		],
@@ -479,13 +479,13 @@
 
 	freeboard.loadDatasourcePlugin({
 		"type_name": "clock",
-		"display_name": "Clock",
+		"display_name": "時計",
 		"settings": [
 			{
 				"name": "refresh",
-				"display_name": "Refresh Every",
+				"display_name": "更新頻度",
 				"type": "number",
-				"suffix": "seconds",
+				"suffix": "秒",
 				"default_value": 1
 			}
 		],
