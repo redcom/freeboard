@@ -513,7 +513,8 @@
 		}
 	});
 
-	freeboard.addStyle('.pointer-widget', "width:100%; height:214px;");
+	freeboard.addStyle('.pointer-widget-wrapper', "width:100%; height:214px; text-align:center;");
+	freeboard.addStyle('.pointer-widget', "width:280px; height:100%; display: inline-block;");
 	freeboard.addStyle('.pointer-value', "position:absolute; height:93px; margin:auto; top:0px; left:0px; bottom:0px; width:100%; text-align:center;");
 
 	var pointerWidget = function (settings) {
@@ -525,6 +526,7 @@
 		var currentValue = 0;
 
 		var titleElement = $('<h2 class="section-title"></h2>');
+		var widgetwrapperElement = $('<div class="pointer-widget-wrapper"></div>');
 		var widgetElement = $('<div class="pointer-widget"></div>');
 		var valueElement = $('<div class="pointer-value"></div>');
 		var valueDiv = $('<div class="widget-big-text"></div>');
@@ -544,8 +546,7 @@
 
 		this.render = function (element) {
 			$(element).append(titleElement);
-			$(element).append(widgetElement);
-			$(element).append(valueElement.append(valueDiv).append(unitsDiv));
+			$(element).append(widgetwrapperElement.append(widgetElement).append(valueElement.append(valueDiv).append(unitsDiv)));
 
 			width = widgetElement.width();
 			height = widgetElement.height();
