@@ -513,7 +513,9 @@
 		}
 	});
 
-	freeboard.addStyle('div.pointer-value', "position:absolute;height:95px;margin: auto;top: 0px;bottom: 0px;width: 100%;text-align:center;");
+	freeboard.addStyle('.pointer-widget', "width:100%; height:214px;");
+	freeboard.addStyle('.pointer-value', "position:absolute; height:93px; margin:auto; top:0px; left:0px; bottom:0px; width:100%; text-align:center;");
+
 	var pointerWidget = function (settings) {
 		var self = this;
 		var paper;
@@ -521,6 +523,10 @@
 		var triangle;
 		var width, height;
 		var currentValue = 0;
+
+		var titleElement = $('<h2 class="section-title"></h2>');
+		var widgetElement = $('<div class="pointer-widget"></div>');
+		var valueElement = $('<div class="pointer-value"></div>');
 		var valueDiv = $('<div class="widget-big-text"></div>');
 		var unitsDiv = $('<div></div>');
 
@@ -537,12 +543,16 @@
 		}
 
 		this.render = function (element) {
-			width = $(element).width();
-			height = $(element).height();
+			$(element).append(titleElement);
+			$(element).append(widgetElement);
+			$(element).append(valueElement.append(valueDiv).append(unitsDiv));
+
+			width = widgetElement.width();
+			height = widgetElement.height();
 
 			var radius = Math.min(width, height) / 2 - strokeWidth * 2;
 
-			paper = Raphael($(element).get()[0], width, height);
+			paper = Raphael(widgetElement[0], width, height);
 			var circle = paper.circle(width / 2, height / 2, radius);
 			circle.attr("stroke", "#FF9900");
 			circle.attr("stroke-width", strokeWidth);
@@ -550,11 +560,10 @@
 			triangle = paper.path(polygonPath([width / 2, (height / 2) - radius + strokeWidth, 15, 20, -30, 0]));
 			triangle.attr("stroke-width", 0);
 			triangle.attr("fill", "#fff");
-
-			$(element).append($('<div class="pointer-value"></div>').append(valueDiv).append(unitsDiv));
 		}
 
 		this.onSettingsChanged = function (newSettings) {
+			titleElement.html(newSettings.title);
 			unitsDiv.html(newSettings.units);
 		}
 
@@ -596,6 +605,11 @@
 			"plugins/thirdparty/raphael.2.1.0.min.js"
 		],
 		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
 			{
 				name: "direction",
 				display_name: "方向",
