@@ -330,7 +330,8 @@
 
 	var gaugeID = 0;
 	freeboard.addStyle('.gauge-widget-wrapper', "width: 100%;text-align: center;");
-	freeboard.addStyle('.gauge-widget', "width:200px;height:150px;display:inline-block;");
+//	freeboard.addStyle('.gauge-widget', "width:200px;height:150px;display:inline-block;");
+	freeboard.addStyle('.gauge-widget', "width:280px;height:214px;display:inline-block;");
 
 	var gaugeWidget = function (settings) {
 		var self = this;
@@ -361,7 +362,8 @@
 				label: currentSettings.units,
 				showInnerShadow: false,
 				shape: currentSettings.shape,
-				valueFontColor: "#d3d4d4",
+				gaugeColor: currentSettings.gauge_color,
+				valueFontColor: currentSettings.value_fontcolor
 			});
 		}
 
@@ -372,7 +374,12 @@
 		}
 
 		this.onSettingsChanged = function (newSettings) {
-			if (newSettings.min_value != currentSettings.min_value || newSettings.max_value != currentSettings.max_value || newSettings.units != currentSettings.units || newSettings.shape != currentSettings.shape) {
+			if (newSettings.min_value != currentSettings.min_value ||
+				newSettings.max_value != currentSettings.max_value ||
+				newSettings.units != currentSettings.units ||
+				newSettings.shape != currentSettings.shape ||
+				newSettings.value_fontcolor != currentSettings.value_fontcolor ||
+				newSettings.gauge_color != currentSettings.gauge_color) {
 				currentSettings = newSettings;
 				createGauge();
 			}
@@ -393,7 +400,7 @@
 		}
 
 		this.getHeight = function () {
-			return 3;
+			return 4;
 		}
 
 		this.onSettingsChanged(settings);
@@ -404,7 +411,6 @@
 		display_name: "ゲージ",
 		"external_scripts" : [
 			"plugins/thirdparty/raphael.2.1.0.min.js",
-			// "plugins/thirdparty/justgage.1.0.1.js"
 			"plugins/thirdparty/justgage.1.0.2.js"
 		],
 		settings: [
@@ -422,6 +428,18 @@
 				name: "units",
 				display_name: "単位",
 				type: "text"
+			},
+			{
+				name: "value_fontcolor",
+				display_name: "値フォント色",
+				type: "color",
+				default_value: "#d3d4d4"
+			},
+			{
+				name: "gauge_color",
+				display_name: "ゲージ背景色",
+				type: "color",
+				default_value: "#edebeb"
 			},
 			{
 				name: "min_value",
