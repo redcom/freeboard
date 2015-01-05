@@ -330,7 +330,6 @@
 
 	var gaugeID = 0;
 	freeboard.addStyle('.gauge-widget-wrapper', "width: 100%;text-align: center;");
-//	freeboard.addStyle('.gauge-widget', "width:200px;height:150px;display:inline-block;");
 	freeboard.addStyle('.gauge-widget', "width:280px;height:214px;display:inline-block;");
 
 	var gaugeWidget = function (settings) {
@@ -362,7 +361,10 @@
 				label: currentSettings.units,
 				showInnerShadow: false,
 				shape: currentSettings.shape,
+				levelColors: [ currentSettings.gauge_upper_color, currentSettings.gauge_mid_color, currentSettings.gauge_lower_color ],
+				gaugeWidthScale: currentSettings.gauge_widthscale/100.0,
 				gaugeColor: currentSettings.gauge_color,
+				labelFontColor: currentSettings.value_fontcolor,
 				valueFontColor: currentSettings.value_fontcolor
 			});
 		}
@@ -378,7 +380,11 @@
 				newSettings.max_value != currentSettings.max_value ||
 				newSettings.units != currentSettings.units ||
 				newSettings.shape != currentSettings.shape ||
+				newSettings.gauge_widthscale != currentSettings.gauge_widthscale ||
 				newSettings.value_fontcolor != currentSettings.value_fontcolor ||
+				newSettings.gauge_upper_color != currentSettings.gauge_upper_color ||
+				newSettings.gauge_mid_color != currentSettings.gauge_mid_color ||
+				newSettings.gauge_lower_color != currentSettings.gauge_lower_color ||
 				newSettings.gauge_color != currentSettings.gauge_color) {
 				currentSettings = newSettings;
 				createGauge();
@@ -425,35 +431,6 @@
 				type: "calculated"
 			},
 			{
-				name: "units",
-				display_name: "単位",
-				type: "text"
-			},
-			{
-				name: "value_fontcolor",
-				display_name: "値フォント色",
-				type: "color",
-				default_value: "#d3d4d4"
-			},
-			{
-				name: "gauge_color",
-				display_name: "ゲージ背景色",
-				type: "color",
-				default_value: "#edebeb"
-			},
-			{
-				name: "min_value",
-				display_name: "最小値",
-				type: "text",
-				default_value: 0
-			},
-			{
-				name: "max_value",
-				display_name: "最大値",
-				type: "text",
-				default_value: 100
-			},
-			{
 				name: "shape",
 				display_name: "型",
 				type: "option",
@@ -471,6 +448,65 @@
 						value: 2
 					}
 				]
+			},
+			{
+				name: "units",
+				display_name: "単位",
+				type: "text"
+			},
+			{
+				name: "value_fontcolor",
+				display_name: "値フォント色",
+				type: "color",
+				default_value: "#d3d4d4",
+				description: "デフォルト色: #d3d4d4"
+			},
+			{
+				name: "gauge_upper_color",
+				display_name: "ゲージ色 Upper",
+				type: "color",
+				default_value: "#ff0000",
+				description: "デフォルト色: #ff0000"
+			},
+			{
+				name: "gauge_mid_color",
+				display_name: "ゲージ色 Mid",
+				type: "color",
+				default_value: "#f9c802",
+				description: "デフォルト色: #f9c802"
+			},
+			{
+				name: "gauge_lower_color",
+				display_name: "ゲージ色 Lower",
+				type: "color",
+				default_value: "#a9d70b",
+				description: "デフォルト色: #a9d70b"
+			},
+			{
+				name: "gauge_color",
+				display_name: "ゲージ背景色",
+				type: "color",
+				default_value: "#edebeb",
+				description: "デフォルト色: #edebeb"
+			},
+			{
+				name: "gauge_widthscale",
+				display_name: "ゲージ太さ",
+				type: "number",
+				default_value: 100,
+				description: "0から300まで"
+			},
+			{
+				name: "min_value",
+				display_name: "最小値",
+				type: "number",
+				default_value: 0
+			},
+			{
+				name: "max_value",
+				display_name: "最大値",
+				type: "number",
+				default_value: 100
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
