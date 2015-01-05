@@ -575,7 +575,8 @@
 		var self = this;
 		var paper;
 		var strokeWidth = 3;
-		var triangle;
+		var circle = null;
+		var triangle = null;
 		var width, height;
 		var currentValue = 0;
 
@@ -585,6 +586,8 @@
 		var valueElement = $('<div class="pointer-value"></div>');
 		var valueDiv = $('<div class="widget-big-text"></div>');
 		var unitsDiv = $('<div></div>');
+
+		var currentSettings = settings;
 
 		function polygonPath(points) {
 			if (!points || points.length < 2)
@@ -608,8 +611,8 @@
 			var radius = Math.min(width, height) / 2 - strokeWidth * 2;
 
 			paper = Raphael(widgetElement[0], width, height);
-			var circle = paper.circle(width / 2, height / 2, radius);
-			circle.attr("stroke", "#FF9900");
+			circle = paper.circle(width / 2, height / 2, radius);
+			circle.attr("stroke", currentSettings.circle_color);
 			circle.attr("stroke-width", strokeWidth);
 
 			triangle = paper.path(polygonPath([width / 2, (height / 2) - radius + strokeWidth, 15, 20, -30, 0]));
@@ -618,6 +621,15 @@
 		}
 
 		this.onSettingsChanged = function (newSettings) {
+			currentSettings = newSettings;
+
+			if (circle) {
+				circle.attr("stroke", newSettings.circle_color);
+			}
+			if (triangle) {
+				triangle.attr("fill", newSettings.pointer_color);
+			}
+
 			titleElement.html(newSettings.title);
 			unitsDiv.html(newSettings.units);
 		}
@@ -680,6 +692,20 @@
 				name: "units",
 				display_name: "単位",
 				type: "text"
+			},
+			{
+				name: "circle_color",
+				display_name: "サークル色",
+				type: "color",
+				default_value: "#ff9900",
+				description: "デフォルト色: #ff9900"
+			},
+			{
+				name: "pointer_color",
+				display_name: "ポインタ色",
+				type: "color",
+				default_value: "#fff",
+				description: "デフォルト色: #fff"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
