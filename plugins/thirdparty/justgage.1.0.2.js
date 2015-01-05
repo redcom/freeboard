@@ -7,6 +7,13 @@
  * LATEST UPDATES
  *
  * -----------------------------
+ * Jan 5, 2014.
+ * -----------------------------
+     * donut - donut property removed
+     * shape - shape property added
+     * labelFontFamily - labelFontFamily property added
+ *
+ * -----------------------------
  * March 16, 2014.
  * -----------------------------
      * fix - https://github.com/toorshia/justgage/issues/112
@@ -190,6 +197,9 @@
     // labelFontColor : string
     // color of label showing label under value
     labelFontColor : obj.kvLookup('labelFontColor', config, dataset, "#b3b3b3"),
+
+    // labelFontFamily : string
+    labelFontFamily : obj.kvLookup('labelFontFamily', config, dataset, "Arial"),
 
     // shadowOpacity : int
     // 0 ~ 1
@@ -679,7 +689,7 @@
   obj.txtTitle.attr({
     "font-size":obj.params.titleFontSize,
     "font-weight":"bold",
-    "font-family":"Arial",
+    "font-family":obj.config.labelFontFamily,
     "fill":obj.config.titleFontColor,
     "fill-opacity":"1"
   });
@@ -690,7 +700,7 @@
   obj.txtValue.attr({
     "font-size":obj.params.valueFontSize,
     "font-weight":"bold",
-    "font-family":"Arial",
+    "font-family":obj.config.labelFontFamily,
     "fill":obj.config.valueFontColor,
     "fill-opacity":"0"
   });
@@ -701,7 +711,7 @@
   obj.txtLabel.attr({
     "font-size":obj.params.labelFontSize,
     "font-weight":"normal",
-    "font-family":"Arial",
+    "font-family":obj.config.labelFontFamily,
     "fill":obj.config.labelFontColor,
     "fill-opacity":"0"
   });
@@ -718,7 +728,7 @@
   obj.txtMin.attr({
     "font-size":obj.params.minFontSize,
     "font-weight":"normal",
-    "font-family":"Arial",
+    "font-family":obj.config.labelFontFamily,
     "fill":obj.config.labelFontColor,
     "fill-opacity": (obj.config.hideMinMax || (obj.config.shape == 2))? "0" : "1"
   });
@@ -735,7 +745,7 @@
   obj.txtMax.attr({
     "font-size":obj.params.maxFontSize,
     "font-weight":"normal",
-    "font-family":"Arial",
+    "font-family":obj.config.labelFontFamily,
     "fill":obj.config.labelFontColor,
     "fill-opacity": (obj.config.hideMinMax || (obj.config.shape == 2))? "0" : "1"
   });
