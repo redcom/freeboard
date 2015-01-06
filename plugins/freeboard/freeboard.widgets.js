@@ -361,9 +361,10 @@
 				label: currentSettings.units,
 				showInnerShadow: false,
 				shape: currentSettings.shape,
-				levelColors: [ currentSettings.gauge_upper_color, currentSettings.gauge_mid_color, currentSettings.gauge_lower_color ],
+				levelColors: [ currentSettings.gauge_lower_color, currentSettings.gauge_mid_color, currentSettings.gauge_upper_color ],
 				gaugeWidthScale: currentSettings.gauge_widthscale/100.0,
 				gaugeColor: currentSettings.gauge_color,
+				labelFontFamily: '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", Arial, sans-serif',
 				labelFontColor: currentSettings.value_fontcolor,
 				valueFontColor: currentSettings.value_fontcolor
 			});
@@ -494,7 +495,7 @@
 				display_name: "ゲージ太さ",
 				type: "number",
 				default_value: 100,
-				description: "0から300まで"
+				description: "0から200まで"
 			},
 			{
 				name: "min_value",
@@ -513,7 +514,6 @@
 			newInstanceCallback(new gaugeWidget(settings));
 		}
 	});
-
 
 	freeboard.addStyle('.sparkline', "width:100%;height: 75px;");
 	var sparklineWidget = function (settings) {

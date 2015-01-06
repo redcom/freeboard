@@ -19,28 +19,29 @@ module.exports = function(grunt) {
                         'lib/js/thirdparty/underscore.js',
                         'lib/js/thirdparty/jquery.gridster.js',
                         'lib/js/thirdparty/jquery.caret.js',
-						'lib/js/thirdparty/jquery.xdomainrequest.js',
+                        'lib/js/thirdparty/jquery.xdomainrequest.js',
                         'lib/js/thirdparty/codemirror.js',
+                        'lib/js/thirdparty/colpick.js',
                     ]
                 ],
                 dest : 'js/freeboard.thirdparty.js'
             },
-			fb : {
-				src : [
-					'lib/js/freeboard/DatasourceModel.js',
-					'lib/js/freeboard/DeveloperConsole.js',
-					'lib/js/freeboard/DialogBox.js',
-					'lib/js/freeboard/FreeboardModel.js',
-					'lib/js/freeboard/FreeboardUI.js',
-					'lib/js/freeboard/JSEditor.js',
-					'lib/js/freeboard/PaneModel.js',
-					'lib/js/freeboard/PluginEditor.js',
-					'lib/js/freeboard/ValueEditor.js',
-					'lib/js/freeboard/WidgetModel.js',
-					'lib/js/freeboard/freeboard.js',
-				],
-				dest : 'js/freeboard.js'
-			},
+            fb : {
+                src : [
+                    'lib/js/freeboard/DatasourceModel.js',
+                    'lib/js/freeboard/DeveloperConsole.js',
+                    'lib/js/freeboard/DialogBox.js',
+                    'lib/js/freeboard/FreeboardModel.js',
+                    'lib/js/freeboard/FreeboardUI.js',
+                    'lib/js/freeboard/JSEditor.js',
+                    'lib/js/freeboard/PaneModel.js',
+                    'lib/js/freeboard/PluginEditor.js',
+                    'lib/js/freeboard/ValueEditor.js',
+                    'lib/js/freeboard/WidgetModel.js',
+                    'lib/js/freeboard/freeboard.js',
+                ],
+                dest : 'js/freeboard.js'
+            },
             plugins : {
                 src : [
                     'plugins/freeboard/*.js'
