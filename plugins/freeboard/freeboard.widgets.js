@@ -337,6 +337,7 @@
 
 		var thisGaugeID = "gauge-" + gaugeID++;
 		var titleElement = $('<h2 class="section-title"></h2>');
+		var wrapperElement = $('<div class="gauge-widget-wrapper"></div>');
 		var gaugeElement = $('<div class="gauge-widget" id="' + thisGaugeID + '"></div>');
 
 		var gaugeObject;
@@ -372,8 +373,13 @@
 
 		this.render = function (element) {
 			rendered = true;
-			$(element).append(titleElement).append($('<div class="gauge-widget-wrapper"></div>').append(gaugeElement));
-			createGauge();
+			$(element).append(titleElement).append(wrapperElement.append(gaugeElement));
+
+			// for justgauge redraw bug.
+			var timerID = setTimeout(function() {
+				createGauge();
+				clearTimeout(timerID);
+			}, 500);
 		}
 
 		this.onSettingsChanged = function (newSettings) {
@@ -512,6 +518,178 @@
 		],
 		newInstance: function (settings, newInstanceCallback) {
 			newInstanceCallback(new gaugeWidget(settings));
+		}
+	});
+
+	var flotchartID = 0;
+	freeboard.addStyle('.flotchart', "width:100%;height: 215px;");
+
+	var flotchartWidget = function (settings) {
+		var self = this;
+
+		var thisID = "flotchart-" + flotchartID++;
+		var titleElement = $('<h2 class="section-title"></h2>');
+		var flotchartElement = $('<div class="flotchart" id="' + thisID + '"></div>');
+		var currentSettings = settings;
+
+		var plot = null;
+
+		function plotChart() {
+			if (plot) {
+				plot.destroy();
+				plot = null;
+			}
+
+			Function.prototype.toJSON = Function.prototype.toString;
+
+			var parser = function(k,v){return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v};
+
+			var options;
+			if (currentSettings.plot_options) {
+				try {
+					options = JSON.parse(currentSettings.plot_options, parser);
+				}
+				catch (e) {
+					console.log(e);
+				}
+			}
+
+			var dataset = [];
+			plot = $.plot($('#'+thisID), dataset, options);
+
+			$("#flotTip").css({
+				"padding": "3px 5px",
+				"color":"#000000",
+				"background-color":"#ffffff",
+				"box-shadow": "0 0 10px #555",
+				"opacity": ".7",
+				"filter": "alpha(opacity=70)",
+				"z-index": "100",
+				"-webkit-border-radius": "4px",
+				"-moz-border-radius": "4px",
+				"border-radius": "4px",
+				"font-size":"12px"
+			});
+
+			$("#flot-y-axis").css({
+				"color": "#ffffff"
+			});
+		}
+
+		function plotData(dataset) {
+			if (!plot)
+				return;
+
+			// Y座標単位を検索
+			var unit1 = '';
+			var unit2 = '';
+
+			for (var i in dataset) {
+				if (unit1 == '') {
+					if (dataset[i].unit != unit1)
+						unit1 = dataset[i].unit;
+				} else {
+					if (dataset[i].unit != unit1) {
+						unit2 = dataset[i].unit;
+						break;
+					}
+				}
+			}
+
+			// 単位フォーマットをグラフに設定
+			plot.getAxes().yaxis.options.tickFormatter = function(v, axis) {
+				var val = Math.floor(v * 10) / 10;
+				return val + unit1;
+			};
+			plot.getAxes().y2axis.options.tickFormatter = function(v, axis) {
+				var val = Math.floor(v * 10) / 10;
+				return val + unit2;
+			};
+
+			try {
+				plot.setData(dataset);
+				plot.setupGrid();
+				plot.draw();
+			} catch (e) {
+				console.log(e);
+			}
+		}
+
+		this.render = function (element) {
+			$(element).append(titleElement).append(flotchartElement);
+			plotChart();
+		}
+
+		this.onSettingsChanged = function (newSettings) {
+			if (newSettings.plot_options != currentSettings.plot_options ||
+				newSettings.value != currentSettings.value) {
+				currentSettings = newSettings;
+				plotChart();
+			} else {
+				currentSettings = newSettings;
+			}
+			titleElement.html(newSettings.title);
+		}
+
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			// console.log(newValue);
+			plotData(newValue);		}
+
+		this.onDispose = function () {
+		}
+
+		this.getHeight = function () {
+			return 4;
+		}
+
+		this.onSettingsChanged(settings);
+	};
+
+	freeboard.loadWidgetPlugin({
+		type_name: "flotchart",
+		display_name: "Flotチャート",
+		"external_scripts" : [
+			"plugins/thirdparty/excanvas.min.js",
+			"plugins/thirdparty/jquery.flot.js",
+			"plugins/thirdparty/jquery.colorhelpers.min.js",
+			"plugins/thirdparty/jquery.flot.canvas.min.js",
+			"plugins/thirdparty/jquery.flot.categories.min.js",
+			"plugins/thirdparty/jquery.flot.crosshair.min.js",
+			"plugins/thirdparty/jquery.flot.downsample.js",
+			"plugins/thirdparty/jquery.flot.errorbars.min.js",
+			"plugins/thirdparty/jquery.flot.fillbetween.min.js",
+			"plugins/thirdparty/jquery.flot.image.min.js",
+			"plugins/thirdparty/jquery.flot.navigate.min.js",
+			"plugins/thirdparty/jquery.flot.pie.min.js",
+			"plugins/thirdparty/jquery.flot.resize.min.js",
+			"plugins/thirdparty/jquery.flot.selection.min.js",
+			"plugins/thirdparty/jquery.flot.stack.min.js",
+			"plugins/thirdparty/jquery.flot.symbol.min.js",
+			"plugins/thirdparty/jquery.flot.threshold.min.js",
+			"plugins/thirdparty/jquery.flot.time.min.js",
+			"plugins/thirdparty/jquery.flot.tooltip.min.js"
+		],
+		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
+			{
+				name: "value",
+				display_name: "値",
+				type: "calculated"
+			},
+			{
+				name: "plot_options",
+				display_name: "プロットオプション",
+				type: "text",
+				default_value: '{ "grid": { "borderColor":"#8b8b8b", "borderWidth":{ "top":0, "left":2, "bottom":2, "right":0 }, "tickColor":"#525252", "hoverable":true }, "tooltip":true, "tooltipOpts": { "content":"function(label, x, y) {var ret = \"%s %x %y\";return ret;}", "defaultTheme":false }, "series": { "shadowSize":0, "downsample": { "threshold":800 }, "lines": { "show":true, "lineWidth":2 }, "points": { "radius":1, "show":false } }, "legend": { "show":true, "position":"sw", "labelFormatter":"function(label, series){return (\"&nbsp;\"+label);}" }, "xaxis": { "font":{ "color":"#8b8b8b" }, "mode":"time" }, "yaxis": { "font":{ "color":"#8b8b8b" }, "position":"left" }, "y2axis": { "position":"right" } }',
+				description: "JSON形式文字列。 参考URL: https://github.com/flot/flot/blob/master/API.md#plot-options"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new flotchartWidget(settings));
 		}
 	});
 
@@ -797,11 +975,11 @@
 				type: "calculated"
 			},
 			{
-				"type": "number",
-				"display_name": "更新頻度",
-				"name": "refresh",
-				"suffix": "秒",
-				"description":"更新する必要がない場合は空白のまま"
+				type: "number",
+				display_name: "更新頻度",
+				name: "refresh",
+				suffix: "秒",
+				description:"更新する必要がない場合は空白のまま"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
