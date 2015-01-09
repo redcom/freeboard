@@ -365,7 +365,7 @@
 				levelColors: [ currentSettings.gauge_lower_color, currentSettings.gauge_mid_color, currentSettings.gauge_upper_color ],
 				gaugeWidthScale: currentSettings.gauge_widthscale/100.0,
 				gaugeColor: currentSettings.gauge_color,
-				labelFontFamily: '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", Arial, sans-serif',
+				labelFontFamily: '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", Helvetica, "メイリオ", "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Meiryo, Osaka, Arial, sans-serif',
 				labelFontColor: currentSettings.value_fontcolor,
 				valueFontColor: currentSettings.value_fontcolor
 			});
