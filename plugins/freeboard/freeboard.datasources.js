@@ -148,7 +148,7 @@
 			{
 				name: "body",
 				display_name: "Body",
-				type: "text",
+				type: "json",
 				description: "リクエスト本文。通常はPOSTメソッド時に使用される。"
 			},
 			{
