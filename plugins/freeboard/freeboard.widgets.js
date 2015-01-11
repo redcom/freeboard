@@ -582,27 +582,6 @@
 			if (!plot)
 				return;
 
-			// Y座標単位を検索
-			var unit1 = '';
-			var unit2 = '';
-
-			for (var i in dataset) {
-				if (dataset[i].yaxis == 1)
-					unit1 = dataset[i].unit;
-				else
-					unit2 = dataset[i].unit;
-			}
-
-			// 単位フォーマットをグラフに設定
-			plot.getAxes().yaxis.options.tickFormatter = function(v, axis) {
-				var val = Math.floor(v * 10) / 10;
-				return val + unit1;
-			};
-			plot.getAxes().y2axis.options.tickFormatter = function(v, axis) {
-				var val = Math.floor(v * 10) / 10;
-				return val + unit2;
-			};
-
 			try {
 				plot.setData(dataset);
 				plot.setupGrid();
@@ -681,7 +660,45 @@
 				name: "plot_options",
 				display_name: "プロットオプション",
 				type: "json",
-				default_value: '{ "grid": { "borderColor":"#8b8b8b", "borderWidth":{ "top":0, "left":2, "bottom":2, "right":0 }, "tickColor":"#525252", "hoverable":true }, "tooltip":true, "tooltipOpts": { "content":"function(label, x, y) {var ret = \"%s %x %y\";return ret;}", "defaultTheme":false }, "series": { "shadowSize":0, "downsample": { "threshold":800 }, "lines": { "show":true, "lineWidth":2 }, "points": { "radius":1, "show":false } }, "legend": { "show":true, "position":"sw", "labelFormatter":"function(label, series){return (\"&nbsp;\"+label);}" }, "xaxis": { "font":{ "color":"#8b8b8b" }, "mode":"time" }, "yaxis": { "font":{ "color":"#8b8b8b" }, "position":"left" }, "y2axis": { "position":"right" } }',
+				default_value: '{\
+    "grid": {\
+            "color": "#8b8b8b",\
+            "borderColor": "#8b8b8b",\
+            "borderWidth": { "top":0, "left":2, "bottom":2, "right":2 },\
+            "tickColor":"#525252", "hoverable":true },\
+            "tooltip":true,\
+            "tooltipOpts": { "content":"function(label, x, y) {var ret = \"%s %x %y\";return ret;}",\
+            "defaultTheme":false\
+    },\
+    "series": {\
+        "shadowSize":0,\
+        "downsample": { "threshold":800 },\
+        "lines": { "show":true, "lineWidth":2 },\
+        "points": { "radius":1, "show":false }\
+    },\
+    "legend": {\
+        "show":true,\
+        "position":"sw",\
+        "backgroundColor":"null",\
+        "labelFormatter":"function(label, series){return (\"&nbsp;\"+label);}"\
+    },\
+    "xaxes": [\
+        {\
+            "font":{ "color":"#8b8b8b" },\
+            "mode":"time"\
+        }\
+    ],\
+    "yaxes": [\
+        {\
+            "font":{ "color":"#8b8b8b" },\
+            "position":"left"\
+        },\
+        {\
+            "font":{ "color":"#8b8b8b" },\
+            "position":"right"\
+        }\
+    ]\
+}',
 				description: "JSON形式文字列。 参考URL: <a href='https://github.com/flot/flot/blob/master/API.md#plot-options' target='_blank'>https://github.com/flot/flot/blob/master/API.md#plot-options</a>"
 			}
 		],
