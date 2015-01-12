@@ -491,7 +491,7 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 				callback();
 			}
 
-        freeboard.emit("dashboard_loaded");
+			freeboard.emit("dashboard_loaded");
 		});
 	}
 
@@ -501,7 +501,11 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		if(window.File && window.FileReader && window.FileList && window.Blob)
 		{
 			var input = document.createElement('input');
+			input.id = "myfile";
 			input.type = "file";
+			$(input).css({
+				'visibility':'hidden'
+			});
 			$(input).on("change", function(event)
 			{
 				var files = event.target.files;
@@ -524,9 +528,20 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 
 					reader.readAsText(file);
 				}
-
+				if (/*@cc_on ! @*/ false || document.documentMode) {   // for IE
+					var disp = document.getElementById("myfile");
+					if (disp)
+						disp.parentNode.removeChild(disp);
+				}
 			});
-			$(input).trigger("click");
+			if (/*@cc_on ! @*/ false || document.documentMode) {   // for IE
+				document.body.appendChild(input);
+				var evt = document.createEvent('MouseEvents');
+				evt.initEvent('click',true,true,window,0,0,0,0,0,false,false,false,false,0,null);
+				input.dispatchEvent(evt);
+			} else {
+				$(input).trigger("click");
+			}
 		}
 		else
 		{
@@ -537,13 +552,21 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 	this.saveDashboard = function()
 	{
 		var contentType = 'application/octet-stream';
-		var a = document.createElement('a');
 		var blob = new Blob([JSON.stringify(self.serialize())], {'type': contentType});
-		document.body.appendChild(a);
-		a.href = window.URL.createObjectURL(blob);
-		a.download = "dashboard.json";
-		a.target="_self";
-		a.click();
+		var file = "dashboard.json";
+
+		if (/*@cc_on ! @*/ false || document.documentMode) {   // for IE
+			window.navigator.msSaveBlob(blob, file);
+		} else {
+			var url = (window.URL || window.webkitURL);
+			var data = url.createObjectURL(blob);
+			var e = document.createEvent("MouseEvents");
+			e.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+			var a = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
+			a.href = data;
+			a.download = file;
+			a.dispatchEvent(e);
+		}
 	}
 
 	this.addDatasource = function(datasource)
@@ -1102,37 +1125,57 @@ JSEditor = function () {
 		assetRoot = _assetRoot;
 	}
 
-	function displayJSEditor(value, callback) {
+	function displayJSEditor(value, mode, callback) {
 
-		var exampleText = "// Example: Convert temp from C to F and truncate to 2 decimal places.\n// return (datasources[\"MyDatasource\"].sensor.tempInF * 1.8 + 32).toFixed(2);";
-
-		// If value is empty, go ahead and suggest something
-		if (!value) {
-			value = exampleText;
-		}
-
+		var exampleText;
 		var codeWindow = $('<div class="code-window"></div>');
 		var codeMirrorWrapper = $('<div class="code-mirror-wrapper"></div>');
 		var codeWindowFooter = $('<div class="code-window-footer"></div>');
-		var codeWindowHeader = $('<div class="code-window-header cm-s-ambiance">This javascript will be re-evaluated any time a datasource referenced here is updated, and the value you <code><span class="cm-keyword">return</span></code> will be displayed in the widget. You can assume this javascript is wrapped in a function of the form <code><span class="cm-keyword">function</span>(<span class="cm-def">datasources</span>)</code> where datasources is a collection of javascript objects (keyed by their name) corresponding to the most current data in a datasource.</div>');
+		var codeWindowHeader = $('<div class="code-window-header cm-s-ambiance"></div>');
+		var config = {};
+
+		switch (mode) {
+			case 'javascript':
+				exampleText = "// 例: 摂氏から華氏へ変換、小数点2桁以下切り捨て。\n// return (datasources[\"MyDatasource\"].sensor.tempInF * 1.8 + 32).toFixed(2);";
+				codeWindowHeader = $('<div class="code-window-header cm-s-ambiance">このJavaScriptは、参照データソースが更新されるたびに再評価されます。そして<span class="cm-keyword">戻り値</span>はウィジェットに表示されます。あなたは関数<code><span class="cm-keyword">function</span>(<span class="cm-def">datasources</span>)</code>の中身をJavaScriptで記述することができます。引数datasourcesはあなたが追加したデータソースの配列です。</div>');
+
+				// If value is empty, go ahead and suggest something
+				if (!value)
+					value = exampleText;
+
+				config = {
+					value: value,
+					mode: "javascript",
+					theme: "ambiance",
+					indentUnit: 4,
+					lineNumbers: true,
+					matchBrackets: true,
+					autoCloseBrackets: true
+				};
+				break;
+			case 'json':
+				exampleText = '// 例: {\n//    "title": "タイトル"\n//    "value": 10\n}';
+				codeWindowHeader = $('<div class="code-window-header cm-s-ambiance"><span class="cm-keyword">ダブルクォーテーション""</span>で括った文字列の中に文字列を記述する場合は<span class="cm-keyword">¥"¥"</span>で括って下さい。<br>例: "function(label, series){return (¥"ID:¥"+label);}" </div>');
+
+				config = {
+					value: value,
+					mode: "javascript",
+					theme: "ambiance",
+					indentUnit: 4,
+					lineNumbers: true,
+					matchBrackets: true,
+					autoCloseBrackets: true
+				};
+				break;
+		}
 
 		codeWindow.append([codeWindowHeader, codeMirrorWrapper, codeWindowFooter]);
 
 		$("body").append(codeWindow);
 
-		var codeMirrorEditor = CodeMirror(codeMirrorWrapper.get(0),
-			{
-				value: value,
-				mode: "javascript",
-				theme: "ambiance",
-				indentUnit: 4,
-				lineNumbers: true,
-				matchBrackets: true,
-				autoCloseBrackets: true
-			}
-		);
+		var codeMirrorEditor = CodeMirror(codeMirrorWrapper.get(0), config);
 
-		var closeButton = $('<span id="dialog-cancel" class="text-button">Close</span>').click(function () {
+		var closeButton = $('<span id="dialog-cancel" class="text-button">閉じる</span>').click(function () {
 			if (callback) {
 				var newValue = codeMirrorEditor.getValue();
 
@@ -1150,8 +1193,8 @@ JSEditor = function () {
 
 	// Public API
 	return {
-		displayJSEditor: function (value, callback) {
-			displayJSEditor(value, callback);
+		displayJSEditor: function (value, mode, callback) {
+			displayJSEditor(value, mode, callback);
 		},
 		setAssetRoot: function (assetRoot) {
 			setAssetRoot(assetRoot)
@@ -1283,9 +1326,9 @@ PluginEditor = function(jsEditor, valueEditor)
 		if($("#setting-row-instance-name").length)
 		{
 			$("#setting-row-instance-name").nextAll().remove();
-	  	 }
-	    	else
-	    	{
+		 }
+			else
+			{
 			$("#setting-row-plugin-types").nextAll().remove();
 		}
 	}
@@ -1318,6 +1361,8 @@ PluginEditor = function(jsEditor, valueEditor)
 
 		function createSettingsFromDefinition(settingsDefs)
 		{
+			var colorPickerID = 0;
+
 			_.each(settingsDefs, function(settingDef)
 			{
 				// Set a default value if one doesn't exist
@@ -1426,7 +1471,7 @@ PluginEditor = function(jsEditor, valueEditor)
 							processHeaderVisibility();
 						}
 
-						$('<div class="table-operation text-button">ADD</div>').appendTo(valueCell).click(function()
+						$('<div class="table-operation text-button">追加</div>').appendTo(valueCell).click(function()
 						{
 							var newSubsettingValue = {};
 
@@ -1450,7 +1495,7 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
 
-                        var onOffSwitch = $('<div class="onoffswitch"><label class="onoffswitch-label" for="' + settingDef.name + '-onoff"><div class="onoffswitch-inner"><span class="on">YES</span><span class="off">NO</span></div><div class="onoffswitch-switch"></div></label></div>').appendTo(valueCell);
+						var onOffSwitch = $('<div class="onoffswitch"><label class="onoffswitch-label" for="' + settingDef.name + '-onoff"><div class="onoffswitch-inner"><span class="on">はい</span><span class="off">いいえ</span></div><div class="onoffswitch-switch"></div></label></div>').appendTo(valueCell);
 
 						var input = $('<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="' + settingDef.name + '-onoff">').prependTo(onOffSwitch).change(function()
 						{
@@ -1511,6 +1556,79 @@ PluginEditor = function(jsEditor, valueEditor)
 
 						break;
 					}
+					case "color":
+					{
+						var curColorPickerID = "picker-" + colorPickerID++;
+						var thisColorPickerID = "#" + curColorPickerID;
+						var defaultValue = currentSettingsValues[settingDef.name];
+						var input = $('<input id="' + curColorPickerID + '" type="text">').appendTo(valueCell);
+
+						newSettings.settings[settingDef.name] = defaultValue;
+
+						$(thisColorPickerID).css({
+							"border-right":"30px solid green",
+							"width":"80px"
+						});
+
+						$(thisColorPickerID).css('border-color', defaultValue);
+
+						var defhex = defaultValue;
+						defhex.replace("#", "");
+
+						$(thisColorPickerID).colpick({
+							layout:'hex',
+							colorScheme:'dark',
+							color: defhex,
+							submit:0,
+							onChange:function(hsb,hex,rgb,el,bySetColor) {
+								$(el).css('border-color','#'+hex);
+								newSettings.settings[settingDef.name] = '#'+hex;
+								if(!bySetColor) {
+									$(el).val('#'+hex);
+								}
+							}
+						}).keyup(function(){
+							$(this).colpickSetColor(this.value);
+						});
+
+						if(settingDef.name in currentSettingsValues) {
+							input.val(currentSettingsValues[settingDef.name]);
+						}
+
+						break;
+					}
+					case 'json':
+					{
+						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
+
+						var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>').appendTo(valueCell).change(function()
+						{
+							newSettings.settings[settingDef.name] = $(this).val();
+						});
+
+						if(settingDef.name in currentSettingsValues)
+						{
+							input.val(currentSettingsValues[settingDef.name]);
+						}
+
+						valueEditor.createValueEditor(input);
+
+						var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
+
+						var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JSON EDITOR</label></li>').mousedown(function(e)
+						{
+							e.preventDefault();
+
+							jsEditor.displayJSEditor(input.val(), 'json', function(result){
+								input.val(result);
+								input.change();
+							});
+						});
+
+						$(valueCell).append(datasourceToolbox.append([datasourceTool, jsEditorTool]));
+
+						break;
+					}
 					default:
 					{
 						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
@@ -1530,41 +1648,41 @@ PluginEditor = function(jsEditor, valueEditor)
 
 							valueEditor.createValueEditor(input);
 
-                            var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
+							var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
 
-                            var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>DATASOURCE</label></li>').mousedown(function(e)
-                            {
-                                e.preventDefault();
-                                $(input).val("")
-                                        .focus()
-                                        .insertAtCaret("datasources[\"")
-                                        .trigger("freeboard-eval");
-                            });
+							var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>データーソース</label></li>').mousedown(function(e)
+							{
+								e.preventDefault();
+								$(input).val("")
+										.focus()
+										.insertAtCaret("datasources[\"")
+										.trigger("freeboard-eval");
+							});
 
-                            var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JS EDITOR</label></li>').mousedown(function(e)
-                            {
-                                e.preventDefault();
+							var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JS EDITOR</label></li>').mousedown(function(e)
+							{
+								e.preventDefault();
 
-                                jsEditor.displayJSEditor(input.val(), function(result){
-                                    input.val(result);
-                                    input.change();
-                                });
-                            });
+								jsEditor.displayJSEditor(input.val(), 'javascript', function(result){
+									input.val(result);
+									input.change();
+								});
+							});
 
-                            $(valueCell).append(datasourceToolbox.append([datasourceTool, jsEditorTool]));
+							$(valueCell).append(datasourceToolbox.append([datasourceTool, jsEditorTool]));
 						}
 						else
 						{
 							var input = $('<input type="text">').appendTo(valueCell).change(function()
 							{
-                                if(settingDef.type == "number")
-                                {
-                                    newSettings.settings[settingDef.name] = Number($(this).val());
-                                }
-                                else
-                                {
-								    newSettings.settings[settingDef.name] = $(this).val();
-                                }
+								if(settingDef.type == "number")
+								{
+									newSettings.settings[settingDef.name] = Number($(this).val());
+								}
+								else
+								{
+									newSettings.settings[settingDef.name] = $(this).val();
+								}
 							});
 
 							if(settingDef.name in currentSettingsValues)
@@ -1577,10 +1695,10 @@ PluginEditor = function(jsEditor, valueEditor)
 					}
 				}
 
-                if(!_.isUndefined(settingDef.suffix))
-                {
-                    valueCell.append($('<div class="input-suffix">' + settingDef.suffix + '</div>'));
-                }
+				if(!_.isUndefined(settingDef.suffix))
+				{
+					valueCell.append($('<div class="input-suffix">' + settingDef.suffix + '</div>'));
+				}
 
 				if(!_.isUndefined(settingDef.description))
 				{
@@ -1590,10 +1708,10 @@ PluginEditor = function(jsEditor, valueEditor)
 		}
 
 
-		new DialogBox(form, title, "Save", "Cancel", function()
+		new DialogBox(form, title, "保存", "キャンセル", function()
 		{
 			$(".validation-error").remove();
-	
+
 			// Loop through each setting and validate it
 			for(var index = 0; index < selectedType.settings.length; index++)
 			{
@@ -1601,12 +1719,17 @@ PluginEditor = function(jsEditor, valueEditor)
 
 				if(settingDef.required && (_.isUndefined(newSettings.settings[settingDef.name]) || newSettings.settings[settingDef.name] == ""))
 				{
-                    _displayValidationError(settingDef.name, "This is required.");
+					_displayValidationError(settingDef.name, "必須項目です。");
 					return true;
 				}
 				else if(settingDef.type == "number" && !_isNumerical(newSettings.settings[settingDef.name]))
 				{
-                    _displayValidationError(settingDef.name, "Must be a number.");
+					_displayValidationError(settingDef.name, "数値のみです。");
+					return true;
+				}
+				else if (settingDef.type == "color" && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newSettings.settings[settingDef.name]) == false)
+				{
+					_displayValidationError(settingDef.name, "無効な色です。");
 					return true;
 				}
 			}
@@ -1623,10 +1746,10 @@ PluginEditor = function(jsEditor, valueEditor)
 
 		if(pluginTypeNames.length > 1)
 		{
-			var typeRow = createSettingRow("plugin-types", "Type");
+			var typeRow = createSettingRow("plugin-types", "タイプ");
 			typeSelect = $('<select></select>').appendTo($('<div class="styled-select"></div>').appendTo(typeRow));
 
-			typeSelect.append($("<option>Select a type...</option>").attr("value", "undefined"));
+			typeSelect.append($("<option>追加するタイプを選択してください。</option>").attr("value", "undefined"));
 
 			_.each(pluginTypes, function(pluginType)
 			{
@@ -1650,16 +1773,16 @@ PluginEditor = function(jsEditor, valueEditor)
 				}
 				else
 				{
-                    $("#setting-row-instance-name").show();
+					$("#setting-row-instance-name").show();
 
-                    if(selectedType.description && selectedType.description.length > 0)
-                    {
-                        pluginDescriptionElement.html(selectedType.description).show();
-                    }
-                    else
-                    {
-                        pluginDescriptionElement.hide();
-                    }
+					if(selectedType.description && selectedType.description.length > 0)
+					{
+						pluginDescriptionElement.html(selectedType.description).show();
+					}
+					else
+					{
+						pluginDescriptionElement.hide();
+					}
 
 					$("#dialog-ok").show();
 					createSettingsFromDefinition(selectedType.settings);
@@ -1674,19 +1797,19 @@ PluginEditor = function(jsEditor, valueEditor)
 			createSettingsFromDefinition(selectedType.settings);
 		}
 
-        if(typeSelect)
-        {
-            if(_.isUndefined(currentTypeName))
-            {
-                $("#setting-row-instance-name").hide();
-                $("#dialog-ok").hide();
-            }
-            else
-            {
-                $("#dialog-ok").show();
-                typeSelect.val(currentTypeName).trigger("change");
-            }
-        }
+		if(typeSelect)
+		{
+			if(_.isUndefined(currentTypeName))
+			{
+				$("#setting-row-instance-name").hide();
+				$("#dialog-ok").hide();
+			}
+			else
+			{
+				$("#dialog-ok").show();
+				typeSelect.val(currentTypeName).trigger("change");
+			}
+		}
 	}
 
 	// Public API
@@ -2431,27 +2554,27 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
 
 (function(jQuery) {
 
-    jQuery.eventEmitter = {
-        _JQInit: function() {
-            this._JQ = jQuery(this);
-        },
-        emit: function(evt, data) {
-            !this._JQ && this._JQInit();
-            this._JQ.trigger(evt, data);
-        },
-        once: function(evt, handler) {
-            !this._JQ && this._JQInit();
-            this._JQ.one(evt, handler);
-        },
-        on: function(evt, handler) {
-            !this._JQ && this._JQInit();
-            this._JQ.bind(evt, handler);
-        },
-        off: function(evt, handler) {
-            !this._JQ && this._JQInit();
-            this._JQ.unbind(evt, handler);
-        }
-    };
+	jQuery.eventEmitter = {
+		_JQInit: function() {
+			this._JQ = jQuery(this);
+		},
+		emit: function(evt, data) {
+			!this._JQ && this._JQInit();
+			this._JQ.trigger(evt, data);
+		},
+		once: function(evt, handler) {
+			!this._JQ && this._JQInit();
+			this._JQ.one(evt, handler);
+		},
+		on: function(evt, handler) {
+			!this._JQ && this._JQInit();
+			this._JQ.bind(evt, handler);
+		},
+		off: function(evt, handler) {
+			!this._JQ && this._JQInit();
+			this._JQ.unbind(evt, handler);
+		}
+	};
 
 }(jQuery));
 
@@ -2471,7 +2594,7 @@ var freeboard = (function()
 
 	var currentStyle = {
 		values: {
-			"font-family": '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", sans-serif',
+			"font-family": '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", "Open Sans", "メイリオ", "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Meiryo, Osaka, Arial, sans-serif',
 			"color"      : "#d3d4d4",
 			"font-weight": 100
 		}
@@ -2489,24 +2612,24 @@ var freeboard = (function()
 			if(options.type == 'datasource')
 			{
 				types = datasourcePlugins;
-				title = "Datasource";
+				title = "データソース";
 			}
 			else if(options.type == 'widget')
 			{
 				types = widgetPlugins;
-				title = "Widget";
+				title = "ウィジェット";
 			}
 			else if(options.type == 'pane')
 			{
-				title = "Pane";
+				title = "ペイン";
 			}
 
 			$(element).click(function(event)
 			{
 				if(options.operation == 'delete')
 				{
-					var phraseElement = $('<p>Are you sure you want to delete this ' + title + '?</p>');
-					new DialogBox(phraseElement, "Confirm Delete", "Yes", "No", function()
+					var phraseElement = $('<p>' + title + ' を削除してもよろしいですか？</p>');
+					new DialogBox(phraseElement, "削除確認", "はい", "いいえ", function()
 					{
 
 						if(options.type == 'datasource')
@@ -2568,12 +2691,12 @@ var freeboard = (function()
 								settings: [
 									{
 										name        : "title",
-										display_name: "Title",
+										display_name: "タイトル",
 										type        : "text"
 									},
 									{
 										name : "col_width",
-										display_name : "Columns",
+										display_name : "カラム数",
 										type : "number",
 										default_value : 1,
 										required : true
@@ -2694,17 +2817,17 @@ var freeboard = (function()
 		// Show the loading indicator when we first load
 		freeboardUI.showLoadingIndicator(true);
 
-        var resizeTimer;
+		var resizeTimer;
 
-        function resizeEnd()
-        {
-            freeboardUI.processResize(true);
-        }
+		function resizeEnd()
+		{
+			freeboardUI.processResize(true);
+		}
 
-        $(window).resize(function() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(resizeEnd, 500);
-        });
+		$(window).resize(function() {
+			clearTimeout(resizeTimer);
+			resizeTimer = setTimeout(resizeEnd, 500);
+		});
 
 	});
 
@@ -2743,7 +2866,7 @@ var freeboard = (function()
 					finishedCallback();
 				}
 
-                freeboard.emit("initialized");
+				freeboard.emit("initialized");
 			}
 		},
 		newDashboard        : function()
@@ -2773,23 +2896,23 @@ var freeboard = (function()
 				plugin.display_name = plugin.type_name;
 			}
 
-            // Add a required setting called name to the beginning
-            plugin.settings.unshift({
-                name : "name",
-                display_name : "Name",
-                type : "text",
-                required : true
-            });
+			// Add a required setting called name to the beginning
+			plugin.settings.unshift({
+				name : "name",
+				display_name : "名前",
+				type : "text",
+				required : true
+			});
 
 
 			theFreeboardModel.addPluginSource(plugin.source);
 			datasourcePlugins[plugin.type_name] = plugin;
 			theFreeboardModel._datasourceTypes.valueHasMutated();
 		},
-        resize : function()
-        {
-            freeboardUI.processResize(true);
-        },
+		resize : function()
+		{
+			freeboardUI.processResize(true);
+		},
 		loadWidgetPlugin    : function(plugin)
 		{
 			if(_.isUndefined(plugin.display_name))
@@ -2835,42 +2958,42 @@ var freeboard = (function()
 		{
 			new DialogBox(contentElement, title, okTitle, cancelTitle, okCallback);
 		},
-        getDatasourceSettings : function(datasourceName)
-        {
-            var datasources = theFreeboardModel.datasources();
+		getDatasourceSettings : function(datasourceName)
+		{
+			var datasources = theFreeboardModel.datasources();
 
-            // Find the datasource with the name specified
-            var datasource = _.find(datasources, function(datasourceModel){
-                return (datasourceModel.name() === datasourceName);
-            });
+			// Find the datasource with the name specified
+			var datasource = _.find(datasources, function(datasourceModel){
+				return (datasourceModel.name() === datasourceName);
+			});
 
-            if(datasource)
-            {
-                return datasource.settings();
-            }
-            else
-            {
-                return null;
-            }
-        },
-        setDatasourceSettings : function(datasourceName, settings)
-        {
-            var datasources = theFreeboardModel.datasources();
+			if(datasource)
+			{
+				return datasource.settings();
+			}
+			else
+			{
+				return null;
+			}
+		},
+		setDatasourceSettings : function(datasourceName, settings)
+		{
+			var datasources = theFreeboardModel.datasources();
 
-            // Find the datasource with the name specified
-            var datasource = _.find(datasources, function(datasourceModel){
-                return (datasourceModel.name() === datasourceName);
-            });
+			// Find the datasource with the name specified
+			var datasource = _.find(datasources, function(datasourceModel){
+				return (datasourceModel.name() === datasourceName);
+			});
 
-            if(!datasource)
-            {
-                console.log("Datasource not found");
-                return;
-            }
+			if(!datasource)
+			{
+				console.log("Datasource not found");
+				return;
+			}
 
-            var combinedSettings = _.defaults(settings, datasource.settings());
-            datasource.settings(combinedSettings);
-        },
+			var combinedSettings = _.defaults(settings, datasource.settings());
+			datasource.settings(combinedSettings);
+		},
 		getStyleString      : function(name)
 		{
 			var returnString = "";

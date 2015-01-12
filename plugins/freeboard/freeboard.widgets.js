@@ -626,7 +626,7 @@
 		display_name: "Flotチャート",
 		"external_scripts" : [
 			"plugins/thirdparty/excanvas.min.js",
-			"plugins/thirdparty/jquery.flot.js",
+			"plugins/thirdparty/jquery.flot.min.js",
 			"plugins/thirdparty/jquery.colorhelpers.min.js",
 			"plugins/thirdparty/jquery.flot.canvas.min.js",
 			"plugins/thirdparty/jquery.flot.categories.min.js",

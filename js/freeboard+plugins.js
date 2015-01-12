@@ -491,7 +491,7 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 				callback();
 			}
 
-        freeboard.emit("dashboard_loaded");
+			freeboard.emit("dashboard_loaded");
 		});
 	}
 
@@ -501,7 +501,11 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		if(window.File && window.FileReader && window.FileList && window.Blob)
 		{
 			var input = document.createElement('input');
+			input.id = "myfile";
 			input.type = "file";
+			$(input).css({
+				'visibility':'hidden'
+			});
 			$(input).on("change", function(event)
 			{
 				var files = event.target.files;
@@ -524,9 +528,20 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 
 					reader.readAsText(file);
 				}
-
+				if (/*@cc_on ! @*/ false || document.documentMode) {   // for IE
+					var disp = document.getElementById("myfile");
+					if (disp)
+						disp.parentNode.removeChild(disp);
+				}
 			});
-			$(input).trigger("click");
+			if (/*@cc_on ! @*/ false || document.documentMode) {   // for IE
+				document.body.appendChild(input);
+				var evt = document.createEvent('MouseEvents');
+				evt.initEvent('click',true,true,window,0,0,0,0,0,false,false,false,false,0,null);
+				input.dispatchEvent(evt);
+			} else {
+				$(input).trigger("click");
+			}
 		}
 		else
 		{
@@ -537,13 +552,21 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 	this.saveDashboard = function()
 	{
 		var contentType = 'application/octet-stream';
-		var a = document.createElement('a');
 		var blob = new Blob([JSON.stringify(self.serialize())], {'type': contentType});
-		document.body.appendChild(a);
-		a.href = window.URL.createObjectURL(blob);
-		a.download = "dashboard.json";
-		a.target="_self";
-		a.click();
+		var file = "dashboard.json";
+
+		if (/*@cc_on ! @*/ false || document.documentMode) {   // for IE
+			window.navigator.msSaveBlob(blob, file);
+		} else {
+			var url = (window.URL || window.webkitURL);
+			var data = url.createObjectURL(blob);
+			var e = document.createEvent("MouseEvents");
+			e.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+			var a = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
+			a.href = data;
+			a.download = file;
+			a.dispatchEvent(e);
+		}
 	}
 
 	this.addDatasource = function(datasource)
@@ -1102,37 +1125,57 @@ JSEditor = function () {
 		assetRoot = _assetRoot;
 	}
 
-	function displayJSEditor(value, callback) {
+	function displayJSEditor(value, mode, callback) {
 
-		var exampleText = "// Example: Convert temp from C to F and truncate to 2 decimal places.\n// return (datasources[\"MyDatasource\"].sensor.tempInF * 1.8 + 32).toFixed(2);";
-
-		// If value is empty, go ahead and suggest something
-		if (!value) {
-			value = exampleText;
-		}
-
+		var exampleText;
 		var codeWindow = $('<div class="code-window"></div>');
 		var codeMirrorWrapper = $('<div class="code-mirror-wrapper"></div>');
 		var codeWindowFooter = $('<div class="code-window-footer"></div>');
-		var codeWindowHeader = $('<div class="code-window-header cm-s-ambiance">This javascript will be re-evaluated any time a datasource referenced here is updated, and the value you <code><span class="cm-keyword">return</span></code> will be displayed in the widget. You can assume this javascript is wrapped in a function of the form <code><span class="cm-keyword">function</span>(<span class="cm-def">datasources</span>)</code> where datasources is a collection of javascript objects (keyed by their name) corresponding to the most current data in a datasource.</div>');
+		var codeWindowHeader = $('<div class="code-window-header cm-s-ambiance"></div>');
+		var config = {};
+
+		switch (mode) {
+			case 'javascript':
+				exampleText = "// 例: 摂氏から華氏へ変換、小数点2桁以下切り捨て。\n// return (datasources[\"MyDatasource\"].sensor.tempInF * 1.8 + 32).toFixed(2);";
+				codeWindowHeader = $('<div class="code-window-header cm-s-ambiance">このJavaScriptは、参照データソースが更新されるたびに再評価されます。そして<span class="cm-keyword">戻り値</span>はウィジェットに表示されます。あなたは関数<code><span class="cm-keyword">function</span>(<span class="cm-def">datasources</span>)</code>の中身をJavaScriptで記述することができます。引数datasourcesはあなたが追加したデータソースの配列です。</div>');
+
+				// If value is empty, go ahead and suggest something
+				if (!value)
+					value = exampleText;
+
+				config = {
+					value: value,
+					mode: "javascript",
+					theme: "ambiance",
+					indentUnit: 4,
+					lineNumbers: true,
+					matchBrackets: true,
+					autoCloseBrackets: true
+				};
+				break;
+			case 'json':
+				exampleText = '// 例: {\n//    "title": "タイトル"\n//    "value": 10\n}';
+				codeWindowHeader = $('<div class="code-window-header cm-s-ambiance"><span class="cm-keyword">ダブルクォーテーション""</span>で括った文字列の中に文字列を記述する場合は<span class="cm-keyword">¥"¥"</span>で括って下さい。<br>例: "function(label, series){return (¥"ID:¥"+label);}" </div>');
+
+				config = {
+					value: value,
+					mode: "javascript",
+					theme: "ambiance",
+					indentUnit: 4,
+					lineNumbers: true,
+					matchBrackets: true,
+					autoCloseBrackets: true
+				};
+				break;
+		}
 
 		codeWindow.append([codeWindowHeader, codeMirrorWrapper, codeWindowFooter]);
 
 		$("body").append(codeWindow);
 
-		var codeMirrorEditor = CodeMirror(codeMirrorWrapper.get(0),
-			{
-				value: value,
-				mode: "javascript",
-				theme: "ambiance",
-				indentUnit: 4,
-				lineNumbers: true,
-				matchBrackets: true,
-				autoCloseBrackets: true
-			}
-		);
+		var codeMirrorEditor = CodeMirror(codeMirrorWrapper.get(0), config);
 
-		var closeButton = $('<span id="dialog-cancel" class="text-button">Close</span>').click(function () {
+		var closeButton = $('<span id="dialog-cancel" class="text-button">閉じる</span>').click(function () {
 			if (callback) {
 				var newValue = codeMirrorEditor.getValue();
 
@@ -1150,8 +1193,8 @@ JSEditor = function () {
 
 	// Public API
 	return {
-		displayJSEditor: function (value, callback) {
-			displayJSEditor(value, callback);
+		displayJSEditor: function (value, mode, callback) {
+			displayJSEditor(value, mode, callback);
 		},
 		setAssetRoot: function (assetRoot) {
 			setAssetRoot(assetRoot)
@@ -1283,9 +1326,9 @@ PluginEditor = function(jsEditor, valueEditor)
 		if($("#setting-row-instance-name").length)
 		{
 			$("#setting-row-instance-name").nextAll().remove();
-	  	 }
-	    	else
-	    	{
+		 }
+			else
+			{
 			$("#setting-row-plugin-types").nextAll().remove();
 		}
 	}
@@ -1318,6 +1361,8 @@ PluginEditor = function(jsEditor, valueEditor)
 
 		function createSettingsFromDefinition(settingsDefs)
 		{
+			var colorPickerID = 0;
+
 			_.each(settingsDefs, function(settingDef)
 			{
 				// Set a default value if one doesn't exist
@@ -1426,7 +1471,7 @@ PluginEditor = function(jsEditor, valueEditor)
 							processHeaderVisibility();
 						}
 
-						$('<div class="table-operation text-button">ADD</div>').appendTo(valueCell).click(function()
+						$('<div class="table-operation text-button">追加</div>').appendTo(valueCell).click(function()
 						{
 							var newSubsettingValue = {};
 
@@ -1450,7 +1495,7 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
 
-                        var onOffSwitch = $('<div class="onoffswitch"><label class="onoffswitch-label" for="' + settingDef.name + '-onoff"><div class="onoffswitch-inner"><span class="on">YES</span><span class="off">NO</span></div><div class="onoffswitch-switch"></div></label></div>').appendTo(valueCell);
+						var onOffSwitch = $('<div class="onoffswitch"><label class="onoffswitch-label" for="' + settingDef.name + '-onoff"><div class="onoffswitch-inner"><span class="on">はい</span><span class="off">いいえ</span></div><div class="onoffswitch-switch"></div></label></div>').appendTo(valueCell);
 
 						var input = $('<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="' + settingDef.name + '-onoff">').prependTo(onOffSwitch).change(function()
 						{
@@ -1511,6 +1556,79 @@ PluginEditor = function(jsEditor, valueEditor)
 
 						break;
 					}
+					case "color":
+					{
+						var curColorPickerID = "picker-" + colorPickerID++;
+						var thisColorPickerID = "#" + curColorPickerID;
+						var defaultValue = currentSettingsValues[settingDef.name];
+						var input = $('<input id="' + curColorPickerID + '" type="text">').appendTo(valueCell);
+
+						newSettings.settings[settingDef.name] = defaultValue;
+
+						$(thisColorPickerID).css({
+							"border-right":"30px solid green",
+							"width":"80px"
+						});
+
+						$(thisColorPickerID).css('border-color', defaultValue);
+
+						var defhex = defaultValue;
+						defhex.replace("#", "");
+
+						$(thisColorPickerID).colpick({
+							layout:'hex',
+							colorScheme:'dark',
+							color: defhex,
+							submit:0,
+							onChange:function(hsb,hex,rgb,el,bySetColor) {
+								$(el).css('border-color','#'+hex);
+								newSettings.settings[settingDef.name] = '#'+hex;
+								if(!bySetColor) {
+									$(el).val('#'+hex);
+								}
+							}
+						}).keyup(function(){
+							$(this).colpickSetColor(this.value);
+						});
+
+						if(settingDef.name in currentSettingsValues) {
+							input.val(currentSettingsValues[settingDef.name]);
+						}
+
+						break;
+					}
+					case 'json':
+					{
+						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
+
+						var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>').appendTo(valueCell).change(function()
+						{
+							newSettings.settings[settingDef.name] = $(this).val();
+						});
+
+						if(settingDef.name in currentSettingsValues)
+						{
+							input.val(currentSettingsValues[settingDef.name]);
+						}
+
+						valueEditor.createValueEditor(input);
+
+						var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
+
+						var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JSON EDITOR</label></li>').mousedown(function(e)
+						{
+							e.preventDefault();
+
+							jsEditor.displayJSEditor(input.val(), 'json', function(result){
+								input.val(result);
+								input.change();
+							});
+						});
+
+						$(valueCell).append(datasourceToolbox.append([datasourceTool, jsEditorTool]));
+
+						break;
+					}
 					default:
 					{
 						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
@@ -1530,41 +1648,41 @@ PluginEditor = function(jsEditor, valueEditor)
 
 							valueEditor.createValueEditor(input);
 
-                            var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
+							var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
 
-                            var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>DATASOURCE</label></li>').mousedown(function(e)
-                            {
-                                e.preventDefault();
-                                $(input).val("")
-                                        .focus()
-                                        .insertAtCaret("datasources[\"")
-                                        .trigger("freeboard-eval");
-                            });
+							var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>データーソース</label></li>').mousedown(function(e)
+							{
+								e.preventDefault();
+								$(input).val("")
+										.focus()
+										.insertAtCaret("datasources[\"")
+										.trigger("freeboard-eval");
+							});
 
-                            var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JS EDITOR</label></li>').mousedown(function(e)
-                            {
-                                e.preventDefault();
+							var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JS EDITOR</label></li>').mousedown(function(e)
+							{
+								e.preventDefault();
 
-                                jsEditor.displayJSEditor(input.val(), function(result){
-                                    input.val(result);
-                                    input.change();
-                                });
-                            });
+								jsEditor.displayJSEditor(input.val(), 'javascript', function(result){
+									input.val(result);
+									input.change();
+								});
+							});
 
-                            $(valueCell).append(datasourceToolbox.append([datasourceTool, jsEditorTool]));
+							$(valueCell).append(datasourceToolbox.append([datasourceTool, jsEditorTool]));
 						}
 						else
 						{
 							var input = $('<input type="text">').appendTo(valueCell).change(function()
 							{
-                                if(settingDef.type == "number")
-                                {
-                                    newSettings.settings[settingDef.name] = Number($(this).val());
-                                }
-                                else
-                                {
-								    newSettings.settings[settingDef.name] = $(this).val();
-                                }
+								if(settingDef.type == "number")
+								{
+									newSettings.settings[settingDef.name] = Number($(this).val());
+								}
+								else
+								{
+									newSettings.settings[settingDef.name] = $(this).val();
+								}
 							});
 
 							if(settingDef.name in currentSettingsValues)
@@ -1577,10 +1695,10 @@ PluginEditor = function(jsEditor, valueEditor)
 					}
 				}
 
-                if(!_.isUndefined(settingDef.suffix))
-                {
-                    valueCell.append($('<div class="input-suffix">' + settingDef.suffix + '</div>'));
-                }
+				if(!_.isUndefined(settingDef.suffix))
+				{
+					valueCell.append($('<div class="input-suffix">' + settingDef.suffix + '</div>'));
+				}
 
 				if(!_.isUndefined(settingDef.description))
 				{
@@ -1590,10 +1708,10 @@ PluginEditor = function(jsEditor, valueEditor)
 		}
 
 
-		new DialogBox(form, title, "Save", "Cancel", function()
+		new DialogBox(form, title, "保存", "キャンセル", function()
 		{
 			$(".validation-error").remove();
-	
+
 			// Loop through each setting and validate it
 			for(var index = 0; index < selectedType.settings.length; index++)
 			{
@@ -1601,12 +1719,17 @@ PluginEditor = function(jsEditor, valueEditor)
 
 				if(settingDef.required && (_.isUndefined(newSettings.settings[settingDef.name]) || newSettings.settings[settingDef.name] == ""))
 				{
-                    _displayValidationError(settingDef.name, "This is required.");
+					_displayValidationError(settingDef.name, "必須項目です。");
 					return true;
 				}
 				else if(settingDef.type == "number" && !_isNumerical(newSettings.settings[settingDef.name]))
 				{
-                    _displayValidationError(settingDef.name, "Must be a number.");
+					_displayValidationError(settingDef.name, "数値のみです。");
+					return true;
+				}
+				else if (settingDef.type == "color" && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newSettings.settings[settingDef.name]) == false)
+				{
+					_displayValidationError(settingDef.name, "無効な色です。");
 					return true;
 				}
 			}
@@ -1623,10 +1746,10 @@ PluginEditor = function(jsEditor, valueEditor)
 
 		if(pluginTypeNames.length > 1)
 		{
-			var typeRow = createSettingRow("plugin-types", "Type");
+			var typeRow = createSettingRow("plugin-types", "タイプ");
 			typeSelect = $('<select></select>').appendTo($('<div class="styled-select"></div>').appendTo(typeRow));
 
-			typeSelect.append($("<option>Select a type...</option>").attr("value", "undefined"));
+			typeSelect.append($("<option>追加するタイプを選択してください。</option>").attr("value", "undefined"));
 
 			_.each(pluginTypes, function(pluginType)
 			{
@@ -1650,16 +1773,16 @@ PluginEditor = function(jsEditor, valueEditor)
 				}
 				else
 				{
-                    $("#setting-row-instance-name").show();
+					$("#setting-row-instance-name").show();
 
-                    if(selectedType.description && selectedType.description.length > 0)
-                    {
-                        pluginDescriptionElement.html(selectedType.description).show();
-                    }
-                    else
-                    {
-                        pluginDescriptionElement.hide();
-                    }
+					if(selectedType.description && selectedType.description.length > 0)
+					{
+						pluginDescriptionElement.html(selectedType.description).show();
+					}
+					else
+					{
+						pluginDescriptionElement.hide();
+					}
 
 					$("#dialog-ok").show();
 					createSettingsFromDefinition(selectedType.settings);
@@ -1674,19 +1797,19 @@ PluginEditor = function(jsEditor, valueEditor)
 			createSettingsFromDefinition(selectedType.settings);
 		}
 
-        if(typeSelect)
-        {
-            if(_.isUndefined(currentTypeName))
-            {
-                $("#setting-row-instance-name").hide();
-                $("#dialog-ok").hide();
-            }
-            else
-            {
-                $("#dialog-ok").show();
-                typeSelect.val(currentTypeName).trigger("change");
-            }
-        }
+		if(typeSelect)
+		{
+			if(_.isUndefined(currentTypeName))
+			{
+				$("#setting-row-instance-name").hide();
+				$("#dialog-ok").hide();
+			}
+			else
+			{
+				$("#dialog-ok").show();
+				typeSelect.val(currentTypeName).trigger("change");
+			}
+		}
 	}
 
 	// Public API
@@ -2431,27 +2554,27 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
 
 (function(jQuery) {
 
-    jQuery.eventEmitter = {
-        _JQInit: function() {
-            this._JQ = jQuery(this);
-        },
-        emit: function(evt, data) {
-            !this._JQ && this._JQInit();
-            this._JQ.trigger(evt, data);
-        },
-        once: function(evt, handler) {
-            !this._JQ && this._JQInit();
-            this._JQ.one(evt, handler);
-        },
-        on: function(evt, handler) {
-            !this._JQ && this._JQInit();
-            this._JQ.bind(evt, handler);
-        },
-        off: function(evt, handler) {
-            !this._JQ && this._JQInit();
-            this._JQ.unbind(evt, handler);
-        }
-    };
+	jQuery.eventEmitter = {
+		_JQInit: function() {
+			this._JQ = jQuery(this);
+		},
+		emit: function(evt, data) {
+			!this._JQ && this._JQInit();
+			this._JQ.trigger(evt, data);
+		},
+		once: function(evt, handler) {
+			!this._JQ && this._JQInit();
+			this._JQ.one(evt, handler);
+		},
+		on: function(evt, handler) {
+			!this._JQ && this._JQInit();
+			this._JQ.bind(evt, handler);
+		},
+		off: function(evt, handler) {
+			!this._JQ && this._JQInit();
+			this._JQ.unbind(evt, handler);
+		}
+	};
 
 }(jQuery));
 
@@ -2471,7 +2594,7 @@ var freeboard = (function()
 
 	var currentStyle = {
 		values: {
-			"font-family": '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", sans-serif',
+			"font-family": '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", "Open Sans", "メイリオ", "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Meiryo, Osaka, Arial, sans-serif',
 			"color"      : "#d3d4d4",
 			"font-weight": 100
 		}
@@ -2489,24 +2612,24 @@ var freeboard = (function()
 			if(options.type == 'datasource')
 			{
 				types = datasourcePlugins;
-				title = "Datasource";
+				title = "データソース";
 			}
 			else if(options.type == 'widget')
 			{
 				types = widgetPlugins;
-				title = "Widget";
+				title = "ウィジェット";
 			}
 			else if(options.type == 'pane')
 			{
-				title = "Pane";
+				title = "ペイン";
 			}
 
 			$(element).click(function(event)
 			{
 				if(options.operation == 'delete')
 				{
-					var phraseElement = $('<p>Are you sure you want to delete this ' + title + '?</p>');
-					new DialogBox(phraseElement, "Confirm Delete", "Yes", "No", function()
+					var phraseElement = $('<p>' + title + ' を削除してもよろしいですか？</p>');
+					new DialogBox(phraseElement, "削除確認", "はい", "いいえ", function()
 					{
 
 						if(options.type == 'datasource')
@@ -2568,12 +2691,12 @@ var freeboard = (function()
 								settings: [
 									{
 										name        : "title",
-										display_name: "Title",
+										display_name: "タイトル",
 										type        : "text"
 									},
 									{
 										name : "col_width",
-										display_name : "Columns",
+										display_name : "カラム数",
 										type : "number",
 										default_value : 1,
 										required : true
@@ -2694,17 +2817,17 @@ var freeboard = (function()
 		// Show the loading indicator when we first load
 		freeboardUI.showLoadingIndicator(true);
 
-        var resizeTimer;
+		var resizeTimer;
 
-        function resizeEnd()
-        {
-            freeboardUI.processResize(true);
-        }
+		function resizeEnd()
+		{
+			freeboardUI.processResize(true);
+		}
 
-        $(window).resize(function() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(resizeEnd, 500);
-        });
+		$(window).resize(function() {
+			clearTimeout(resizeTimer);
+			resizeTimer = setTimeout(resizeEnd, 500);
+		});
 
 	});
 
@@ -2743,7 +2866,7 @@ var freeboard = (function()
 					finishedCallback();
 				}
 
-                freeboard.emit("initialized");
+				freeboard.emit("initialized");
 			}
 		},
 		newDashboard        : function()
@@ -2773,23 +2896,23 @@ var freeboard = (function()
 				plugin.display_name = plugin.type_name;
 			}
 
-            // Add a required setting called name to the beginning
-            plugin.settings.unshift({
-                name : "name",
-                display_name : "Name",
-                type : "text",
-                required : true
-            });
+			// Add a required setting called name to the beginning
+			plugin.settings.unshift({
+				name : "name",
+				display_name : "名前",
+				type : "text",
+				required : true
+			});
 
 
 			theFreeboardModel.addPluginSource(plugin.source);
 			datasourcePlugins[plugin.type_name] = plugin;
 			theFreeboardModel._datasourceTypes.valueHasMutated();
 		},
-        resize : function()
-        {
-            freeboardUI.processResize(true);
-        },
+		resize : function()
+		{
+			freeboardUI.processResize(true);
+		},
 		loadWidgetPlugin    : function(plugin)
 		{
 			if(_.isUndefined(plugin.display_name))
@@ -2835,42 +2958,42 @@ var freeboard = (function()
 		{
 			new DialogBox(contentElement, title, okTitle, cancelTitle, okCallback);
 		},
-        getDatasourceSettings : function(datasourceName)
-        {
-            var datasources = theFreeboardModel.datasources();
+		getDatasourceSettings : function(datasourceName)
+		{
+			var datasources = theFreeboardModel.datasources();
 
-            // Find the datasource with the name specified
-            var datasource = _.find(datasources, function(datasourceModel){
-                return (datasourceModel.name() === datasourceName);
-            });
+			// Find the datasource with the name specified
+			var datasource = _.find(datasources, function(datasourceModel){
+				return (datasourceModel.name() === datasourceName);
+			});
 
-            if(datasource)
-            {
-                return datasource.settings();
-            }
-            else
-            {
-                return null;
-            }
-        },
-        setDatasourceSettings : function(datasourceName, settings)
-        {
-            var datasources = theFreeboardModel.datasources();
+			if(datasource)
+			{
+				return datasource.settings();
+			}
+			else
+			{
+				return null;
+			}
+		},
+		setDatasourceSettings : function(datasourceName, settings)
+		{
+			var datasources = theFreeboardModel.datasources();
 
-            // Find the datasource with the name specified
-            var datasource = _.find(datasources, function(datasourceModel){
-                return (datasourceModel.name() === datasourceName);
-            });
+			// Find the datasource with the name specified
+			var datasource = _.find(datasources, function(datasourceModel){
+				return (datasourceModel.name() === datasourceName);
+			});
 
-            if(!datasource)
-            {
-                console.log("Datasource not found");
-                return;
-            }
+			if(!datasource)
+			{
+				console.log("Datasource not found");
+				return;
+			}
 
-            var combinedSettings = _.defaults(settings, datasource.settings());
-            datasource.settings(combinedSettings);
-        },
+			var combinedSettings = _.defaults(settings, datasource.settings());
+			datasource.settings(combinedSettings);
+		},
 		getStyleString      : function(name)
 		{
 			var returnString = "";
@@ -3014,14 +3137,14 @@ $.extend(freeboard, jQuery.eventEmitter);
 			},
 			{
 				name: "refresh",
-				display_name: "Refresh Every",
+				display_name: "更新頻度",
 				type: "number",
-				suffix: "seconds",
+				suffix: "秒",
 				default_value: 5
 			},
 			{
 				name: "method",
-				display_name: "Method",
+				display_name: "メソッド",
 				type: "option",
 				options: [
 					{
@@ -3045,22 +3168,22 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "body",
 				display_name: "Body",
-				type: "text",
-				description: "The body of the request. Normally only used if method is POST"
+				type: "json",
+				description: "リクエスト本文。通常はPOSTメソッド時に使用される。"
 			},
 			{
 				name: "headers",
-				display_name: "Headers",
+				display_name: "Header",
 				type: "array",
 				settings: [
 					{
 						name: "name",
-						display_name: "Name",
+						display_name: "名前",
 						type: "text"
 					},
 					{
 						name: "value",
-						display_name: "Value",
+						display_name: "値",
 						type: "text"
 					}
 				]
@@ -3139,31 +3262,31 @@ $.extend(freeboard, jQuery.eventEmitter);
 		settings: [
 			{
 				name: "location",
-				display_name: "Location",
+				display_name: "場所",
 				type: "text",
-				description: "Example: London, UK"
+				description: "例: London, UK"
 			},
 			{
 				name: "units",
-				display_name: "Units",
+				display_name: "単位",
 				type: "option",
-				default: "imperial",
+				default: "metric",
 				options: [
 					{
-						name: "Imperial",
-						value: "imperial"
+						name: "メトリック",
+						value: "metric"
 					},
 					{
-						name: "Metric",
-						value: "metric"
+						name: "インペリアル",
+						value: "imperial"
 					}
 				]
 			},
 			{
 				name: "refresh",
-				display_name: "Refresh Every",
+				display_name: "更新頻度",
 				type: "number",
-				suffix: "seconds",
+				suffix: "秒",
 				default_value: 5
 			}
 		],
@@ -3217,8 +3340,8 @@ $.extend(freeboard, jQuery.eventEmitter);
 		"settings": [
 			{
 				name: "thing_id",
-				display_name: "Thing Name",
-				"description": "Example: salty-dog-1",
+				display_name: "物の名前",
+				"description": "例: ソルティドッグ1",
 				type: "text"
 			}
 		],
@@ -3303,26 +3426,26 @@ $.extend(freeboard, jQuery.eventEmitter);
 		"settings": [
 			{
 				"name": "datafile",
-				"display_name": "Data File URL",
+				"display_name": "データファイルURL",
 				"type": "text",
-				"description": "A link to a JSON array of data."
+				"description": "JSON配列データへのリンク"
 			},
 			{
 				name: "is_jsonp",
-				display_name: "Is JSONP",
+				display_name: "JSONP使用",
 				type: "boolean"
 			},
 			{
 				"name": "loop",
-				"display_name": "Loop",
+				"display_name": "ループ再生",
 				"type": "boolean",
-				"description": "Rewind and loop when finished"
+				"description": "巻戻しとループ再生時終了"
 			},
 			{
 				"name": "refresh",
-				"display_name": "Refresh Every",
+				"display_name": "更新頻度",
 				"type": "number",
-				"suffix": "seconds",
+				"suffix": "秒",
 				"default_value": 5
 			}
 		],
@@ -3376,13 +3499,13 @@ $.extend(freeboard, jQuery.eventEmitter);
 
 	freeboard.loadDatasourcePlugin({
 		"type_name": "clock",
-		"display_name": "Clock",
+		"display_name": "時計",
 		"settings": [
 			{
 				"name": "refresh",
-				"display_name": "Refresh Every",
+				"display_name": "更新頻度",
 				"type": "number",
-				"suffix": "seconds",
+				"suffix": "秒",
 				"default_value": 1
 			}
 		],
@@ -3405,42 +3528,42 @@ $.extend(freeboard, jQuery.eventEmitter);
 	var SPARKLINE_HISTORY_LENGTH = 100;
 	var SPARKLINE_COLORS = ["#FF9900", "#FFFFFF", "#B3B4B4", "#6B6B6B", "#28DE28", "#13F7F9", "#E6EE18", "#C41204", "#CA3CB8", "#0B1CFB"];
 
-    function easeTransitionText(newValue, textElement, duration) {
+	function easeTransitionText(newValue, textElement, duration) {
 
 		var currentValue = $(textElement).text();
 
-        if (currentValue == newValue)
-            return;
+		if (currentValue == newValue)
+			return;
 
-        if ($.isNumeric(newValue) && $.isNumeric(currentValue)) {
-            var numParts = newValue.toString().split('.');
-            var endingPrecision = 0;
+		if ($.isNumeric(newValue) && $.isNumeric(currentValue)) {
+			var numParts = newValue.toString().split('.');
+			var endingPrecision = 0;
 
-            if (numParts.length > 1) {
-                endingPrecision = numParts[1].length;
-            }
+			if (numParts.length > 1) {
+				endingPrecision = numParts[1].length;
+			}
 
-            numParts = currentValue.toString().split('.');
-            var startingPrecision = 0;
+			numParts = currentValue.toString().split('.');
+			var startingPrecision = 0;
 
-            if (numParts.length > 1) {
-                startingPrecision = numParts[1].length;
-            }
+			if (numParts.length > 1) {
+				startingPrecision = numParts[1].length;
+			}
 
-            jQuery({transitionValue: Number(currentValue), precisionValue: startingPrecision}).animate({transitionValue: Number(newValue), precisionValue: endingPrecision}, {
-                duration: duration,
-                step: function () {
-                    $(textElement).text(this.transitionValue.toFixed(this.precisionValue));
-                },
-                done: function () {
-                    $(textElement).text(newValue);
-                }
-            });
-        }
-        else {
-            $(textElement).text(newValue);
-        }
-    }
+			jQuery({transitionValue: Number(currentValue), precisionValue: startingPrecision}).animate({transitionValue: Number(newValue), precisionValue: endingPrecision}, {
+				duration: duration,
+				step: function () {
+					$(textElement).text(this.transitionValue.toFixed(this.precisionValue));
+				},
+				done: function () {
+					$(textElement).text(newValue);
+				}
+			});
+		}
+		else {
+			$(textElement).text(newValue);
+		}
+	}
 
 	function addValueToSparkline(element, value) {
 		var values = $(element).data().values;
@@ -3539,16 +3662,16 @@ $.extend(freeboard, jQuery.eventEmitter);
 	freeboard.addStyle('.tw-sparkline',
 		'height:20px;');
 
-    var textWidget = function (settings) {
+	var textWidget = function (settings) {
 
-        var self = this;
+		var self = this;
 
-        var currentSettings = settings;
+		var currentSettings = settings;
 		var displayElement = $('<div class="tw-display"></div>');
 		var titleElement = $('<h2 class="section-title tw-title tw-td"></h2>');
-        var valueElement = $('<div class="tw-value"></div>');
-        var unitsElement = $('<div class="tw-unit"></div>');
-        var sparklineElement = $('<div class="tw-sparkline tw-td"></div>');
+		var valueElement = $('<div class="tw-value"></div>');
+		var unitsElement = $('<div class="tw-unit"></div>');
+		var sparklineElement = $('<div class="tw-sparkline tw-td"></div>');
 
 		function updateValueSizing()
 		{
@@ -3562,7 +3685,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 			}
 		}
 
-        this.render = function (element) {
+		this.render = function (element) {
 			$(element).empty();
 
 			$(displayElement)
@@ -3573,10 +3696,10 @@ $.extend(freeboard, jQuery.eventEmitter);
 			$(element).append(displayElement);
 
 			updateValueSizing();
-        }
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            currentSettings = newSettings;
+		this.onSettingsChanged = function (newSettings) {
+			currentSettings = newSettings;
 
 			var shouldDisplayTitle = (!_.isUndefined(newSettings.title) && newSettings.title != "");
 			var shouldDisplayUnits = (!_.isUndefined(newSettings.units) && newSettings.units != "");
@@ -3629,754 +3752,1064 @@ $.extend(freeboard, jQuery.eventEmitter);
 			valueElement.css({"font-size" : valueFontSize + "px"});
 
 			updateValueSizing();
-        }
+		}
 
 		this.onSizeChanged = function()
 		{
 			updateValueSizing();
 		}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (settingName == "value") {
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (settingName == "value") {
 
-                if (currentSettings.animate) {
-                    easeTransitionText(newValue, valueElement, 500);
-                }
-                else {
-                    valueElement.text(newValue);
-                }
+				if (currentSettings.animate) {
+					easeTransitionText(newValue, valueElement, 500);
+				}
+				else {
+					valueElement.text(newValue);
+				}
 
-                if (currentSettings.sparkline) {
-                    addValueToSparkline(sparklineElement, newValue);
-                }
-            }
-        }
+				if (currentSettings.sparkline) {
+					addValueToSparkline(sparklineElement, newValue);
+				}
+			}
+		}
 
-        this.onDispose = function () {
+		this.onDispose = function () {
 
-        }
+		}
 
-        this.getHeight = function () {
-            if (currentSettings.size == "big" || currentSettings.sparkline) {
-                return 2;
-            }
-            else {
-                return 1;
-            }
-        }
+		this.getHeight = function () {
+			if (currentSettings.size == "big" || currentSettings.sparkline) {
+				return 2;
+			}
+			else {
+				return 1;
+			}
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        type_name: "text_widget",
-        display_name: "Text",
-        "external_scripts" : [
-            "plugins/thirdparty/jquery.sparkline.min.js"
-        ],
-        settings: [
-            {
-                name: "title",
-                display_name: "Title",
-                type: "text"
-            },
-            {
-                name: "size",
-                display_name: "Size",
-                type: "option",
-                options: [
-                    {
-                        name: "Regular",
-                        value: "regular"
-                    },
-                    {
-                        name: "Big",
-                        value: "big"
-                    }
-                ]
-            },
-            {
-                name: "value",
-                display_name: "Value",
-                type: "calculated"
-            },
-            {
-                name: "sparkline",
-                display_name: "Include Sparkline",
-                type: "boolean"
-            },
-            {
-                name: "animate",
-                display_name: "Animate Value Changes",
-                type: "boolean",
-                default_value: true
-            },
-            {
-                name: "units",
-                display_name: "Units",
-                type: "text"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new textWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		type_name: "text_widget",
+		display_name: "テキスト",
+		"external_scripts" : [
+			"plugins/thirdparty/jquery.sparkline.min.js"
+		],
+		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
+			{
+				name: "size",
+				display_name: "サイズ",
+				type: "option",
+				options: [
+					{
+						name: "レギュラー",
+						value: "regular"
+					},
+					{
+						name: "ビッグ",
+						value: "big"
+					}
+				]
+			},
+			{
+				name: "value",
+				display_name: "値",
+				type: "calculated"
+			},
+			{
+				name: "sparkline",
+				display_name: "スパークラインを含む",
+				type: "boolean"
+			},
+			{
+				name: "animate",
+				display_name: "値変化アニメーション",
+				type: "boolean",
+				default_value: true
+			},
+			{
+				name: "units",
+				display_name: "単位",
+				type: "text"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new textWidget(settings));
+		}
+	});
 
-    var gaugeID = 0;
+	var gaugeID = 0;
 	freeboard.addStyle('.gauge-widget-wrapper', "width: 100%;text-align: center;");
-	freeboard.addStyle('.gauge-widget', "width:200px;height:160px;display:inline-block;");
+	freeboard.addStyle('.gauge-widget', "width:280px;height:214px;display:inline-block;");
 
-    var gaugeWidget = function (settings) {
-        var self = this;
+	var gaugeWidget = function (settings) {
+		var self = this;
 
-        var thisGaugeID = "gauge-" + gaugeID++;
-        var titleElement = $('<h2 class="section-title"></h2>');
-        var gaugeElement = $('<div class="gauge-widget" id="' + thisGaugeID + '"></div>');
+		var thisGaugeID = "gauge-" + gaugeID++;
+		var titleElement = $('<h2 class="section-title"></h2>');
+		var wrapperElement = $('<div class="gauge-widget-wrapper"></div>');
+		var gaugeElement = $('<div class="gauge-widget" id="' + thisGaugeID + '"></div>');
 
-        var gaugeObject;
-        var rendered = false;
+		var gaugeObject;
+		var rendered = false;
 
-        var currentSettings = settings;
+		var currentSettings = settings;
 
-        function createGauge() {
-            if (!rendered) {
-                return;
-            }
+		function createGauge() {
+			if (!rendered) {
+				return;
+			}
 
-            gaugeElement.empty();
+			currentSettings.shape = parseInt(currentSettings.shape);
 
-            gaugeObject = new JustGage({
-                id: thisGaugeID,
-                value: (_.isUndefined(currentSettings.min_value) ? 0 : currentSettings.min_value),
-                min: (_.isUndefined(currentSettings.min_value) ? 0 : currentSettings.min_value),
-                max: (_.isUndefined(currentSettings.max_value) ? 0 : currentSettings.max_value),
-                label: currentSettings.units,
-                showInnerShadow: false,
-                valueFontColor: "#d3d4d4"
-            });
-        }
+			gaugeElement.empty();
 
-        this.render = function (element) {
-            rendered = true;
-            $(element).append(titleElement).append($('<div class="gauge-widget-wrapper"></div>').append(gaugeElement));
-            createGauge();
-        }
+			var valueStyle = freeboard.getStyleObject("values");
 
-        this.onSettingsChanged = function (newSettings) {
-            if (newSettings.min_value != currentSettings.min_value || newSettings.max_value != currentSettings.max_value || newSettings.units != currentSettings.units) {
-                currentSettings = newSettings;
-                createGauge();
-            }
-            else {
-                currentSettings = newSettings;
-            }
+			gaugeObject = new JustGage({
+				id: thisGaugeID,
+				value: (_.isUndefined(currentSettings.min_value) ? 0 : currentSettings.min_value),
+				min: (_.isUndefined(currentSettings.min_value) ? 0 : currentSettings.min_value),
+				max: (_.isUndefined(currentSettings.max_value) ? 0 : currentSettings.max_value),
+				label: currentSettings.units,
+				showInnerShadow: false,
+				shape: currentSettings.shape,
+				levelColors: [ currentSettings.gauge_lower_color, currentSettings.gauge_mid_color, currentSettings.gauge_upper_color ],
+				gaugeWidthScale: currentSettings.gauge_widthscale/100.0,
+				gaugeColor: currentSettings.gauge_color,
+				labelFontFamily: valueStyle['font-family'],
+				labelFontColor: currentSettings.value_fontcolor,
+				valueFontColor: currentSettings.value_fontcolor
+			});
+		}
 
-            titleElement.html(newSettings.title);
-        }
+		this.render = function (element) {
+			rendered = true;
+			$(element).append(titleElement).append(wrapperElement.append(gaugeElement));
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (!_.isUndefined(gaugeObject)) {
-                gaugeObject.refresh(Number(newValue));
-            }
-        }
+			// for justgauge redraw bug.
+			var timerID = setTimeout(function() {
+				createGauge();
+				clearTimeout(timerID);
+			}, 500);
+		}
 
-        this.onDispose = function () {
-        }
+		this.onSettingsChanged = function (newSettings) {
+			if (newSettings.min_value != currentSettings.min_value ||
+				newSettings.max_value != currentSettings.max_value ||
+				newSettings.units != currentSettings.units ||
+				newSettings.shape != currentSettings.shape ||
+				newSettings.gauge_widthscale != currentSettings.gauge_widthscale ||
+				newSettings.value_fontcolor != currentSettings.value_fontcolor ||
+				newSettings.gauge_upper_color != currentSettings.gauge_upper_color ||
+				newSettings.gauge_mid_color != currentSettings.gauge_mid_color ||
+				newSettings.gauge_lower_color != currentSettings.gauge_lower_color ||
+				newSettings.gauge_color != currentSettings.gauge_color) {
+				currentSettings = newSettings;
+				createGauge();
+			}
+			else {
+				currentSettings = newSettings;
+			}
 
-        this.getHeight = function () {
-            return 3;
-        }
+			titleElement.html(newSettings.title);
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (!_.isUndefined(gaugeObject)) {
+				gaugeObject.refresh(Number(newValue));
+			}
+		}
 
-    freeboard.loadWidgetPlugin({
-        type_name: "gauge",
-        display_name: "Gauge",
-        "external_scripts" : [
-            "plugins/thirdparty/raphael.2.1.0.min.js",
-            "plugins/thirdparty/justgage.1.0.1.js"
-        ],
-        settings: [
-            {
-                name: "title",
-                display_name: "Title",
-                type: "text"
-            },
-            {
-                name: "value",
-                display_name: "Value",
-                type: "calculated"
-            },
-            {
-                name: "units",
-                display_name: "Units",
-                type: "text"
-            },
-            {
-                name: "min_value",
-                display_name: "Minimum",
-                type: "text",
-                default_value: 0
-            },
-            {
-                name: "max_value",
-                display_name: "Maximum",
-                type: "text",
-                default_value: 100
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new gaugeWidget(settings));
-        }
-    });
+		this.onDispose = function () {
+		}
 
+		this.getHeight = function () {
+			return 4;
+		}
+
+		this.onSettingsChanged(settings);
+	};
+
+	freeboard.loadWidgetPlugin({
+		type_name: "gauge",
+		display_name: "ゲージ",
+		"external_scripts" : [
+			"plugins/thirdparty/raphael.2.1.0.min.js",
+			"plugins/thirdparty/justgage.1.0.2.js"
+		],
+		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
+			{
+				name: "value",
+				display_name: "値",
+				type: "calculated"
+			},
+			{
+				name: "shape",
+				display_name: "型",
+				type: "option",
+				options: [
+					{
+						name: "ハーフ",
+						value: 0
+					},
+					{
+						name: "ファン",
+						value: 1
+					},
+					{
+						name: "ドーナッツ",
+						value: 2
+					}
+				]
+			},
+			{
+				name: "units",
+				display_name: "単位",
+				type: "text"
+			},
+			{
+				name: "value_fontcolor",
+				display_name: "値フォント色",
+				type: "color",
+				default_value: "#d3d4d4",
+				description: "デフォルト色: #d3d4d4"
+			},
+			{
+				name: "gauge_upper_color",
+				display_name: "ゲージ色 Upper",
+				type: "color",
+				default_value: "#ff0000",
+				description: "デフォルト色: #ff0000"
+			},
+			{
+				name: "gauge_mid_color",
+				display_name: "ゲージ色 Mid",
+				type: "color",
+				default_value: "#f9c802",
+				description: "デフォルト色: #f9c802"
+			},
+			{
+				name: "gauge_lower_color",
+				display_name: "ゲージ色 Lower",
+				type: "color",
+				default_value: "#a9d70b",
+				description: "デフォルト色: #a9d70b"
+			},
+			{
+				name: "gauge_color",
+				display_name: "ゲージ背景色",
+				type: "color",
+				default_value: "#edebeb",
+				description: "デフォルト色: #edebeb"
+			},
+			{
+				name: "gauge_widthscale",
+				display_name: "ゲージ太さ",
+				type: "number",
+				default_value: 100,
+				description: "0から200まで"
+			},
+			{
+				name: "min_value",
+				display_name: "最小値",
+				type: "number",
+				default_value: 0
+			},
+			{
+				name: "max_value",
+				display_name: "最大値",
+				type: "number",
+				default_value: 100
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new gaugeWidget(settings));
+		}
+	});
+
+	var flotchartID = 0;
+	freeboard.addStyle('.flotchart', "width:100%;height: 215px;");
+
+	var flotchartWidget = function (settings) {
+		var self = this;
+
+		var thisID = "flotchart-" + flotchartID++;
+		var titleElement = $('<h2 class="section-title"></h2>');
+		var flotchartElement = $('<div class="flotchart" id="' + thisID + '"></div>');
+		var currentSettings = settings;
+
+		var plot = null;
+
+		function plotChart() {
+			if (plot) {
+				plot.destroy();
+				plot = null;
+			}
+
+			Function.prototype.toJSON = Function.prototype.toString;
+
+			var parser = function(k,v){return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v};
+
+			var options;
+			if (currentSettings.plot_options) {
+				try {
+					options = JSON.parse(currentSettings.plot_options, parser);
+				}
+				catch (e) {
+					console.log(e);
+				}
+			}
+
+			var dataset = [];
+			plot = $.plot($('#'+thisID), dataset, options);
+
+			$("#flotTip").css({
+				"padding": "3px 5px",
+				"color":"#000000",
+				"background-color":"#ffffff",
+				"box-shadow": "0 0 10px #555",
+				"opacity": ".7",
+				"filter": "alpha(opacity=70)",
+				"z-index": "100",
+				"-webkit-border-radius": "4px",
+				"-moz-border-radius": "4px",
+				"border-radius": "4px",
+				"font-size":"12px"
+			});
+
+			$("#flot-y-axis").css({
+				"color": "#ffffff"
+			});
+		}
+
+		function plotData(dataset) {
+			if (!plot)
+				return;
+
+			try {
+				plot.setData(dataset);
+				plot.setupGrid();
+				plot.draw();
+			} catch (e) {
+				console.log(e);
+			}
+		}
+
+		this.render = function (element) {
+			$(element).append(titleElement).append(flotchartElement);
+			plotChart();
+		}
+
+		this.onSettingsChanged = function (newSettings) {
+			if (newSettings.plot_options != currentSettings.plot_options ||
+				newSettings.value != currentSettings.value) {
+				currentSettings = newSettings;
+				plotChart();
+			} else {
+				currentSettings = newSettings;
+			}
+			titleElement.html(newSettings.title);
+		}
+
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			// console.log(newValue);
+			plotData(newValue);		}
+
+		this.onDispose = function () {
+		}
+
+		this.getHeight = function () {
+			return 4;
+		}
+
+		this.onSettingsChanged(settings);
+	};
+
+	freeboard.loadWidgetPlugin({
+		type_name: "flotchart",
+		display_name: "Flotチャート",
+		"external_scripts" : [
+			"plugins/thirdparty/excanvas.min.js",
+			"plugins/thirdparty/jquery.flot.min.js",
+			"plugins/thirdparty/jquery.colorhelpers.min.js",
+			"plugins/thirdparty/jquery.flot.canvas.min.js",
+			"plugins/thirdparty/jquery.flot.categories.min.js",
+			"plugins/thirdparty/jquery.flot.crosshair.min.js",
+			"plugins/thirdparty/jquery.flot.downsample.js",
+			"plugins/thirdparty/jquery.flot.errorbars.min.js",
+			"plugins/thirdparty/jquery.flot.fillbetween.min.js",
+			"plugins/thirdparty/jquery.flot.image.min.js",
+			"plugins/thirdparty/jquery.flot.navigate.min.js",
+			"plugins/thirdparty/jquery.flot.pie.min.js",
+			"plugins/thirdparty/jquery.flot.resize.min.js",
+			"plugins/thirdparty/jquery.flot.selection.min.js",
+			"plugins/thirdparty/jquery.flot.stack.min.js",
+			"plugins/thirdparty/jquery.flot.symbol.min.js",
+			"plugins/thirdparty/jquery.flot.threshold.min.js",
+			"plugins/thirdparty/jquery.flot.time.min.js",
+			"plugins/thirdparty/jquery.flot.tooltip.min.js"
+		],
+		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
+			{
+				name: "value",
+				display_name: "値",
+				type: "calculated"
+			},
+			{
+				name: "plot_options",
+				display_name: "プロットオプション",
+				type: "json",
+				default_value: '{\
+    "grid": {\
+            "color": "#8b8b8b",\
+            "borderColor": "#8b8b8b",\
+            "borderWidth": { "top":0, "left":2, "bottom":2, "right":2 },\
+            "tickColor":"#525252", "hoverable":true },\
+            "tooltip":true,\
+            "tooltipOpts": { "content":"function(label, x, y) {var ret = \"%s %x %y\";return ret;}",\
+            "defaultTheme":false\
+    },\
+    "series": {\
+        "shadowSize":0,\
+        "downsample": { "threshold":800 },\
+        "lines": { "show":true, "lineWidth":2 },\
+        "points": { "radius":1, "show":false }\
+    },\
+    "legend": {\
+        "show":true,\
+        "position":"sw",\
+        "backgroundColor":"null",\
+        "labelFormatter":"function(label, series){return (\"&nbsp;\"+label);}"\
+    },\
+    "xaxes": [\
+        {\
+            "font":{ "color":"#8b8b8b" },\
+            "mode":"time"\
+        }\
+    ],\
+    "yaxes": [\
+        {\
+            "font":{ "color":"#8b8b8b" },\
+            "position":"left"\
+        },\
+        {\
+            "font":{ "color":"#8b8b8b" },\
+            "position":"right"\
+        }\
+    ]\
+}',
+				description: "JSON形式文字列。 参考URL: <a href='https://github.com/flot/flot/blob/master/API.md#plot-options' target='_blank'>https://github.com/flot/flot/blob/master/API.md#plot-options</a>"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new flotchartWidget(settings));
+		}
+	});
 
 	freeboard.addStyle('.sparkline', "width:100%;height: 75px;");
-    var sparklineWidget = function (settings) {
-        var self = this;
+	var sparklineWidget = function (settings) {
+		var self = this;
 
-        var titleElement = $('<h2 class="section-title"></h2>');
-        var sparklineElement = $('<div class="sparkline"></div>');
+		var titleElement = $('<h2 class="section-title"></h2>');
+		var sparklineElement = $('<div class="sparkline"></div>');
 
-        this.render = function (element) {
-            $(element).append(titleElement).append(sparklineElement);
-        }
+		this.render = function (element) {
+			$(element).append(titleElement).append(sparklineElement);
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            titleElement.html((_.isUndefined(newSettings.title) ? "" : newSettings.title));
-        }
+		this.onSettingsChanged = function (newSettings) {
+			titleElement.html((_.isUndefined(newSettings.title) ? "" : newSettings.title));
+		}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            addValueToSparkline(sparklineElement, newValue);
-        }
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			addValueToSparkline(sparklineElement, newValue);
+		}
 
-        this.onDispose = function () {
-        }
+		this.onDispose = function () {
+		}
 
-        this.getHeight = function () {
-            return 2;
-        }
+		this.getHeight = function () {
+			return 2;
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        type_name: "sparkline",
-        display_name: "Sparkline",
-        "external_scripts" : [
-            "plugins/thirdparty/jquery.sparkline.min.js"
-        ],
-        settings: [
-            {
-                name: "title",
-                display_name: "Title",
-                type: "text"
-            },
-            {
-                name: "value",
-                display_name: "Value",
-                type: "calculated"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new sparklineWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		type_name: "sparkline",
+		display_name: "スパークラインチャート",
+		"external_scripts" : [
+			"plugins/thirdparty/jquery.sparkline.min.js"
+		],
+		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
+			{
+				name: "value",
+				display_name: "値",
+				type: "calculated"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new sparklineWidget(settings));
+		}
+	});
 
-	freeboard.addStyle('div.pointer-value', "position:absolute;height:95px;margin: auto;top: 0px;bottom: 0px;width: 100%;text-align:center;");
-    var pointerWidget = function (settings) {
-        var self = this;
-        var paper;
-        var strokeWidth = 3;
-        var triangle;
-        var width, height;
-        var currentValue = 0;
-        var valueDiv = $('<div class="widget-big-text"></div>');
-        var unitsDiv = $('<div></div>');
+	freeboard.addStyle('.pointer-widget-wrapper', "width:100%; height:214px; text-align:center;");
+	freeboard.addStyle('.pointer-widget', "width:280px; height:100%; display: inline-block;");
+	freeboard.addStyle('.pointer-value', "position:absolute; height:93px; margin:auto; top:0px; left:0px; bottom:0px; width:100%; text-align:center;");
 
-        function polygonPath(points) {
-            if (!points || points.length < 2)
-                return [];
-            var path = []; //will use path object type
-            path.push(['m', points[0], points[1]]);
-            for (var i = 2; i < points.length; i += 2) {
-                path.push(['l', points[i], points[i + 1]]);
-            }
-            path.push(['z']);
-            return path;
-        }
+	var pointerWidget = function (settings) {
+		var self = this;
+		var paper;
+		var strokeWidth = 3;
+		var circle = null;
+		var triangle = null;
+		var width, height;
+		var currentValue = 0;
 
-        this.render = function (element) {
-            width = $(element).width();
-            height = $(element).height();
+		var titleElement = $('<h2 class="section-title"></h2>');
+		var widgetwrapperElement = $('<div class="pointer-widget-wrapper"></div>');
+		var widgetElement = $('<div class="pointer-widget"></div>');
+		var valueElement = $('<div class="pointer-value"></div>');
+		var valueDiv = $('<div class="widget-big-text"></div>');
+		var unitsDiv = $('<div></div>');
 
-            var radius = Math.min(width, height) / 2 - strokeWidth * 2;
+		var currentSettings = settings;
 
-            paper = Raphael($(element).get()[0], width, height);
-            var circle = paper.circle(width / 2, height / 2, radius);
-            circle.attr("stroke", "#FF9900");
-            circle.attr("stroke-width", strokeWidth);
+		function polygonPath(points) {
+			if (!points || points.length < 2)
+				return [];
+			var path = []; //will use path object type
+			path.push(['m', points[0], points[1]]);
+			for (var i = 2; i < points.length; i += 2) {
+				path.push(['l', points[i], points[i + 1]]);
+			}
+			path.push(['z']);
+			return path;
+		}
 
-            triangle = paper.path(polygonPath([width / 2, (height / 2) - radius + strokeWidth, 15, 20, -30, 0]));
-            triangle.attr("stroke-width", 0);
-            triangle.attr("fill", "#fff");
+		this.render = function (element) {
+			$(element).append(titleElement);
+			$(element).append(widgetwrapperElement.append(widgetElement).append(valueElement.append(valueDiv).append(unitsDiv)));
 
-            $(element).append($('<div class="pointer-value"></div>').append(valueDiv).append(unitsDiv));
-        }
+			width = widgetElement.width();
+			height = widgetElement.height();
 
-        this.onSettingsChanged = function (newSettings) {
-            unitsDiv.html(newSettings.units);
-        }
+			var radius = Math.min(width, height) / 2 - strokeWidth * 2;
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (settingName == "direction") {
-                if (!_.isUndefined(triangle)) {
-                    var direction = "r";
+			paper = Raphael(widgetElement[0], width, height);
+			circle = paper.circle(width / 2, height / 2, radius);
+			circle.attr("stroke", currentSettings.circle_color);
+			circle.attr("stroke-width", strokeWidth);
 
-                    var oppositeCurrent = currentValue + 180;
+			triangle = paper.path(polygonPath([width / 2, (height / 2) - radius + strokeWidth, 15, 20, -30, 0]));
+			triangle.attr("stroke-width", 0);
+			triangle.attr("fill", "#fff");
+		}
 
-                    if (oppositeCurrent < newValue) {
-                        //direction = "l";
-                    }
+		this.onSettingsChanged = function (newSettings) {
+			currentSettings = newSettings;
 
-                    triangle.animate({transform: "r" + newValue + "," + (width / 2) + "," + (height / 2)}, 250, "bounce");
-                }
+			if (circle) {
+				circle.attr("stroke", newSettings.circle_color);
+			}
+			if (triangle) {
+				triangle.attr("fill", newSettings.pointer_color);
+			}
 
-                currentValue = newValue;
-            }
-            else if (settingName == "value_text") {
-                valueDiv.html(newValue);
-            }
-        }
+			titleElement.html(newSettings.title);
+			unitsDiv.html(newSettings.units);
+		}
 
-        this.onDispose = function () {
-        }
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (settingName == "direction") {
+				if (!_.isUndefined(triangle)) {
+					var direction = "r";
 
-        this.getHeight = function () {
-            return 4;
-        }
+					var oppositeCurrent = currentValue + 180;
 
-        this.onSettingsChanged(settings);
-    };
+					if (oppositeCurrent < newValue) {
+						//direction = "l";
+					}
 
-    freeboard.loadWidgetPlugin({
-        type_name: "pointer",
-        display_name: "Pointer",
-        "external_scripts" : [
-            "plugins/thirdparty/raphael.2.1.0.min.js"
-        ],
-        settings: [
-            {
-                name: "direction",
-                display_name: "Direction",
-                type: "calculated",
-                description: "In degrees"
-            },
-            {
-                name: "value_text",
-                display_name: "Value Text",
-                type: "calculated"
-            },
-            {
-                name: "units",
-                display_name: "Units",
-                type: "text"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new pointerWidget(settings));
-        }
-    });
+					triangle.animate({transform: "r" + newValue + "," + (width / 2) + "," + (height / 2)}, 250, "bounce");
+				}
 
-    var pictureWidget = function(settings)
-    {
-        var self = this;
-        var widgetElement;
-        var timer;
-        var imageURL;
+				currentValue = newValue;
+			}
+			else if (settingName == "value_text") {
+				valueDiv.html(newValue);
+			}
+		}
 
-        function stopTimer()
-        {
-            if(timer)
-            {
-                clearInterval(timer);
-                timer = null;
-            }
-        }
+		this.onDispose = function () {
+		}
 
-        function updateImage()
-        {
-            if(widgetElement && imageURL)
-            {
-                var cacheBreakerURL = imageURL + (imageURL.indexOf("?") == -1 ? "?" : "&") + Date.now();
+		this.getHeight = function () {
+			return 4;
+		}
 
-                $(widgetElement).css({
-                    "background-image" :  "url(" + cacheBreakerURL + ")"
-                });
-            }
-        }
+		this.onSettingsChanged(settings);
+	};
 
-        this.render = function(element)
-        {
-            $(element).css({
-                width : "100%",
-                height: "100%",
-                "background-size" : "cover",
-                "background-position" : "center"
-            });
+	freeboard.loadWidgetPlugin({
+		type_name: "pointer",
+		display_name: "ポインタ",
+		"external_scripts" : [
+			"plugins/thirdparty/raphael.2.1.0.min.js"
+		],
+		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
+			{
+				name: "direction",
+				display_name: "方向",
+				type: "calculated",
+				description: "角度"
+			},
+			{
+				name: "value_text",
+				display_name: "値テキスト",
+				type: "calculated"
+			},
+			{
+				name: "units",
+				display_name: "単位",
+				type: "text"
+			},
+			{
+				name: "circle_color",
+				display_name: "サークル色",
+				type: "color",
+				default_value: "#ff9900",
+				description: "デフォルト色: #ff9900"
+			},
+			{
+				name: "pointer_color",
+				display_name: "ポインタ色",
+				type: "color",
+				default_value: "#fff",
+				description: "デフォルト色: #fff"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new pointerWidget(settings));
+		}
+	});
 
-            widgetElement = element;
-        }
+	var pictureWidget = function(settings)
+	{
+		var self = this;
+		var widgetElement;
+		var timer;
+		var imageURL;
 
-        this.onSettingsChanged = function(newSettings)
-        {
-            stopTimer();
+		function stopTimer()
+		{
+			if(timer)
+			{
+				clearInterval(timer);
+				timer = null;
+			}
+		}
 
-            if(newSettings.refresh && newSettings.refresh > 0)
-            {
-                timer = setInterval(updateImage, Number(newSettings.refresh) * 1000);
-            }
-        }
+		function updateImage()
+		{
+			if(widgetElement && imageURL)
+			{
+				var cacheBreakerURL = imageURL + (imageURL.indexOf("?") == -1 ? "?" : "&") + Date.now();
 
-        this.onCalculatedValueChanged = function(settingName, newValue)
-        {
-            if(settingName == "src")
-            {
-                imageURL = newValue;
-            }
+				$(widgetElement).css({
+					"background-image" :  "url(" + cacheBreakerURL + ")"
+				});
+			}
+		}
 
-            updateImage();
-        }
+		this.render = function(element)
+		{
+			$(element).css({
+				width : "100%",
+				height: "100%",
+				"background-size" : "cover",
+				"background-position" : "center"
+			});
 
-        this.onDispose = function()
-        {
-            stopTimer();
-        }
+			widgetElement = element;
+		}
 
-        this.getHeight = function()
-        {
-            return 4;
-        }
+		this.onSettingsChanged = function(newSettings)
+		{
+			stopTimer();
 
-        this.onSettingsChanged(settings);
-    };
+			if(newSettings.refresh && newSettings.refresh > 0)
+			{
+				timer = setInterval(updateImage, Number(newSettings.refresh) * 1000);
+			}
+		}
 
-    freeboard.loadWidgetPlugin({
-        type_name: "picture",
-        display_name: "Picture",
-        fill_size: true,
-        settings: [
-            {
-                name: "src",
-                display_name: "Image URL",
-                type: "calculated"
-            },
-            {
-                "type": "number",
-                "display_name": "Refresh every",
-                "name": "refresh",
-                "suffix": "seconds",
-                "description":"Leave blank if the image doesn't need to be refreshed"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new pictureWidget(settings));
-        }
-    });
+		this.onCalculatedValueChanged = function(settingName, newValue)
+		{
+			if(settingName == "src")
+			{
+				imageURL = newValue;
+			}
+
+			updateImage();
+		}
+
+		this.onDispose = function()
+		{
+			stopTimer();
+		}
+
+		this.getHeight = function()
+		{
+			return 4;
+		}
+
+		this.onSettingsChanged(settings);
+	};
+
+	freeboard.loadWidgetPlugin({
+		type_name: "picture",
+		display_name: "画像",
+		fill_size: true,
+		settings: [
+			{
+				name: "src",
+				display_name: "画像URL",
+				type: "calculated"
+			},
+			{
+				type: "number",
+				display_name: "更新頻度",
+				name: "refresh",
+				suffix: "秒",
+				description:"更新する必要がない場合は空白のまま"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new pictureWidget(settings));
+		}
+	});
 
 	freeboard.addStyle('.indicator-light', "border-radius:50%;width:22px;height:22px;border:2px solid #3d3d3d;margin-top:5px;float:left;background-color:#222;margin-right:10px;");
 	freeboard.addStyle('.indicator-light.on', "background-color:#FFC773;box-shadow: 0px 0px 15px #FF9900;border-color:#FDF1DF;");
 	freeboard.addStyle('.indicator-text', "margin-top:10px;");
-    var indicatorWidget = function (settings) {
-        var self = this;
-        var titleElement = $('<h2 class="section-title"></h2>');
-        var stateElement = $('<div class="indicator-text"></div>');
-        var indicatorElement = $('<div class="indicator-light"></div>');
-        var currentSettings = settings;
-        var isOn = false;
+	var indicatorWidget = function (settings) {
+		var self = this;
+		var titleElement = $('<h2 class="section-title"></h2>');
+		var stateElement = $('<div class="indicator-text"></div>');
+		var indicatorElement = $('<div class="indicator-light"></div>');
+		var currentSettings = settings;
+		var isOn = false;
 
-        function updateState() {
-            indicatorElement.toggleClass("on", isOn);
+		function updateState() {
+			indicatorElement.toggleClass("on", isOn);
 
-            if (isOn) {
-                stateElement.text((_.isUndefined(currentSettings.on_text) ? "" : currentSettings.on_text));
-            }
-            else {
-                stateElement.text((_.isUndefined(currentSettings.off_text) ? "" : currentSettings.off_text));
-            }
-        }
+			if (isOn) {
+				stateElement.text((_.isUndefined(currentSettings.on_text) ? "" : currentSettings.on_text));
+			}
+			else {
+				stateElement.text((_.isUndefined(currentSettings.off_text) ? "" : currentSettings.off_text));
+			}
+		}
 
-        this.render = function (element) {
-            $(element).append(titleElement).append(indicatorElement).append(stateElement);
-        }
+		this.render = function (element) {
+			$(element).append(titleElement).append(indicatorElement).append(stateElement);
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            currentSettings = newSettings;
-            titleElement.html((_.isUndefined(newSettings.title) ? "" : newSettings.title));
-            updateState();
-        }
+		this.onSettingsChanged = function (newSettings) {
+			currentSettings = newSettings;
+			titleElement.html((_.isUndefined(newSettings.title) ? "" : newSettings.title));
+			updateState();
+		}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (settingName == "value") {
-                isOn = Boolean(newValue);
-            }
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (settingName == "value") {
+				isOn = Boolean(newValue);
+			}
 
-            updateState();
-        }
+			updateState();
+		}
 
-        this.onDispose = function () {
-        }
+		this.onDispose = function () {
+		}
 
-        this.getHeight = function () {
-            return 1;
-        }
+		this.getHeight = function () {
+			return 1;
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        type_name: "indicator",
-        display_name: "Indicator Light",
-        settings: [
-            {
-                name: "title",
-                display_name: "Title",
-                type: "text"
-            },
-            {
-                name: "value",
-                display_name: "Value",
-                type: "calculated"
-            },
-            {
-                name: "on_text",
-                display_name: "On Text",
-                type: "calculated"
-            },
-            {
-                name: "off_text",
-                display_name: "Off Text",
-                type: "calculated"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new indicatorWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		type_name: "indicator",
+		display_name: "インジケータライト",
+		settings: [
+			{
+				name: "title",
+				display_name: "タイトル",
+				type: "text"
+			},
+			{
+				name: "value",
+				display_name: "値",
+				type: "calculated"
+			},
+			{
+				name: "on_text",
+				display_name: "ON時テキスト",
+				type: "calculated"
+			},
+			{
+				name: "off_text",
+				display_name: "OFF時テキスト",
+				type: "calculated"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new indicatorWidget(settings));
+		}
+	});
 
-    freeboard.addStyle('.gm-style-cc a', "text-shadow:none;");
+	freeboard.addStyle('.gm-style-cc a', "text-shadow:none;");
 
-    var googleMapWidget = function (settings) {
-        var self = this;
-        var currentSettings = settings;
-        var map;
-        var marker;
-        var currentPosition = {};
+	var googleMapWidget = function (settings) {
+		var self = this;
+		var currentSettings = settings;
+		var map;
+		var marker;
+		var currentPosition = {};
 
-        function updatePosition() {
-            if (map && marker && currentPosition.lat && currentPosition.lon) {
-                var newLatLon = new google.maps.LatLng(currentPosition.lat, currentPosition.lon);
-                marker.setPosition(newLatLon);
-                map.panTo(newLatLon);
-            }
-        }
+		function updatePosition() {
+			if (map && marker && currentPosition.lat && currentPosition.lon) {
+				var newLatLon = new google.maps.LatLng(currentPosition.lat, currentPosition.lon);
+				marker.setPosition(newLatLon);
+				map.panTo(newLatLon);
+			}
+		}
 
-        this.render = function (element) {
-            function initializeMap() {
-                var mapOptions = {
-                    zoom: 13,
-                    center: new google.maps.LatLng(37.235, -115.811111),
-                    disableDefaultUI: true,
-                    draggable: false,
-                    styles: [
-                        {"featureType": "water", "elementType": "geometry", "stylers": [
-                            {"color": "#2a2a2a"}
-                        ]},
-                        {"featureType": "landscape", "elementType": "geometry", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 20}
-                        ]},
-                        {"featureType": "road.highway", "elementType": "geometry.fill", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 17}
-                        ]},
-                        {"featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 29},
-                            {"weight": 0.2}
-                        ]},
-                        {"featureType": "road.arterial", "elementType": "geometry", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 18}
-                        ]},
-                        {"featureType": "road.local", "elementType": "geometry", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 16}
-                        ]},
-                        {"featureType": "poi", "elementType": "geometry", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 21}
-                        ]},
-                        {"elementType": "labels.text.stroke", "stylers": [
-                            {"visibility": "on"},
-                            {"color": "#000000"},
-                            {"lightness": 16}
-                        ]},
-                        {"elementType": "labels.text.fill", "stylers": [
-                            {"saturation": 36},
-                            {"color": "#000000"},
-                            {"lightness": 40}
-                        ]},
-                        {"elementType": "labels.icon", "stylers": [
-                            {"visibility": "off"}
-                        ]},
-                        {"featureType": "transit", "elementType": "geometry", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 19}
-                        ]},
-                        {"featureType": "administrative", "elementType": "geometry.fill", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 20}
-                        ]},
-                        {"featureType": "administrative", "elementType": "geometry.stroke", "stylers": [
-                            {"color": "#000000"},
-                            {"lightness": 17},
-                            {"weight": 1.2}
-                        ]}
-                    ]
-                };
+		this.render = function (element) {
+			function initializeMap() {
+				var mapOptions = {
+					zoom: 13,
+					center: new google.maps.LatLng(37.235, -115.811111),
+					disableDefaultUI: true,
+					draggable: false,
+					styles: [
+						{"featureType": "water", "elementType": "geometry", "stylers": [
+							{"color": "#2a2a2a"}
+						]},
+						{"featureType": "landscape", "elementType": "geometry", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 20}
+						]},
+						{"featureType": "road.highway", "elementType": "geometry.fill", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 17}
+						]},
+						{"featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 29},
+							{"weight": 0.2}
+						]},
+						{"featureType": "road.arterial", "elementType": "geometry", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 18}
+						]},
+						{"featureType": "road.local", "elementType": "geometry", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 16}
+						]},
+						{"featureType": "poi", "elementType": "geometry", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 21}
+						]},
+						{"elementType": "labels.text.stroke", "stylers": [
+							{"visibility": "on"},
+							{"color": "#000000"},
+							{"lightness": 16}
+						]},
+						{"elementType": "labels.text.fill", "stylers": [
+							{"saturation": 36},
+							{"color": "#000000"},
+							{"lightness": 40}
+						]},
+						{"elementType": "labels.icon", "stylers": [
+							{"visibility": "off"}
+						]},
+						{"featureType": "transit", "elementType": "geometry", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 19}
+						]},
+						{"featureType": "administrative", "elementType": "geometry.fill", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 20}
+						]},
+						{"featureType": "administrative", "elementType": "geometry.stroke", "stylers": [
+							{"color": "#000000"},
+							{"lightness": 17},
+							{"weight": 1.2}
+						]}
+					]
+				};
 
-                map = new google.maps.Map(element, mapOptions);
+				map = new google.maps.Map(element, mapOptions);
 
-                google.maps.event.addDomListener(element, 'mouseenter', function (e) {
-                    e.cancelBubble = true;
-                    if (!map.hover) {
-                        map.hover = true;
-                        map.setOptions({zoomControl: true});
-                    }
-                });
+				google.maps.event.addDomListener(element, 'mouseenter', function (e) {
+					e.cancelBubble = true;
+					if (!map.hover) {
+						map.hover = true;
+						map.setOptions({zoomControl: true});
+					}
+				});
 
-                google.maps.event.addDomListener(element, 'mouseleave', function (e) {
-                    if (map.hover) {
-                        map.setOptions({zoomControl: false});
-                        map.hover = false;
-                    }
-                });
+				google.maps.event.addDomListener(element, 'mouseleave', function (e) {
+					if (map.hover) {
+						map.setOptions({zoomControl: false});
+						map.hover = false;
+					}
+				});
 
-                marker = new google.maps.Marker({map: map});
+				marker = new google.maps.Marker({map: map});
 
-                updatePosition();
-            }
+				updatePosition();
+			}
 
-            if (window.google && window.google.maps) {
-                initializeMap();
-            }
-            else {
-                window.gmap_initialize = initializeMap;
-                head.js("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&callback=gmap_initialize");
-            }
-        }
+			if (window.google && window.google.maps) {
+				initializeMap();
+			}
+			else {
+				window.gmap_initialize = initializeMap;
+				head.js("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&callback=gmap_initialize");
+			}
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            currentSettings = newSettings;
-        }
+		this.onSettingsChanged = function (newSettings) {
+			currentSettings = newSettings;
+		}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (settingName == "lat") {
-                currentPosition.lat = newValue;
-            }
-            else if (settingName == "lon") {
-                currentPosition.lon = newValue;
-            }
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (settingName == "lat") {
+				currentPosition.lat = newValue;
+			}
+			else if (settingName == "lon") {
+				currentPosition.lon = newValue;
+			}
 
-            updatePosition();
-        }
+			updatePosition();
+		}
 
-        this.onDispose = function () {
-        }
+		this.onDispose = function () {
+		}
 
-        this.getHeight = function () {
-            return 4;
-        }
+		this.getHeight = function () {
+			return 4;
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        type_name: "google_map",
-        display_name: "Google Map",
-        fill_size: true,
-        settings: [
-            {
-                name: "lat",
-                display_name: "Latitude",
-                type: "calculated"
-            },
-            {
-                name: "lon",
-                display_name: "Longitude",
-                type: "calculated"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new googleMapWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		type_name: "google_map",
+		display_name: "Google Map",
+		fill_size: true,
+		settings: [
+			{
+				name: "lat",
+				display_name: "緯度",
+				type: "calculated"
+			},
+			{
+				name: "lon",
+				display_name: "経度",
+				type: "calculated"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new googleMapWidget(settings));
+		}
+	});
 
-    freeboard.addStyle('.html-widget', "white-space:normal;width:100%;height:100%");
+	freeboard.addStyle('.html-widget', "white-space:normal;width:100%;height:100%");
 
-    var htmlWidget = function (settings) {
-        var self = this;
-        var htmlElement = $('<div class="html-widget"></div>');
-        var currentSettings = settings;
+	var htmlWidget = function (settings) {
+		var self = this;
+		var htmlElement = $('<div class="html-widget"></div>');
+		var currentSettings = settings;
 
-        this.render = function (element) {
-            $(element).append(htmlElement);
-        }
+		this.render = function (element) {
+			$(element).append(htmlElement);
+		}
 
-        this.onSettingsChanged = function (newSettings) {
-            currentSettings = newSettings;
-        }
+		this.onSettingsChanged = function (newSettings) {
+			currentSettings = newSettings;
+		}
 
-        this.onCalculatedValueChanged = function (settingName, newValue) {
-            if (settingName == "html") {
-                htmlElement.html(newValue);
-            }
-        }
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+			if (settingName == "html") {
+				htmlElement.html(newValue);
+			}
+		}
 
-        this.onDispose = function () {
-        }
+		this.onDispose = function () {
+		}
 
-        this.getHeight = function () {
-            return Number(currentSettings.height);
-        }
+		this.getHeight = function () {
+			return Number(currentSettings.height);
+		}
 
-        this.onSettingsChanged(settings);
-    };
+		this.onSettingsChanged(settings);
+	};
 
-    freeboard.loadWidgetPlugin({
-        "type_name": "html",
-        "display_name": "HTML",
-        "fill_size": true,
-        "settings": [
-            {
-                "name": "html",
-                "display_name": "HTML",
-                "type": "calculated",
-                "description": "Can be literal HTML, or javascript that outputs HTML."
-            },
-            {
-                "name": "height",
-                "display_name": "Height Blocks",
-                "type": "number",
-                "default_value": 4,
-                "description": "A height block is around 60 pixels"
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback) {
-            newInstanceCallback(new htmlWidget(settings));
-        }
-    });
+	freeboard.loadWidgetPlugin({
+		"type_name": "html",
+		"display_name": "HTML",
+		"fill_size": true,
+		"settings": [
+			{
+				"name": "html",
+				"display_name": "HTML",
+				"type": "calculated",
+				"description": "HTML文字列かjavascriptが使用できます。"
+			},
+			{
+				"name": "height",
+				"display_name": "ブロック高さ",
+				"type": "number",
+				"default_value": 4,
+				"description": "1ブロック高さは約60pixel"
+			}
+		],
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new htmlWidget(settings));
+		}
+	});
 
 }());
