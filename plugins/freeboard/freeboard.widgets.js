@@ -592,7 +592,8 @@
 
 		this.onCalculatedValueChanged = function (settingName, newValue) {
 			// console.log(newValue);
-			plotData(newValue);		}
+			plotData(newValue);
+		}
 
 		this.onDispose = function () {
 		}
