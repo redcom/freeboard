@@ -1137,7 +1137,7 @@ JSEditor = function () {
 		switch (mode) {
 			case 'javascript':
 				exampleText = "// 例: 摂氏から華氏へ変換、小数点2桁以下切り捨て。\n// return (datasources[\"MyDatasource\"].sensor.tempInF * 1.8 + 32).toFixed(2);";
-				codeWindowHeader = $('<div class="code-window-header cm-s-ambiance">このJavaScriptは、参照データソースが更新されるたびに再評価されます。そして<span class="cm-keyword">戻り値</span>はウィジェットに表示されます。あなたは関数<code><span class="cm-keyword">function</span>(<span class="cm-def">datasources</span>)</code>の中身をJavaScriptで記述することができます。引数datasourcesはあなたが追加したデータソースの配列です。</div>');
+				codeWindowHeader = $('<div class="code-window-header cm-s-ambiance">このJavaScriptは、参照データソースが更新されるたびに再評価されます。そして<span class="cm-keyword">戻り値</span>はウィジェットに表示されます。あなたは関数<code><span class="cm-keyword">function</span>(<span class="cm-def">datasources</span>)</code>の中身をJavaScriptで記述することができます。引数datasourcesは追加したデータソースの配列です。</div>');
 
 				// If value is empty, go ahead and suggest something
 				if (!value)
