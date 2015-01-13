@@ -22,6 +22,7 @@ module.exports = function(grunt) {
                         'lib/js/thirdparty/jquery.xdomainrequest.js',
                         'lib/js/thirdparty/codemirror.js',
                         'lib/js/thirdparty/colpick.js',
+                        'lib/js/thirdparty/webfont.js',
                     ]
                 ],
                 dest : 'js/freeboard.thirdparty.js'

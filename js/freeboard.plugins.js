@@ -1021,7 +1021,8 @@
 	});
 
 	var flotchartID = 0;
-	freeboard.addStyle('.flotchart', "width:100%;height: 215px;");
+	freeboard.addStyle('.flotchart', 'width:100%;height: 215px;');
+	freeboard.addStyle('#flotTip', 'padding:3px 5px; color:#000000; background-color:#ffffff; box-shadow:0 0 10px #555; opacity:.7; filter:alpha(opacity=70); z-index:100; -webkit-border-radius:4px; -moz-border-radius:4px; border-radius:4px; font-size:12px;');
 
 	var flotchartWidget = function (settings) {
 		var self = this;
@@ -1055,24 +1056,6 @@
 
 			var dataset = [];
 			plot = $.plot($('#'+thisID), dataset, options);
-
-			$("#flotTip").css({
-				"padding": "3px 5px",
-				"color":"#000000",
-				"background-color":"#ffffff",
-				"box-shadow": "0 0 10px #555",
-				"opacity": ".7",
-				"filter": "alpha(opacity=70)",
-				"z-index": "100",
-				"-webkit-border-radius": "4px",
-				"-moz-border-radius": "4px",
-				"border-radius": "4px",
-				"font-size":"12px"
-			});
-
-			$("#flot-y-axis").css({
-				"color": "#ffffff"
-			});
 		}
 
 		function plotData(dataset) {

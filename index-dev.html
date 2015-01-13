@@ -13,20 +13,6 @@
     <link href="lib/css/thirdparty/codemirror-ambiance.css" rel="stylesheet" />
     <link href="lib/css/thirdparty/colpick.css" rel="stylesheet" />
     <link href="lib/css/freeboard/styles.css" rel="stylesheet" />
-    <script type="text/javascript">
-        WebFontConfig = {
-            google: { families: [ 'Open+Sans::latin' ] }
-        };
-        (function() {
-            var wf = document.createElement('script');
-            wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
-              '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-            wf.type = 'text/javascript';
-            wf.async = 'true';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(wf, s);
-        })();
-    </script>
     <script src="lib/js/thirdparty/head.js"></script>
     <script type="text/javascript">
         head.js("lib/js/thirdparty/knockout.js",
@@ -38,6 +24,7 @@
                 "lib/js/thirdparty/codemirror.js",
                 "lib/js/thirdparty/jquery.xdomainrequest.js",
                 "lib/js/thirdparty/colpick.js",
+                "lib/js/thirdparty/webfont.js",
 
                 "lib/js/freeboard/freeboardModel.js",
                 "lib/js/freeboard/datasourceModel.js",
