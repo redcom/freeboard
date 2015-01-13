@@ -205,6 +205,8 @@
 					// Rejigger our data into something easier to understand
 					var newData = {
 						place_name: data.name,
+						latitude: data.coord.lat,
+						longitude: data.coord.lon,
 						sunrise: (new Date(data.sys.sunrise * 1000)).toLocaleTimeString(),
 						sunset: (new Date(data.sys.sunset * 1000)).toLocaleTimeString(),
 						conditions: toTitleCase(data.weather[0].description),
