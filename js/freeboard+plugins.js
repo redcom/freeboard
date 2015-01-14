@@ -530,9 +530,7 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 					reader.readAsText(file);
 				}
 				if (/*@cc_on ! @*/ false || document.documentMode) {   // for IE
-					var disp = document.getElementById("myfile");
-					if (disp)
-						disp.parentNode.removeChild(disp);
+					$("#myfile").remove();
 				}
 			});
 			if (/*@cc_on ! @*/ false || document.documentMode) {   // for IE
