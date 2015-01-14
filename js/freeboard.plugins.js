@@ -1044,12 +1044,12 @@
 
 			Function.prototype.toJSON = Function.prototype.toString;
 
-			var parser = function(k,v){return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v};
-
 			var options;
 			if (currentSettings.plot_options) {
 				try {
-					options = JSON.parse(currentSettings.plot_options, parser);
+					options = JSON.parse(currentSettings.plot_options, function(k,v) {
+						return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v;
+					});
 				}
 				catch (e) {
 					console.log(e);
@@ -1090,8 +1090,8 @@
 		}
 
 		this.onCalculatedValueChanged = function (settingName, newValue) {
-			// console.log(newValue);
-			plotData(newValue);		}
+			plotData(newValue);
+		}
 
 		this.onDispose = function () {
 		}

@@ -202,7 +202,7 @@ DeveloperConsole = function(theFreeboardModel)
 	}
 }
 
-function DialogBox(contentElement, title, okTitle, cancelTitle, okCallback)
+function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
 {
 	var modal_width = 900;
 
@@ -233,9 +233,9 @@ function DialogBox(contentElement, title, okTitle, cancelTitle, okCallback)
 		{
 			var hold = false;
 
-			if(_.isFunction(okCallback))
+			if(_.isFunction(closeCallback))
 			{
-				hold = okCallback();
+				hold = closeCallback("ok");
 			}
 
 			if(!hold)
@@ -249,6 +249,7 @@ function DialogBox(contentElement, title, okTitle, cancelTitle, okCallback)
 	{
 		$('<span id="dialog-cancel" class="text-button">' + cancelTitle + '</span>').appendTo(footer).click(function()
 		{
+			closeCallback("cancel");
 			closeModal();
 		});
 	}
@@ -1708,36 +1709,42 @@ PluginEditor = function(jsEditor, valueEditor)
 		}
 
 
-		new DialogBox(form, title, "保存", "キャンセル", function()
+		new DialogBox(form, title, "保存", "キャンセル", function(okcancel)
 		{
-			$(".validation-error").remove();
+			if (okcancel == "ok") {
+				$(".validation-error").remove();
 
-			// Loop through each setting and validate it
-			for(var index = 0; index < selectedType.settings.length; index++)
-			{
-				var settingDef = selectedType.settings[index];
+				// Loop through each setting and validate it
+				for(var index = 0; index < selectedType.settings.length; index++)
+				{
+					var settingDef = selectedType.settings[index];
 
-				if(settingDef.required && (_.isUndefined(newSettings.settings[settingDef.name]) || newSettings.settings[settingDef.name] == ""))
-				{
-					_displayValidationError(settingDef.name, "必須項目です。");
-					return true;
+					if(settingDef.required && (_.isUndefined(newSettings.settings[settingDef.name]) || newSettings.settings[settingDef.name] == ""))
+					{
+						_displayValidationError(settingDef.name, "必須項目です。");
+						return true;
+					}
+					else if(settingDef.type == "number" && !_isNumerical(newSettings.settings[settingDef.name]))
+					{
+						_displayValidationError(settingDef.name, "数値のみです。");
+						return true;
+					}
+					else if (settingDef.type == "color" && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newSettings.settings[settingDef.name]) == false)
+					{
+						_displayValidationError(settingDef.name, "無効な色です。");
+						return true;
+					}
 				}
-				else if(settingDef.type == "number" && !_isNumerical(newSettings.settings[settingDef.name]))
+
+				if(_.isFunction(settingsSavedCallback))
 				{
-					_displayValidationError(settingDef.name, "数値のみです。");
-					return true;
-				}
-				else if (settingDef.type == "color" && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newSettings.settings[settingDef.name]) == false)
-				{
-					_displayValidationError(settingDef.name, "無効な色です。");
-					return true;
+					settingsSavedCallback(newSettings);
 				}
 			}
 
-			if(_.isFunction(settingsSavedCallback))
-			{
-				settingsSavedCallback(newSettings);
-			}
+			// Remove colorpick dom objects
+			colorPickerID = 0;
+			$("[id^=collorpicker]").remove();
 		});
 
 		// Create our body
