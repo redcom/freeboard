@@ -15817,7 +15817,7 @@ new a.w;var b=new a.Ba;0<b.Rb&&a.La(b);a.b("jqueryTmplTemplateEngine",a.Ba)})()}
 		this.player_width = this.$player.width();
 		this.player_height = this.$player.height();
 
-		var container_width = this.options.container_width || this.$container.width();
+		var container_width = this.$container.width();
 		this.player_max_left = (container_width - this.player_width + this.options.offset_left);
 
 		if(this.options.start)

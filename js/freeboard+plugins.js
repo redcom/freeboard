@@ -166,30 +166,30 @@ DeveloperConsole = function(theFreeboardModel)
 			addNewScriptRow();
 		});
 
-		new DialogBox(container, "Developer Console", "OK", null, function(){
+		new DialogBox(container, "Developer Console", "OK", null, function(okcancel){
+			if (okcancel == 'ok') {
+				// Unload our previous scripts
+				_.each(theFreeboardModel.plugins(), function(pluginSource){
 
-			// Unload our previous scripts
-			_.each(theFreeboardModel.plugins(), function(pluginSource){
+					$('script[src^="' + pluginSource + '"]').remove();
 
-				$('script[src^="' + pluginSource + '"]').remove();
+				});
 
-			});
+				theFreeboardModel.plugins.removeAll();
 
-			theFreeboardModel.plugins.removeAll();
+				_.each(pluginScriptsInputs, function(scriptInput){
 
-			_.each(pluginScriptsInputs, function(scriptInput){
+					var scriptURL = scriptInput.val();
 
-				var scriptURL = scriptInput.val();
+					if(scriptURL && scriptURL.length > 0)
+					{
+						theFreeboardModel.addPluginSource(scriptURL);
 
-				if(scriptURL && scriptURL.length > 0)
-				{
-					theFreeboardModel.addPluginSource(scriptURL);
-
-					// Load the script with a cache buster
-					head.js(scriptURL + "?" + Date.now());
-				}
-			});
-
+						// Load the script with a cache buster
+						head.js(scriptURL + "?" + Date.now());
+					}
+				});
+			}
 		});
 	}
 
@@ -2634,22 +2634,22 @@ var freeboard = (function()
 				if(options.operation == 'delete')
 				{
 					var phraseElement = $('<p>' + title + ' を削除してもよろしいですか？</p>');
-					new DialogBox(phraseElement, "削除確認", "はい", "いいえ", function()
+					new DialogBox(phraseElement, "削除確認", "はい", "いいえ", function(okcancel)
 					{
-
-						if(options.type == 'datasource')
-						{
-							theFreeboardModel.deleteDatasource(viewModel);
+						if (okcancel == 'ok') {
+							if(options.type == 'datasource')
+							{
+								theFreeboardModel.deleteDatasource(viewModel);
+							}
+							else if(options.type == 'widget')
+							{
+								theFreeboardModel.deleteWidget(viewModel);
+							}
+							else if(options.type == 'pane')
+							{
+								theFreeboardModel.deletePane(viewModel);
+							}
 						}
-						else if(options.type == 'widget')
-						{
-							theFreeboardModel.deleteWidget(viewModel);
-						}
-						else if(options.type == 'pane')
-						{
-							theFreeboardModel.deletePane(viewModel);
-						}
-
 					});
 				}
 				else
@@ -2701,7 +2701,7 @@ var freeboard = (function()
 									},
 									{
 										name : "col_width",
-										display_name : "カラム数",
+										display_name : "カラム幅",
 										type : "number",
 										default_value : 1,
 										required : true
