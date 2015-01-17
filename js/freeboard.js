@@ -1159,6 +1159,7 @@ JSEditor = function () {
 				config = {
 					value: value,
 					mode: "javascript",
+					json: true,
 					theme: "ambiance",
 					indentUnit: 4,
 					lineNumbers: true,

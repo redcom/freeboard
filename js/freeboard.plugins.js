@@ -1023,24 +1023,29 @@
 	});
 
 	var flotchartID = 0;
-	freeboard.addStyle('.flotchart', 'width:100%;height: 215px;');
-	freeboard.addStyle('#flotTip', 'padding:3px 5px; color:#000000; background-color:#ffffff; box-shadow:0 0 10px #555; opacity:.7; filter:alpha(opacity=70); z-index:100; -webkit-border-radius:4px; -moz-border-radius:4px; border-radius:4px; font-size:12px;');
 
 	var flotchartWidget = function (settings) {
 		var self = this;
 
-		var thisID = "flotchart-" + flotchartID++;
+		var currentID = "flotchart-" + flotchartID++;
 		var titleElement = $('<h2 class="section-title"></h2>');
-		var flotchartElement = $('<div class="flotchart" id="' + thisID + '"></div>');
+		var flotchartElement = $('<div class="flotchart" id="' + currentID + '"></div>');
 		var currentSettings = settings;
 
-		var plot = null;
+		var plot;
 
-		function plotChart() {
+		function createWidget() {
 			if (plot) {
 				plot.destroy();
 				plot = null;
 			}
+
+			freeboard.addStyle('#flotTip', currentSettings.tooltip_style);
+
+			flotchartElement.css({
+				"height": 60 * currentSettings.blocks - 25 + "px",
+				"width": "100%"
+			});
 
 			Function.prototype.toJSON = Function.prototype.toString;
 
@@ -1057,7 +1062,7 @@
 			}
 
 			var dataset = [];
-			plot = $.plot($('#'+thisID), dataset, options);
+			plot = $.plot($('#'+currentID), dataset, options);
 		}
 
 		function plotData(dataset) {
@@ -1075,14 +1080,16 @@
 
 		this.render = function (element) {
 			$(element).append(titleElement).append(flotchartElement);
-			plotChart();
+			createWidget();
 		}
 
 		this.onSettingsChanged = function (newSettings) {
 			if (newSettings.plot_options != currentSettings.plot_options ||
-				newSettings.value != currentSettings.value) {
+				newSettings.value != currentSettings.value ||
+				newSettings.blocks != currentSettings.blocks ||
+				newSettings.tooltip_style != currentSettings.tooltip_style) {
 				currentSettings = newSettings;
-				plotChart();
+				createWidget();
 			} else {
 				currentSettings = newSettings;
 			}
@@ -1097,7 +1104,7 @@
 		}
 
 		this.getHeight = function () {
-			return 4;
+			return currentSettings.blocks;
 		}
 
 		this.onSettingsChanged(settings);
@@ -1134,13 +1141,20 @@
 				type: "text"
 			},
 			{
+				name: "blocks",
+				display_name: "高さ (ブロック数)",
+				type: "number",
+				default_value: 4,
+				description: "1ブロック60ピクセル。"
+			},
+			{
 				name: "value",
 				display_name: "値",
 				type: "calculated"
 			},
 			{
 				name: "plot_options",
-				display_name: "プロットオプション",
+				display_name: "チャートオプション",
 				type: "json",
 				default_value: '{\n\
     "grid": {\n\
@@ -1185,6 +1199,13 @@
     ]\n\
 }',
 				description: "JSON形式文字列。 参考URL: <a href='https://github.com/flot/flot/blob/master/API.md#plot-options' target='_blank'>https://github.com/flot/flot/blob/master/API.md#plot-options</a>"
+			},
+			{
+				name: "tooltip_style",
+				display_name: "ツールチップスタイル",
+				type: "text",
+				default_value: 'padding:3px 5px; color:#000000; background-color:#ffffff; box-shadow:0 0 10px #555; opacity:.7; filter:alpha(opacity=70); z-index:100; -webkit-border-radius:4px; -moz-border-radius:4px; border-radius:4px; font-size:12px;',
+				description: "チャートオプションでtooltip:trueの場合のみ有効。CSS形式"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
