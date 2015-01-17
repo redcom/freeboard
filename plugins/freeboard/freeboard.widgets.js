@@ -643,44 +643,47 @@
 				name: "plot_options",
 				display_name: "プロットオプション",
 				type: "json",
-				default_value: '{\
-    "grid": {\
-            "color": "#8b8b8b",\
-            "borderColor": "#8b8b8b",\
-            "borderWidth": { "top":0, "left":2, "bottom":2, "right":2 },\
-            "tickColor":"#525252", "hoverable":true },\
-            "tooltip":true,\
-            "tooltipOpts": { "content":"function(label, x, y) {var ret = \"%s %x %y\";return ret;}",\
-            "defaultTheme":false\
-    },\
-    "series": {\
-        "shadowSize":0,\
-        "downsample": { "threshold":800 },\
-        "lines": { "show":true, "lineWidth":2 },\
-        "points": { "radius":1, "show":false }\
-    },\
-    "legend": {\
-        "show":true,\
-        "position":"sw",\
-        "backgroundColor":"null",\
-        "labelFormatter":"function(label, series){return (\"&nbsp;\"+label);}"\
-    },\
-    "xaxes": [\
-        {\
-            "font":{ "color":"#8b8b8b" },\
-            "mode":"time"\
-        }\
-    ],\
-    "yaxes": [\
-        {\
-            "font":{ "color":"#8b8b8b" },\
-            "position":"left"\
-        },\
-        {\
-            "font":{ "color":"#8b8b8b" },\
-            "position":"right"\
-        }\
-    ]\
+				default_value: '{\n\
+    "grid": {\n\
+        "color":"#8b8b8b",\n\
+        "borderColor":"#8b8b8b",\n\
+        "borderWidth":{ "top":0, "left":2, "bottom":2, "right":2 },\n\
+        "tickColor":"#525252",\n\
+        "hoverable":true,\n\
+    },\n\
+    "tooltip":true,\n\
+    "tooltipOpts": {\n\
+        "content":"function(label, x, y) {var ret = \"%s %x %y\";return ret;}",\n\
+        "defaultTheme":false\n\
+    },\n\
+    "series": {\n\
+        "shadowSize":0,\n\
+        "downsample": { "threshold":800 },\n\
+        "lines": { "show":true, "lineWidth":2 },\n\
+        "points": { "radius":1, "show":false }\n\
+    },\n\
+    "legend": {\n\
+        "show":true,\n\
+        "position":"sw",\n\
+        "backgroundColor":"null",\n\
+        "labelFormatter":"function(label, series){return (\"&nbsp;\"+label);}"\n\
+    },\n\
+    "xaxes": [\n\
+        {\n\
+            "font":{ "color":"#8b8b8b" },\n\
+            "mode":"time"\n\
+        }\n\
+    ],\n\
+    "yaxes": [\n\
+        {\n\
+            "font":{ "color":"#8b8b8b" },\n\
+            "position":"left"\n\
+        },\n\
+        {\n\
+            "font":{ "color":"#8b8b8b" },\n\
+            "position":"right"\n\
+        }\n\
+    ]\n\
 }',
 				description: "JSON形式文字列。 参考URL: <a href='https://github.com/flot/flot/blob/master/API.md#plot-options' target='_blank'>https://github.com/flot/flot/blob/master/API.md#plot-options</a>"
 			}
