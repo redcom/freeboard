@@ -4137,6 +4137,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 					});
 				}
 				catch (e) {
+					alert(e);
 					console.log(e);
 				}
 			}
