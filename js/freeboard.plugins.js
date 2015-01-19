@@ -1257,7 +1257,8 @@
 			{
 				name: "value",
 				display_name: "値",
-				type: "calculated"
+				type: "calculated",
+				multi_input: true
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {

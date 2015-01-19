@@ -1326,9 +1326,9 @@ PluginEditor = function(jsEditor, valueEditor)
 		if($("#setting-row-instance-name").length)
 		{
 			$("#setting-row-instance-name").nextAll().remove();
-		 }
-			else
-			{
+		}
+		else
+		{
 			$("#setting-row-plugin-types").nextAll().remove();
 		}
 	}
@@ -1336,6 +1336,67 @@ PluginEditor = function(jsEditor, valueEditor)
 	function _isNumerical(n)
 	{
 		return !isNaN(parseFloat(n)) && isFinite(n);
+	}
+
+	function _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, includeRemove)
+	{
+		var input = $('<textarea></textarea>');
+
+		if(settingDef.multi_input) {
+			input.change(function() {
+				var arrayInput = [];
+				$(valueCell).find('textarea').each(function() {
+					var thisVal = $(this).val();
+					if(thisVal) {
+						arrayInput = arrayInput.concat(thisVal);
+					}
+				});
+				newSettings.settings[settingDef.name] = arrayInput;
+			});
+		} else {
+			input.change(function() {
+				newSettings.settings[settingDef.name] = $(this).val();
+			});
+		}
+
+		if(currentValue) {
+			input.val(currentValue);
+		}
+
+		valueEditor.createValueEditor(input);
+
+		var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
+		var wrapperDiv = $('<div class="calculated-setting-row"></div>');
+		wrapperDiv.append(input).append(datasourceToolbox);
+
+		var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>データソース</label></li>')
+			.mousedown(function(e) {
+				e.preventDefault();
+				$(input).val("").focus().insertAtCaret("datasources[\"").trigger("freeboard-eval");
+			});
+		datasourceToolbox.append(datasourceTool);
+
+		var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JS EDITOR</label></li>')
+			.mousedown(function(e) {
+				e.preventDefault();
+				jsEditor.displayJSEditor(input.val(), 'javascript', function(result) {
+					input.val(result);
+					input.change();
+				});
+			});
+		datasourceToolbox.append(jsEditorTool);
+
+		if(includeRemove) {
+			var removeButton = $('<li class="remove-setting-row"><i class="icon-minus icon-white"></i><label></label></li>')
+				.mousedown(function(e) {
+					e.preventDefault();
+					wrapperDiv.remove();
+					$(valueCell).find('textarea:first').change();
+			});
+			datasourceToolbox.prepend(removeButton);
+		}
+
+		$(valueCell).append(wrapperDiv);
 	}
 
 	function createPluginEditor(title, pluginTypes, currentTypeName, currentSettingsValues, settingsSavedCallback)
@@ -1625,7 +1686,7 @@ PluginEditor = function(jsEditor, valueEditor)
 							});
 						});
 
-						$(valueCell).append(datasourceToolbox.append([datasourceTool, jsEditorTool]));
+						$(valueCell).append(datasourceToolbox.append(jsEditorTool));
 
 						break;
 					}
@@ -1633,43 +1694,31 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
 
-
 						if(settingDef.type == "calculated")
 						{
-							var input = $('<textarea></textarea>').appendTo(valueCell).change(function()
-							{
-								newSettings.settings[settingDef.name] = $(this).val();
-							});
-
-							if(settingDef.name in currentSettingsValues)
-							{
-								input.val(currentSettingsValues[settingDef.name]);
+							if(settingDef.name in currentSettingsValues) {
+								var currentValue = currentSettingsValues[settingDef.name];
+								if(settingDef.multi_input && _.isArray(currentValue)) {
+									var includeRemove = false;
+									for(var i=0; i<currentValue.length; i++) {
+										_appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue[i], includeRemove);
+										includeRemove = true;
+									}
+								} else {
+									_appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, false);
+								}
+							} else {
+								_appendCalculatedSettingRow(valueCell, newSettings, settingDef, null, false);
 							}
 
-							valueEditor.createValueEditor(input);
-
-							var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
-
-							var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>データーソース</label></li>').mousedown(function(e)
-							{
-								e.preventDefault();
-								$(input).val("")
-										.focus()
-										.insertAtCaret("datasources[\"")
-										.trigger("freeboard-eval");
-							});
-
-							var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JS EDITOR</label></li>').mousedown(function(e)
-							{
-								e.preventDefault();
-
-								jsEditor.displayJSEditor(input.val(), 'javascript', function(result){
-									input.val(result);
-									input.change();
-								});
-							});
-
-							$(valueCell).append(datasourceToolbox.append([datasourceTool, jsEditorTool]));
+							if(settingDef.multi_input) {
+								var inputAdder = $('<ul class="board-toolbar"><li class="add-setting-row"><i class="icon-plus icon-white"></i><label>追加</label></li></ul>')
+									.mousedown(function(e) {
+										e.preventDefault();
+										_appendCalculatedSettingRow(valueCell, newSettings, settingDef, null, true);
+									});
+								$(valueCell).siblings('.form-label').append(inputAdder);
+							}
 						}
 						else
 						{
@@ -2302,6 +2351,11 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
 				var script = currentSettings[settingDef.name];
 
 				if (!_.isUndefined(script)) {
+
+					if(_.isArray(script)) {
+						script = "[" + script.join(",") + "]";
+					}
+
 					// If there is no return, add one
 					if ((script.match(/;/g) || []).length <= 1 && script.indexOf("return") == -1) {
 						script = "return " + script;
@@ -2309,7 +2363,7 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
 
 					var valueFunction;
 
-					try {
+ 					try {
 						valueFunction = new Function("datasources", script);
 					}
 					catch (e) {
@@ -4283,7 +4337,8 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "value",
 				display_name: "値",
-				type: "calculated"
+				type: "calculated",
+				multi_input: true
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
