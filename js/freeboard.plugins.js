@@ -111,8 +111,8 @@
 			},
 			{
 				name: "use_thingproxy",
-				display_name: "Try thingproxy",
-				description: 'A direct JSON connection will be tried first, if that fails, a JSONP connection will be tried. If that fails, you can use thingproxy, which can solve many connection problems to APIs. <a href="https://github.com/Freeboard/thingproxy" target="_blank">More information</a>.',
+				display_name: "プロキシサーバー試行",
+				description: 'まず直接接続し、失敗した場合、JSONP接続を試みます。これも失敗した場合、プロキシサーバーを使用することができます。使用することで多くのAPI接続トラブルを解決できるでしょう。<a href="https://github.com/Freeboard/thingproxy" target="_blank">詳細</a>',
 				type: "boolean",
 				default_value: true
 			},
