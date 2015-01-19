@@ -559,7 +559,7 @@
 				}
 				catch (e) {
 					alert(e);
-					console.log(e);
+					console.error(e);
 				}
 			}
 
