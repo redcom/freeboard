@@ -846,16 +846,13 @@
 				default_value: '{\n\
 	"chart": {\n\
 		"type": "spline",\n\
-		"animation": "Highcharts.svg",\n\
-		"marginRight": 20\n\
+		"animation": "Highcharts.svg"\n\
 	},\n\
 	"title": {\n\
-		"text": "Enter Title",\n\
-		"x": -20\n\
+		"text": "Enter Title"\n\
 	},\n\
 	"subtitle": {\n\
-		"text": "Enter Subtitle",\n\
-		"x": -20\n\
+		"text": "Enter Subtitle"\n\
 	},\n\
 	"xAxis": {\n\
 		"title": {\n\
