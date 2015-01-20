@@ -732,14 +732,17 @@
 
 	var highchartsWidget = function (settings) {
 		var self = this;
-		var currentID = "highchart-" + highchartsID++;
+		var currentID = "highcharts" + highchartsID++;
 		var highchartsElement = $('<div class="highcharts" id="' + currentID + '"></div>');
 		var currentSettings = settings;
+		var chart;
 
 		function createWidget() {
 
-			highchartsElement.css('height', 60 * self.getHeight() - 10 + 'px');
-			highchartsElement.css('width', '100%');
+			highchartsElement.css({
+				"height": 60 * currentSettings.blocks + "px",
+				"width": "100%"
+			});
 
 			var options;
 			var theme;
@@ -778,6 +781,10 @@
 			$.extend(true, options, theme);
 
 			highchartsElement.highcharts(options);
+
+			highchartsElement.resize(function(){
+				highchartsElement.highcharts().reflow();
+			});
 		}
 
 		this.render = function (element) {
@@ -882,7 +889,7 @@
 				"#DF5353", "#7798BF", "#aaeeee"\n\
 	],\n\
 	"chart": {\n\
-		"backgroundColor": "null",\n\
+		"backgroundColor": "#2a2a2a",\n\
 		"plotBorderColor": "#606063"\n\
 	},\n\
 	"title": {\n\
