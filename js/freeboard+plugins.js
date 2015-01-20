@@ -1154,7 +1154,7 @@ JSEditor = function () {
 				break;
 			case 'json':
 				exampleText = '// 例: {\n//    "title": "タイトル"\n//    "value": 10\n}';
-				codeWindowHeader = $('<div class="code-window-header cm-s-ambiance"><span class="cm-keyword">ダブルクォーテーション""</span>で括った文字列の中に文字列を記述する場合は<span class="cm-keyword">¥"¥"</span>で括って下さい。<br>例: "function(label, series){return (¥"ID:¥"+label);}" </div>');
+				codeWindowHeader = $('<div class="code-window-header cm-s-ambiance"><span class="cm-keyword">"(ダブルクォーテーション)</span>で括った文字列の中では適切なエスケープシーケンスを使用して下さい。<br>例: "function(label, series){return (\\\"ID:\\\"+label);}" </div>');
 
 				config = {
 					value: value,
@@ -3827,6 +3827,17 @@ $.extend(freeboard, jQuery.eventEmitter);
 	var SPARKLINE_HISTORY_LENGTH = 100;
 	var SPARKLINE_COLORS = ["#FF9900", "#FFFFFF", "#B3B4B4", "#6B6B6B", "#28DE28", "#13F7F9", "#E6EE18", "#C41204", "#CA3CB8", "#0B1CFB"];
 
+	function jsonEscapeEntities(str) {
+		var entitiesMap = {
+			'<': '&lt;',
+			'>': '&gt;',
+			'&': '&amp;'
+		};
+		return str.replace(/[&<>]/g, function(key) {
+			return entitiesMap[key];
+		});
+	}
+
 	function easeTransitionText(newValue, textElement, duration) {
 
 		var currentValue = $(textElement).text();
@@ -4367,15 +4378,17 @@ $.extend(freeboard, jQuery.eventEmitter);
 			Function.prototype.toJSON = Function.prototype.toString;
 
 			var options;
-			if (currentSettings.plot_options) {
+			if (currentSettings.options) {
 				try {
-					options = JSON.parse(currentSettings.plot_options, function(k,v) {
+					options = jsonEscapeEntities(currentSettings.options);
+					options = JSON.parse(options, function(k,v) {
 						return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v;
 					});
 				}
 				catch (e) {
-					alert(e);
+					alert("チャートオプションが不正です。 " + e);
 					console.error(e);
+					return;
 				}
 			}
 
@@ -4402,7 +4415,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 		}
 
 		this.onSettingsChanged = function (newSettings) {
-			if (newSettings.plot_options != currentSettings.plot_options ||
+			if (newSettings.options != currentSettings.options ||
 				newSettings.value != currentSettings.value ||
 				newSettings.blocks != currentSettings.blocks ||
 				newSettings.tooltip_style != currentSettings.tooltip_style) {
@@ -4471,50 +4484,50 @@ $.extend(freeboard, jQuery.eventEmitter);
 				type: "calculated"
 			},
 			{
-				name: "plot_options",
+				name: "options",
 				display_name: "チャートオプション",
 				type: "json",
 				default_value: '{\n\
-    "grid": {\n\
-        "color":"#8b8b8b",\n\
-        "borderColor":"#8b8b8b",\n\
-        "borderWidth":{ "top":0, "left":2, "bottom":2, "right":2 },\n\
-        "tickColor":"#525252",\n\
-        "hoverable":true,\n\
-    },\n\
-    "tooltip":true,\n\
-    "tooltipOpts": {\n\
-        "content":"function(label, x, y) {var ret = \"%s %x %y\";return ret;}",\n\
-        "defaultTheme":false\n\
-    },\n\
-    "series": {\n\
-        "shadowSize":0,\n\
-        "downsample": { "threshold":800 },\n\
-        "lines": { "show":true, "lineWidth":2 },\n\
-        "points": { "radius":1, "show":false }\n\
-    },\n\
-    "legend": {\n\
-        "show":true,\n\
-        "position":"sw",\n\
-        "backgroundColor":"null",\n\
-        "labelFormatter":"function(label, series){return (\"&nbsp;\"+label);}"\n\
-    },\n\
-    "xaxes": [\n\
-        {\n\
-            "font":{ "color":"#8b8b8b" },\n\
-            "mode":"time"\n\
-        }\n\
-    ],\n\
-    "yaxes": [\n\
-        {\n\
-            "font":{ "color":"#8b8b8b" },\n\
-            "position":"left"\n\
-        },\n\
-        {\n\
-            "font":{ "color":"#8b8b8b" },\n\
-            "position":"right"\n\
-        }\n\
-    ]\n\
+	"grid": {\n\
+		"color":"#8b8b8b",\n\
+		"borderColor":"#8b8b8b",\n\
+		"borderWidth":{ "top":0, "left":2, "bottom":2, "right":2 },\n\
+		"tickColor":"#525252",\n\
+		"hoverable":true\n\
+	},\n\
+	"tooltip":true,\n\
+	"tooltipOpts": {\n\
+		"content":"function(label, x, y) {var ret = \\\"%s %x %y\\\";return ret;}",\n\
+		"defaultTheme":false\n\
+	},\n\
+	"series": {\n\
+		"shadowSize":0,\n\
+		"downsample": { "threshold":800 },\n\
+		"lines": { "show":true, "lineWidth":2 },\n\
+		"points": { "radius":1, "show":false }\n\
+	},\n\
+	"legend": {\n\
+		"show":true,\n\
+		"position":"sw",\n\
+		"backgroundColor":"null",\n\
+		"labelFormatter":"function(label, series){return (\\\"&nbsp;\\\"+label);}"\n\
+	},\n\
+	"xaxes": [\n\
+		{\n\
+			"font":{ "color":"#8b8b8b" },\n\
+			"mode":"time"\n\
+		}\n\
+	],\n\
+	"yaxes": [\n\
+		{\n\
+			"font":{ "color":"#8b8b8b" },\n\
+			"position":"left"\n\
+		},\n\
+		{\n\
+			"font":{ "color":"#8b8b8b" },\n\
+			"position":"right"\n\
+		}\n\
+	]\n\
 }',
 				description: "JSON形式文字列。 参考URL: <a href='https://github.com/flot/flot/blob/master/API.md#plot-options' target='_blank'>https://github.com/flot/flot/blob/master/API.md#plot-options</a>"
 			},
@@ -4528,6 +4541,330 @@ $.extend(freeboard, jQuery.eventEmitter);
 		],
 		newInstance: function (settings, newInstanceCallback) {
 			newInstanceCallback(new flotchartWidget(settings));
+		}
+	});
+
+	var highchartsID = 0;
+
+	var highchartsWidget = function (settings) {
+		var self = this;
+		var currentID = "highchart-" + highchartsID++;
+		var highchartsElement = $('<div class="highcharts" id="' + currentID + '"></div>');
+		var currentSettings = settings;
+
+		function createWidget() {
+
+			highchartsElement.css('height', 60 * self.getHeight() - 10 + 'px');
+			highchartsElement.css('width', '100%');
+
+			var options;
+			var theme;
+
+			if (currentSettings.options) {
+				try {
+					options = jsonEscapeEntities(currentSettings.options);
+					options = JSON.parse(options, function(k,v) {
+						return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v;
+					});
+				}
+				catch (e) {
+					alert("チャートオプションが不正です。 " + e);
+					console.error(e);
+					return;
+				}
+			}
+
+			if (currentSettings.theme) {
+				try {
+					theme = JSON.parse(currentSettings.theme, function(k,v) {
+						return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v;
+					});
+				}
+				catch (e) {
+					alert("チャートテーマが不正です。 " + e);
+					console.error(e);
+					return;
+				}
+			}
+
+			var dataset = [];
+			options['series'] = dataset;
+
+			// merge theme to options
+			$.extend(true, options, theme);
+
+			highchartsElement.highcharts(options);
+		}
+
+		this.render = function (element) {
+			$(element).append(highchartsElement);
+			createWidget();
+		}
+
+		this.onSettingsChanged = function (newSettings) {
+			if (newSettings.blocks != currentSettings.blocks ||
+				newSettings.value != currentSettings.value ||
+				newSettings.options != currentSettings.options ||
+				newSettings.theme != currentSettings.theme) {
+				currentSettings = newSettings;
+				createWidget();
+			} else {
+				currentSettings = newSettings;
+			}
+		}
+
+		this.onCalculatedValueChanged = function (settingName, newValue) {
+		}
+
+		this.onDispose = function () {
+		}
+
+		this.getHeight = function () {
+			return currentSettings.blocks;
+		}
+
+		this.onSettingsChanged(settings);
+	};
+
+	var valueStyle = freeboard.getStyleObject("values");
+
+	freeboard.loadWidgetPlugin({
+		type_name: "highcharts",
+		display_name: "Highチャート",
+		"external_scripts" : [
+						"http://code.highcharts.com/highcharts.js",
+						"http://code.highcharts.com/modules/exporting.js"],
+		fill_size : true,
+		settings: [
+			{
+				name: "blocks",
+				display_name: "高さ (ブロック数)",
+				type: "number",
+				default_value: 4,
+				description: "1ブロック60ピクセル。"
+			},
+			{
+				name: "value",
+				display_name: "値",
+				type: "calculated"
+			},
+			{
+				name: "options",
+				display_name: "チャートオプション",
+				type: "json",
+				default_value: '{\n\
+	"chart": {\n\
+		"type": "spline",\n\
+		"animation": "Highcharts.svg",\n\
+		"marginRight": 20\n\
+	},\n\
+	"title": {\n\
+		"text": "Enter Title",\n\
+		"x": -20\n\
+	},\n\
+	"subtitle": {\n\
+		"text": "Enter Subtitle",\n\
+		"x": -20\n\
+	},\n\
+	"xAxis": {\n\
+		"title": {\n\
+			"text": "Time"\n\
+		},\n\
+		"type": "datetime",\n\
+		"floor": 0\n\
+	},\n\
+	"yAxis": {\n\
+		"title": {\n\
+			"text": "Values"\n\
+		},\n\
+		"minorTickInterval": "auto",\n\
+		"floor": 0\n\
+	},\n\
+	"tooltip": {\n\
+		"formatter": "function() { return \\\"<b>\\\" + this.series.name + \\\"</b><br/>\\\" + Highcharts.dateFormat(\\\"%Y-%m-%d %H:%M:%S\\\", this.x) + \\\"<br/>\\\" + Highcharts.numberFormat(this.y, 2); }"\n\
+	}\n\
+}',
+
+				description: "JSON形式文字列。 参考URL: <a href='http://www.highcharts.com/' target='_blank'>http://www.highcharts.com/</a>"
+			},
+			{
+				name: "theme",
+				display_name: "チャートテーマ",
+				type: "json",
+				default_value: '{\n\
+	"colors": [\n\
+				"#2b908f", "#90ee7e", "#f45b5b", "#7798BF",\n\
+				"#aaeeee", "#ff0066", "#eeaaee", "#55BF3B",\n\
+				"#DF5353", "#7798BF", "#aaeeee"\n\
+	],\n\
+	"chart": {\n\
+		"backgroundColor": "null",\n\
+		"plotBorderColor": "#606063"\n\
+	},\n\
+	"title": {\n\
+		"style": {\n\
+			"color": "#E0E0E3",\n\
+			"fontSize": "20px"\n\
+		}\n\
+	},\n\
+	"subtitle": {\n\
+		"style": {\n\
+			"color": "#E0E0E3",\n\
+			"textTransform": "uppercase"\n\
+		}\n\
+	},\n\
+	"xAxis": {\n\
+		"gridLineColor": "#707073",\n\
+		"labels": {\n\
+			"style": {\n\
+				"color": "#E0E0E3"\n\
+			}\n\
+		},\n\
+		"lineColor": "#707073",\n\
+		"minorGridLineColor": "#505053",\n\
+		"tickColor": "#707073",\n\
+		"title": {\n\
+			"style": {\n\
+				"color": "#A0A0A3"\n\
+			}\n\
+		}\n\
+	},\n\
+	"yAxis": {\n\
+		"gridLineColor": "#707073",\n\
+		"labels": {\n\
+			"style": {\n\
+				"color": "#E0E0E3"\n\
+			}\n\
+		},\n\
+		"lineColor": "#707073",\n\
+		"minorGridLineColor": "#505053",\n\
+		"tickColor": "#707073",\n\
+		"tickWidth": 1,\n\
+		"title": {\n\
+			"style": {\n\
+				"color": "#A0A0A3"\n\
+			}\n\
+		}\n\
+	},\n\
+	"tooltip": {\n\
+		"backgroundColor": "rgba(0, 0, 0, 0.85)",\n\
+		"style": {\n\
+			"color": "#F0F0F0"\n\
+		}\n\
+	},\n\
+	"plotOptions": {\n\
+		"series": {\n\
+			"dataLabels": {\n\
+				"color": "#B0B0B3"\n\
+			},\n\
+			"marker": {\n\
+				"lineColor": "#333"\n\
+			}\n\
+		},\n\
+		"boxplot": {\n\
+			"fillColor": "#505053"\n\
+		},\n\
+		"candlestick": {\n\
+			"lineColor": "white"\n\
+		},\n\
+		"errorbar": {\n\
+			"color": "white"\n\
+		}\n\
+	},\n\
+	"legend": {\n\
+		"itemStyle": {\n\
+			"color": "#E0E0E3"\n\
+		},\n\
+		"itemHoverStyle": {\n\
+			"color": "#FFF"\n\
+		},\n\
+		"itemHiddenStyle": {\n\
+			"color": "#606063"\n\
+		}\n\
+	},\n\
+	"credits": {\n\
+		"style": {\n\
+			"color": "#666"\n\
+		}\n\
+	},\n\
+	"labels": {\n\
+		"style": {\n\
+			"color": "#707073"\n\
+		}\n\
+	},\n\
+	"drilldown": {\n\
+		"activeAxisLabelStyle": {\n\
+			"color": "#F0F0F3"\n\
+		},\n\
+		"activeDataLabelStyle": {\n\
+			"color": "#F0F0F3"\n\
+		}\n\
+	},\n\
+	"navigation": {\n\
+		"buttonOptions": {\n\
+			"align": "left",\n\
+			"symbolStroke": "#DDDDDD",\n\
+			"theme": {\n\
+				"fill": "#505053"\n\
+			}\n\
+		}\n\
+	},\n\
+	"rangeSelector": {\n\
+		"buttonTheme": {\n\
+			"fill": "#505053",\n\
+			"stroke": "#000000",\n\
+			"style": {\n\
+				"color": "#CCC"\n\
+			},\n\
+			"states": {\n\
+				"hover": {\n\
+					"fill": "#707073",\n\
+					"stroke": "#000000",\n\
+					"style": {\n\
+						"color": "white"\n\
+					}\n\
+				},\n\
+				"select": {\n\
+					"fill": "#000003",\n\
+					"stroke": "#000000",\n\
+					"style": {\n\
+						"color": "white"\n\
+					}\n\
+				}\n\
+			}\n\
+		},\n\
+		"inputBoxBorderColor": "#505053",\n\
+		"inputStyle": {\n\
+			"backgroundColor": "#333",\n\
+			"color": "silver"\n\
+		},\n\
+		"labelStyle": {\n\
+			"color": "silver"\n\
+		}\n\
+	},\n\
+	"scrollbar": {\n\
+		"barBackgroundColor": "#808083",\n\
+		"barBorderColor": "#808083",\n\
+		"buttonArrowColor": "#CCC",\n\
+		"buttonBackgroundColor": "#606063",\n\
+		"buttonBorderColor": "#606063",\n\
+		"rifleColor": "#FFF",\n\
+		"trackBackgroundColor": "#404043",\n\
+		"trackBorderColor": "#404043"\n\
+	},\n\
+	"legendBackgroundColor": "rgba(0, 0, 0, 0.5)",\n\
+	"background2": "#505053",\n\
+	"dataLabelsColor": "#B0B0B3",\n\
+	"textColor": "#C0C0C0",\n\
+	"contrastTextColor": "#F0F0F3",\n\
+	"maskColor": "rgba(255,255,255,0.3)"\n\
+}',
+				description: "JSON形式文字列。 参考URL: <a href='http://www.highcharts.com/' target='_blank'>http://www.highcharts.com/</a>"
+			}
+		],
+
+		newInstance: function (settings, newInstanceCallback) {
+			newInstanceCallback(new highchartsWidget(settings));
 		}
 	});
 
@@ -5063,5 +5400,4 @@ $.extend(freeboard, jQuery.eventEmitter);
 			newInstanceCallback(new htmlWidget(settings));
 		}
 	});
-
 }());
