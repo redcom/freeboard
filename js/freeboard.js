@@ -2654,7 +2654,8 @@ var freeboard = (function()
 
 	var currentStyle = {
 		values: {
-			"font-family": '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", "Open Sans", "メイリオ", "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Meiryo, Osaka, Arial, sans-serif',
+			"font-family-light": '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", "Open Sans", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, Arial, sans-serif',
+			"font-family": '"Helvetica Neue", Helvetica, "Open Sans", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, Arial, sans-serif',
 			"color"      : "#d3d4d4",
 			"font-weight": 100
 		}

@@ -2654,7 +2654,8 @@ var freeboard = (function()
 
 	var currentStyle = {
 		values: {
-			"font-family": '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", "Open Sans", "メイリオ", "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Meiryo, Osaka, Arial, sans-serif',
+			"font-family-light": '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", "Open Sans", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, Arial, sans-serif',
+			"font-family": '"Helvetica Neue", Helvetica, "Open Sans", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, Arial, sans-serif',
 			"color"      : "#d3d4d4",
 			"font-weight": 100
 		}
@@ -4194,7 +4195,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				levelColors: [ currentSettings.gauge_lower_color, currentSettings.gauge_mid_color, currentSettings.gauge_upper_color ],
 				gaugeWidthScale: currentSettings.gauge_widthscale/100.0,
 				gaugeColor: currentSettings.gauge_color,
-				labelFontFamily: valueStyle['font-family'],
+				labelFontFamily: valueStyle['font-family-light'],
 				labelFontColor: currentSettings.value_fontcolor,
 				valueFontColor: currentSettings.value_fontcolor
 			});
@@ -4551,7 +4552,6 @@ $.extend(freeboard, jQuery.eventEmitter);
 		var currentID = "highcharts" + highchartsID++;
 		var highchartsElement = $('<div class="highcharts" id="' + currentID + '"></div>');
 		var currentSettings = settings;
-		var chart;
 
 		function createWidget() {
 
@@ -4589,6 +4589,16 @@ $.extend(freeboard, jQuery.eventEmitter);
 					return;
 				}
 			}
+
+			var valueStyle = freeboard.getStyleObject("values");
+			var font = {
+				chart: {
+					style: {
+						fontFamily: valueStyle['font-family']
+					}
+				}
+			};
+			$.extend(true, theme, font);
 
 			var dataset = [];
 			options['series'] = dataset;

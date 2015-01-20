@@ -14,7 +14,7 @@ module.exports = function(grunt) {
                     [
                         'lib/js/thirdparty/head.js',
                         'lib/js/thirdparty/jquery.js',
-                        'lib/js/thirdparty/jquery.resize.js',
+                        'lib/js/thirdparty/jquery.ba-resize.js',
                         'lib/js/thirdparty/jquery-ui.js',
                         'lib/js/thirdparty/knockout.js',
                         'lib/js/thirdparty/underscore.js',
