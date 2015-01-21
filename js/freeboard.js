@@ -280,6 +280,8 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		}
 	});
 
+	this.isVisibleDatasources = ko.observable(false);
+
 	this.header_image = ko.observable();
 	this.plugins = ko.observableArray();
 	this.datasources = ko.observableArray();
@@ -637,6 +639,10 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 
 		self.isEditing(editing);
 
+		if (editing == false) {
+			self.setVisibilityDatasource(false);
+		}
+
 		if(_.isUndefined(animate))
 		{
 			animate = true;
@@ -669,10 +675,40 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		freeboardUI.showPaneEditIcons(editing, animate);
 	}
 
+	this.setVisibilityDatasource = function(visibility, animate)
+	{
+		// Don't allow editing if it's not allowed
+		if(!self.allow_edit())
+			return;
+
+		if(_.isUndefined(animate))
+			animate = true;
+
+		self.isVisibleDatasources(visibility);
+
+		var barElem = $("#datasources");
+
+		var barWidth = barElem.outerWidth();
+
+		var animateLength = (animate) ? 250 : 0;
+
+		if (visibility == true) {
+			barElem.animate({'right' : 0 + "px" }, animateLength);
+		} else {
+			barElem.animate({'right' : -barWidth + "px" }, animateLength);
+		}
+	}
+
 	this.toggleEditing = function()
 	{
 		var editing = !self.isEditing();
 		self.setEditing(editing);
+	}
+
+	this.toggleDatasources = function()
+	{
+		var visibility = !self.isVisibleDatasources();
+		self.setVisibilityDatasource(visibility);
 	}
 }
 
