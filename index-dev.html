@@ -73,46 +73,24 @@
 <header id="main-header" data-bind="if:allow_edit">
     <div id="admin-bar">
         <div id="admin-menu">
+            <div id="board-logo">
+                <a href="index-dev.html"><img src="img/logo.png" alt="logo" height="49" width="186"></a>
+            </div>
             <div id="board-tools">
-                <img src="img/logo.png" alt="logo" height="49" width="186">
                 <div id="board-actions">
-                    <ul class="board-toolbar vertical">
-                        <li data-bind="click: loadDashboardFromLocalFile"><i id="full-screen-icon" class="icon-folder-open icon-white"></i><label id="full-screen">設定 ロード</label></li>
-                        <li data-bind="click: saveDashboard"><i class="icon-download-alt icon-white"></i><label>設定 保存</label></li>
+                    <ul class="board-toolbar collapse">
+                        <li data-bind="click: loadDashboardFromLocalFile"><i id="full-screen-icon" class="icon-folder-open icon-white"></i><label id="full-screen">ロード</label></li>
+                        <li data-bind="click: saveDashboard"><i class="icon-download-alt icon-white"></i><label>保存</label></li>
                         <li id="add-pane" data-bind="click: createPane"><i class="icon-plus icon-white"></i><label>ペイン追加</label></li>
                     </ul>
                 </div>
             </div>
-            <div id="datasources">
-                <h2 class="title">データソース</h2>
-
-                <div class="datasource-list-container">
-                    <table class="table table-condensed sub-table" id="datasources-list" data-bind="if: datasources().length">
-                        <thead>
-                        <tr>
-                            <th>名前</th>
-                            <th>最終更新日</th>
-                            <th>&nbsp;</th>
-                        </tr>
-                        </thead>
-                        <tbody data-bind="foreach: datasources">
-                        <tr>
-                            <td>
-                                <span class="text-button datasource-name" data-bind="text: name, pluginEditor: {operation: 'edit', type: 'datasource'}"></span>
-                            </td>
-                            <td data-bind="text: last_updated"></td>
-                            <td>
-                                <ul class="board-toolbar">
-                                    <li data-bind="click: updateNow"><i class="icon-refresh icon-white"></i></li>
-                                    <li data-bind="pluginEditor: {operation: 'delete', type: 'datasource'}">
-                                        <i class="icon-trash icon-white"></i></li>
-                                </ul>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+            <div id="board-configs">
+                <div id="board-actions-right">
+                    <ul class="board-toolbar collapse">
+                        <li id="toggle-datasources" data-bind="click: toggleDatasources"><i class="icon-hdd icon-white"></i><label>データソース</label></li>
+                    </ul>
                 </div>
-                <span class="text-button table-operation" data-bind="pluginEditor: {operation: 'add', type: 'datasource'}">追加</span>
             </div>
         </div>
     </div>
@@ -130,6 +108,50 @@
         <i id="toggle-header-icon" class="icon-wrench icon-white"></i>
     </div>
 </header>
+
+<div id="datasources">
+    <div class="datasource-container">
+        <div class="datasource-container-header">
+            <h2 class="datasource-container-header title">データソース</h2>
+            <div>
+                <ul class="board-toolbar collapse">
+                    <li data-bind="click: toggleDatasources"><i class="icon-remove icon-white"></i></li>
+                </ul>
+            </div>
+        </div>
+        <div class="datasource-list-container">
+            <table class="table table-condensed sub-table" id="datasources-list" data-bind="if: datasources().length">
+                <thead>
+                <tr>
+                    <th>名前</th>
+                    <th>最終更新日</th>
+                    <th>&nbsp;</th>
+                </tr>
+                </thead>
+                <tbody data-bind="foreach: datasources">
+                <tr>
+                    <td>
+                        <span class="text-button datasource-name" data-bind="text: name, pluginEditor: {operation: 'edit', type: 'datasource'}"></span>
+                    </td>
+                    <td data-bind="text: last_updated"></td>
+                    <td>
+                        <ul class="board-toolbar">
+                            <li data-bind="click: updateNow"><i class="icon-refresh icon-white"></i></li>
+                            <li data-bind="pluginEditor: {operation: 'delete', type: 'datasource'}">
+                                <i class="icon-trash icon-white"></i></li>
+                        </ul>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="datasource-toolbar">
+            <ul class="board-toolbar collapse">
+                <li data-bind="pluginEditor: {operation: 'add', type: 'datasource'}"><i class="icon-plus icon-white"></i><label>追加</label></li>
+            </ul>
+        </div>
+    </div>
+</div>
 
 <div style="display:hidden">
     <ul data-bind="template: { name: 'pane-template', foreach: panes}">
