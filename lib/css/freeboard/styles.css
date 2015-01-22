@@ -2005,9 +2005,6 @@ h2.title {
 }
 
 @media screen and (max-width : 960px) {
-	#add-pane {
-		padding-top: 10px;
-	}
 
 	.text-button {
 		font-size: 14px;
@@ -2024,10 +2021,6 @@ h2.title {
 		padding: 1px 8px;
 		line-height: 25px;
 		border-width: 2px;
-	}
-
-	#admin-menu {
-		width: 100%;
 	}
 
 	h2.title {
