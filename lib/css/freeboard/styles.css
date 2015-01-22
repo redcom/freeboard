@@ -1803,13 +1803,7 @@ td.form-table-value > input[type="checkbox"] {
 
 #board-logo {
 	float: left;
-	height: 100%;
-	display: table;
-}
-
-#board-logo > *{
-	display:table-cell;
-	vertical-align: middle;
+	margin-top: 3px;
 }
 
 ul.board-toolbar {
@@ -2004,7 +1998,119 @@ h2.title {
 	display: none;
 }
 
+/*
+	Responsible Menu Icon
+*/
+#hamburger
+{
+	box-sizing: border-box;
+	display: none;
+	width: 50px;
+	height: 45px;
+	position: fixed;
+	top: 9px;
+	left: 0px;
+	z-index: 2;
+}
+#hamburger:before,
+#hamburger:after,
+#hamburger span
+{
+	background: #d3d4d4;
+	content: '';
+	display: none;
+	width: 30px;
+	height: 5px;
+	position: absolute;
+	left: 20px;
+}
+#hamburger:before
+{
+	top: 9px;
+}
+#hamburger span
+{
+	top: 19px;
+}
+#hamburger:after
+{
+	top: 29px;
+}
+
+/* Hamburger animation */
+#hamburger:before,
+#hamburger:after,
+#hamburger span
+{
+	-webkit-transition: none 0.5s ease 0.5s;
+	transition: none 0.5s ease 0.5s;
+
+	-webkit-transition-property: transform, top, bottom, left, opacity;
+	transition-property: transform, top, bottom, left, opacity;
+}
+
+html.boardtools-opening #hamburger:before,
+html.boardtools-opening #hamburger:after
+{
+	top: 19px;
+}
+html.boardtools-opening #hamburger span
+{
+	left: -50px;
+	opacity: 0;
+}
+html.boardtools-opening #hamburger:before
+{
+	transform: rotate(45deg);
+}
+html.boardtools-opening #hamburger:after
+{
+	transform: rotate(-45deg);
+}
+
 @media screen and (max-width : 960px) {
+
+	#admin-menu {
+		padding-left: 60px;
+	}
+
+	#hamburger,
+	#hamburger:before,
+	#hamburger:after,
+	#hamburger span {
+		display: block;
+	}
+
+	#board-tools {
+		position: fixed;
+		top: 0;
+		left: -250px;
+		width: 250px;
+		height: 100%;
+		background: #313131;
+		box-shadow: 0 0 5px #000;
+		z-index: 100;
+	}
+
+	#board-actions {
+		display: block;
+		vertical-align: top;
+	}
+
+	#board-actions ul > li {
+		float: none;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	#board-config {
+		width: 50%;
+	}
+
+	#board-actions-right ul > li label {
+		display: none;
+	}
 
 	.text-button {
 		font-size: 14px;
@@ -2023,26 +2129,6 @@ h2.title {
 		border-width: 2px;
 	}
 
-	h2.title {
-		font-size: 10px;
-		padding-top: 5px;
-		padding-bottom: 5px;
-	}
-
-	#board-tools {
-		width: 100%;
-	}
-
-	#datasources {
-		width: 100%;
-		float: none;
-		clear: both;
-	}
-
-	#board-actions {
-		float: left;
-	}
-
 	.modal header {
 		height: 30px;
 	}
@@ -2051,10 +2137,6 @@ h2.title {
 		width: 100%;
 		top: 0px;
 		left: 0px;
-	}
-
-	.datasource-list-container {
-		max-height: 77px;
 	}
 
 	.form-label {
@@ -2420,4 +2502,3 @@ input:-moz-placeholder, textarea:-moz-placeholder {
 	width: 100%;
 	height: 100% !important;
 }
-
