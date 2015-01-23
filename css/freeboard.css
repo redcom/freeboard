@@ -2858,7 +2858,7 @@ html.boardtools-opening #hamburger:after
 		left: -250px;
 		width: 250px;
 		height: 100%;
-		background: #313131;
+		background: #171717;
 		box-shadow: 0 0 5px #000;
 		z-index: 100;
 	}
@@ -2866,13 +2866,21 @@ html.boardtools-opening #hamburger:after
 	#board-actions {
 		display: block;
 		vertical-align: top;
+		padding-top: 30px;
 	}
 
 	#board-actions ul > li {
 		float: none;
-		border-bottom-width: 1px;
-		border-bottom-style: solid;
-		border-color: rgba(255, 255, 255, 0.1);
+		margin: 0px;
+		border-left-width: 5px;
+		border-left-style: solid;
+		border-color: #8b8b8b;
+	}
+
+	#board-actions ul > li:hover {
+		float: none;
+		margin: 0px;
+		border-color: #FF9900;
 	}
 
 	#board-configs {

@@ -2008,7 +2008,7 @@ h2.title {
 	width: 50px;
 	height: 45px;
 	position: fixed;
-	top: 9px;
+	top: 10px;
 	left: 0px;
 	z-index: 2;
 }
@@ -2019,22 +2019,22 @@ h2.title {
 	background: #d3d4d4;
 	content: '';
 	display: none;
-	width: 30px;
-	height: 5px;
+	width: 25px;
+	height: 4px;
 	position: absolute;
 	left: 20px;
 }
 #hamburger:before
 {
-	top: 9px;
+	top: 10px;
 }
 #hamburger span
 {
-	top: 19px;
+	top: 18px;
 }
 #hamburger:after
 {
-	top: 29px;
+	top: 26px;
 }
 
 /* Hamburger animation */
@@ -2052,7 +2052,7 @@ h2.title {
 html.boardtools-opening #hamburger:before,
 html.boardtools-opening #hamburger:after
 {
-	top: 19px;
+	top: 18px;
 }
 html.boardtools-opening #hamburger span
 {
@@ -2071,7 +2071,7 @@ html.boardtools-opening #hamburger:after
 @media screen and (max-width : 960px) {
 
 	#admin-menu {
-		padding-left: 60px;
+		padding-left: 50px;
 	}
 
 	#hamburger,
