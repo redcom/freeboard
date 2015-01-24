@@ -513,18 +513,21 @@
 				name: "gauge_widthscale",
 				display_name: "ゲージ太さ",
 				type: "number",
+				required : true,
 				default_value: 100,
 				description: "0から200まで"
 			},
 			{
 				name: "min_value",
 				display_name: "最小値",
+				required : true,
 				type: "number",
 				default_value: 0
 			},
 			{
 				name: "max_value",
 				display_name: "最大値",
+				required : true,
 				type: "number",
 				default_value: 100
 			}
@@ -659,6 +662,7 @@
 				name: "blocks",
 				display_name: "高さ (ブロック数)",
 				type: "number",
+				required : true,
 				default_value: 4,
 				description: "1ブロック60ピクセル。"
 			},
@@ -1252,6 +1256,7 @@
 				"name": "height",
 				"display_name": "ブロック高さ",
 				"type": "number",
+				"required" : true,
 				"default_value": 4,
 				"description": "1ブロック高さは約60pixel"
 			}

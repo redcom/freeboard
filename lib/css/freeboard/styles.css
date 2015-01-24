@@ -2103,7 +2103,7 @@ html.boardtools-opening #hamburger:after
 		margin: 0px;
 		border-left-width: 5px;
 		border-left-style: solid;
-		border-color: #8b8b8b;
+		border-color: transparent;
 	}
 
 	#board-actions ul > li:hover {

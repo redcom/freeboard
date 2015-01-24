@@ -107,6 +107,7 @@
 			{
 				name: "url",
 				display_name: "URL",
+				required : true,
 				type: "text"
 			},
 			{
@@ -120,6 +121,7 @@
 				name: "refresh",
 				display_name: "更新頻度",
 				type: "number",
+				required : true,
 				suffix: "秒",
 				default_value: 5
 			},
@@ -247,6 +249,7 @@
 				name: "location",
 				display_name: "場所",
 				type: "text",
+				required : true,
 				description: "例: London, UK"
 			},
 			{
@@ -269,6 +272,7 @@
 				name: "refresh",
 				display_name: "更新頻度",
 				type: "number",
+				required : true,
 				suffix: "秒",
 				default_value: 5
 			}
@@ -324,7 +328,8 @@
 			{
 				name: "thing_id",
 				display_name: "物の名前",
-				"description": "例: ソルティドッグ1",
+				description: "例: ソルティドッグ1",
+				required : true,
 				type: "text"
 			}
 		],
@@ -410,6 +415,7 @@
 			{
 				"name": "datafile",
 				"display_name": "データファイルURL",
+				"required" : true,
 				"type": "text",
 				"description": "JSON配列データへのリンク"
 			},
@@ -427,6 +433,7 @@
 			{
 				"name": "refresh",
 				"display_name": "更新頻度",
+				"required" : true,
 				"type": "number",
 				"suffix": "秒",
 				"default_value": 5
@@ -488,6 +495,7 @@
 				"name": "refresh",
 				"display_name": "更新頻度",
 				"type": "number",
+				"required" : true,
 				"suffix": "秒",
 				"default_value": 1
 			}
@@ -574,6 +582,7 @@
 			{
 				name        : "url",
 				display_name: "サーバーURL",
+				required : true,
 				type        : "text"
 			}
 		],
@@ -596,7 +605,7 @@
 			if (typeof objdata == "object") {
 				updateCallback(objdata);
 			} else {
-				updateCallback(data);
+				updateCallback(message);
 			}
 		}
 
@@ -698,6 +707,7 @@
 			{
 				name : "url",
 				display_name : "サーバーURL",
+				required : true,
 				description : "(オプション) カスタム名前空間を使用する場合、URLの最後に名前空間を追加して下さい。<br>例: http://localhost/chat",
 				type : "text"
 			},
@@ -726,13 +736,161 @@
 					display_name : "ルームに参加するイベント名",
 					type : "text"
 				} ]
-			} ],
-		newInstance : function(settings, newInstanceCallback,
-				updateCallback) {
-			newInstanceCallback(new nodeJSDatasource(settings,
-					updateCallback));
+			}
+		],
+		newInstance : function(settings, newInstanceCallback, updateCallback) {
+			newInstanceCallback(new nodeJSDatasource(settings, updateCallback));
 		}
 	});
+
+	var mqttDatasource = function(settings, updateCallback) {
+
+		var self = this;
+		var currentSettings = settings;
+		var client;
+		var CONNECT_DELAY = 1000;
+
+		function onConnect(frame) {
+			console.info("MQTT Connected to %s", currentSettings.url);
+			self.client.subscribe(currentSettings.url);
+		}
+
+		function onConnectionLost(responseObject) {
+			console.info("MQTT ConnectionLost %s %s", currentSettings.url, responseObject.errorMessage);
+			if (currentSettings.reconnect == true) {
+				setTimeout(function() {
+					connectToServer();
+				}, CONNECT_DELAY);
+			}
+		}
+
+		function onConnectFailure(error) {
+			console.error("MQTT Failed Connect to %s", currentSettings.url);
+		}
+
+		function onMessageArrived(message) {
+			console.info("MQTT Received %s", message);
+
+			var objdata = JSON.parse(message.payloadString);
+			if (typeof objdata == "object") {
+				updateCallback(objdata);
+			} else {
+				updateCallback(objdata);
+			}
+		}
+
+		function discardSocket() {
+			// Disconnect datasource MQTT
+			if (self.client) {
+				self.client.disconnect();
+				delete self.client;
+				self.client = null;
+			}
+		}
+
+		function connectToServer() {
+
+			try {
+				discardSocket();
+
+				self.client = new Paho.MQTT.Client(
+					currentSettings.url, currentSettings.port, currentSettings.clientID);
+				self.client.onConnect = onConnect;
+				self.client.onMessageArrived = onMessageArrived;
+				self.client.onConnectionLost = onConnectionLost;
+				self.client.connect({
+					userName: currentSettings.username,
+					password: currentSettings.password,
+					onSuccess: onConnect,
+					onFailure: onConnectFailure
+				});
+			} catch (e) {
+				console.error(e.message);
+				alert(e.message);
+			}
+		}
+
+
+		function initializeDataSource() {
+			connectToServer();
+		}
+
+		this.updateNow = function() {
+			// Just seat back, relax and wait for incoming events
+			return;
+		};
+
+		this.onDispose = function() {
+			discardSocket();
+		};
+
+		this.onSettingsChanged = function(newSettings) {
+			currentSettings = newSettings;
+			discardSocket();
+		};
+
+		initializeDataSource();
+	};
+
+	freeboard.loadDatasourcePlugin({
+		type_name : "mqtt",
+		display_name : "MQTT over Websocket",
+		description : "<a href='http://mqtt.org/', target='_blank'>MQTT</a>プロトコルをWebSocketを介し使用し、MQTTブローカーサーバーからデータソースをリアルタイムで取得します。",
+		external_scripts : [ "plugins/thirdparty/mqttws31.js" ],
+		settings : [
+			{
+				name : "url",
+				display_name : "DNSホスト名",
+				required : true,
+				description : "MQTTブローカーサーバーのDNSホスト名を設定して下さい。<br>例: location.hostname",
+				type : "text"
+			},
+			{
+				name : "port",
+				display_name : "ポート番号",
+				required : true,
+				type : "number",
+				default_value: 8080
+			},
+			{
+				name : "clientID",
+				display_name : "クライアントID",
+				required : true,
+				description : "任意のクライアントID文字列 23文字まで",
+				type : "text",
+				default_value: "SensorCorpus"
+			},
+			{
+				name : "username",
+				display_name : "ユーザー名",
+				description : "必要ない場合は空白。",
+				type : "text"
+			},
+			{
+				name : "password",
+				display_name : "パスワード",
+				description : "必要ない場合は空白。",
+				type : "text"
+			},
+			{
+				name : "topic",
+				display_name : "トピック",
+				required : true,
+				type : "text",
+				description : "購読するトピック名を設定して下さい。<br>例: my/topic>",
+			},
+			{
+				name : "reconnect",
+				display_name : "自動再接続",
+				type: "boolean",
+				description : "接続が切れた場合、自動的に再接続します。",
+				default_value: true
+			}
+		],
+		newInstance : function(settings, newInstanceCallback, updateCallback) {
+			newInstanceCallback(new mqttDatasource(settings, updateCallback));
+		}
+	})
 }());
 // ┌────────────────────────────────────────────────────────────────────┐ \\
 // │ F R E E B O A R D                                                  │ \\
@@ -1249,18 +1407,21 @@
 				name: "gauge_widthscale",
 				display_name: "ゲージ太さ",
 				type: "number",
+				required : true,
 				default_value: 100,
 				description: "0から200まで"
 			},
 			{
 				name: "min_value",
 				display_name: "最小値",
+				required : true,
 				type: "number",
 				default_value: 0
 			},
 			{
 				name: "max_value",
 				display_name: "最大値",
+				required : true,
 				type: "number",
 				default_value: 100
 			}
@@ -1395,6 +1556,7 @@
 				name: "blocks",
 				display_name: "高さ (ブロック数)",
 				type: "number",
+				required : true,
 				default_value: 4,
 				description: "1ブロック60ピクセル。"
 			},
@@ -1988,6 +2150,7 @@
 				"name": "height",
 				"display_name": "ブロック高さ",
 				"type": "number",
+				"required" : true,
 				"default_value": 4,
 				"description": "1ブロック高さは約60pixel"
 			}

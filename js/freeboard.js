@@ -671,7 +671,7 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		{
 			$("#toggle-header-icon").addClass("icon-chevron-up").removeClass("icon-wrench");
 			$(".gridster .gs_w").css({cursor: "pointer"});
-			$("#hamburger").animate({"top": "9px"}, animateLength);
+			$("#hamburger").animate({"top": "10px"}, animateLength);
 			$("#main-header").animate({"top": "0px"}, animateLength);
 			$("#board-content").animate({"top": (barHeight + 20) + "px"}, animateLength);
 			$("#main-header").data().shown = true;
@@ -2772,16 +2772,16 @@ var freeboard = (function()
 			if(options.type == 'datasource')
 			{
 				types = datasourcePlugins;
-				title = "データソース";
+				title = "データソース設定";
 			}
 			else if(options.type == 'widget')
 			{
 				types = widgetPlugins;
-				title = "ウィジェット";
+				title = "ウィジェット設定";
 			}
 			else if(options.type == 'pane')
 			{
-				title = "ペイン";
+				title = "ペイン設定";
 			}
 
 			$(element).click(function(event)
