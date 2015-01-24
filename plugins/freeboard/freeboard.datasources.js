@@ -749,7 +749,7 @@
 		var currentSettings = settings;
 		var client;
 		var dispose = false;
-		var CONNECT_DELAY = 1000;
+		var CONNECTION_DELAY = 1000;
 
 		function onConnect(frame) {
 			console.info("MQTT Connected to %s", currentSettings.url);
@@ -758,12 +758,10 @@
 
 		function onConnectionLost(responseObject) {
 			console.info("MQTT ConnectionLost %s %s", currentSettings.url, responseObject.errorMessage);
-			if (dispose == false) {
-				if (currentSettings.reconnect == true) {
-					setTimeout(function() {
-						connectToServer();
-					}, CONNECT_DELAY);
-				}
+			if (dispose == false && currentSettings.reconnect == true) {
+				setTimeout(function() {
+					connectToServer();
+				}, CONNECTION_DELAY);
 			}
 		}
 
@@ -778,7 +776,7 @@
 			if (typeof objdata == "object") {
 				updateCallback(objdata);
 			} else {
-				updateCallback(objdata);
+				updateCallback(message.payloadString);
 			}
 		}
 
@@ -881,7 +879,7 @@
 				display_name : "トピック",
 				required : true,
 				type : "text",
-				description : "購読するトピック名を設定して下さい。<br>例: my/topic>",
+				description : "購読するトピック名を設定して下さい。<br>例: my/topic",
 			},
 			{
 				name : "reconnect",

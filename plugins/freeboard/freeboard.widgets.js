@@ -520,7 +520,6 @@
 			{
 				name: "min_value",
 				display_name: "最小値",
-				required : true,
 				type: "number",
 				default_value: 0
 			},
