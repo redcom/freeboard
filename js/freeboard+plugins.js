@@ -3946,6 +3946,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 		}
 
 		function onConnectFailure(error) {
+			self.client = null;
 			console.error("MQTT Failed Connect to %s", currentSettings.url);
 		}
 
@@ -3964,7 +3965,6 @@ $.extend(freeboard, jQuery.eventEmitter);
 			// Disconnect datasource MQTT
 			if (self.client) {
 				self.client.disconnect();
-				delete self.client;
 				self.client = null;
 			}
 		}
@@ -3980,8 +3980,8 @@ $.extend(freeboard, jQuery.eventEmitter);
 				self.client.onMessageArrived = onMessageArrived;
 				self.client.onConnectionLost = onConnectionLost;
 				self.client.connect({
-					userName: currentSettings.username,
-					password: currentSettings.password,
+					userName: _.isUndefined(currentSettings.username) ? "" : currentSettings.username,
+					password: _.isUndefined(currentSettings.password) ? "" : currentSettings.password,
 					onSuccess: onConnect,
 					onFailure: onConnectFailure
 				});
