@@ -3928,6 +3928,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 		var self = this;
 		var currentSettings = settings;
 		var client;
+		var dispose = false;
 		var CONNECT_DELAY = 1000;
 
 		function onConnect(frame) {
@@ -3937,10 +3938,12 @@ $.extend(freeboard, jQuery.eventEmitter);
 
 		function onConnectionLost(responseObject) {
 			console.info("MQTT ConnectionLost %s %s", currentSettings.url, responseObject.errorMessage);
-			if (currentSettings.reconnect == true) {
-				setTimeout(function() {
-					connectToServer();
-				}, CONNECT_DELAY);
+			if (dispose == false) {
+				if (currentSettings.reconnect == true) {
+					setTimeout(function() {
+						connectToServer();
+					}, CONNECT_DELAY);
+				}
 			}
 		}
 
@@ -4001,6 +4004,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 		};
 
 		this.onDispose = function() {
+			dispose = true;
 			discardSocket();
 		};
 

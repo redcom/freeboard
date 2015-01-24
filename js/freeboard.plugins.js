@@ -748,6 +748,7 @@
 		var self = this;
 		var currentSettings = settings;
 		var client;
+		var dispose = false;
 		var CONNECT_DELAY = 1000;
 
 		function onConnect(frame) {
@@ -757,10 +758,12 @@
 
 		function onConnectionLost(responseObject) {
 			console.info("MQTT ConnectionLost %s %s", currentSettings.url, responseObject.errorMessage);
-			if (currentSettings.reconnect == true) {
-				setTimeout(function() {
-					connectToServer();
-				}, CONNECT_DELAY);
+			if (dispose == false) {
+				if (currentSettings.reconnect == true) {
+					setTimeout(function() {
+						connectToServer();
+					}, CONNECT_DELAY);
+				}
 			}
 		}
 
@@ -821,6 +824,7 @@
 		};
 
 		this.onDispose = function() {
+			dispose = true;
 			discardSocket();
 		};
 
