@@ -1538,7 +1538,6 @@
 			"plugins/thirdparty/jquery.flot.errorbars.min.js",
 			"plugins/thirdparty/jquery.flot.fillbetween.min.js",
 			"plugins/thirdparty/jquery.flot.image.min.js",
-			"plugins/thirdparty/jquery.flot.navigate.min.js",
 			"plugins/thirdparty/jquery.flot.pie.min.js",
 			"plugins/thirdparty/jquery.flot.resize.min.js",
 			"plugins/thirdparty/jquery.flot.selection.min.js",
