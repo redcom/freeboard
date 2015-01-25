@@ -753,7 +753,7 @@
 
 		function onConnect(frame) {
 			console.info("MQTT Connected to %s", currentSettings.url);
-			self.client.subscribe(currentSettings.url);
+			self.client.subscribe(_.isUndefined(currentSettings.topic) ? "" : currentSettings.topic);
 		}
 
 		function onConnectionLost(responseObject) {
@@ -771,7 +771,7 @@
 		}
 
 		function onMessageArrived(message) {
-			console.info("MQTT Received %s", message);
+			console.info("MQTT Received %s from %s", message,  currentSettings.url);
 
 			var objdata = JSON.parse(message.payloadString);
 			if (typeof objdata == "object") {
@@ -795,7 +795,9 @@
 				discardSocket();
 
 				self.client = new Paho.MQTT.Client(
-					currentSettings.url, currentSettings.port, currentSettings.clientID);
+					_.isUndefined(currentSettings.url) ? "" : currentSettings.url,
+					_.isUndefined(currentSettings.port) ? "" : currentSettings.port,
+					_.isUndefined(currentSettings.clientID) ? "" : currentSettings.clientID);
 				self.client.onConnect = onConnect;
 				self.client.onMessageArrived = onMessageArrived;
 				self.client.onConnectionLost = onConnectionLost;
@@ -806,8 +808,7 @@
 					onFailure: onConnectFailure
 				});
 			} catch (e) {
-				console.error(e.message);
-				alert(e.message);
+				console.error(e);
 			}
 		}
 
@@ -863,23 +864,23 @@
 				default_value: "SensorCorpus"
 			},
 			{
-				name : "username",
-				display_name : "ユーザー名",
-				description : "必要ない場合は空白。",
-				type : "text"
-			},
-			{
-				name : "password",
-				display_name : "パスワード",
-				description : "必要ない場合は空白。",
-				type : "text"
-			},
-			{
 				name : "topic",
 				display_name : "トピック",
 				required : true,
 				type : "text",
 				description : "購読するトピック名を設定して下さい。<br>例: my/topic",
+			},
+			{
+				name : "username",
+				display_name : "(オプション) ユーザー名",
+				description : "必要ない場合は空白。",
+				type : "text"
+			},
+			{
+				name : "password",
+				display_name : "(オプション) パスワード",
+				description : "必要ない場合は空白。",
+				type : "text"
 			},
 			{
 				name : "reconnect",
