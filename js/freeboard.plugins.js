@@ -908,6 +908,17 @@
 	var SPARKLINE_HISTORY_LENGTH = 100;
 	var SPARKLINE_COLORS = ["#FF9900", "#FFFFFF", "#B3B4B4", "#6B6B6B", "#28DE28", "#13F7F9", "#E6EE18", "#C41204", "#CA3CB8", "#0B1CFB"];
 
+	function jsonEscapeEntities(str) {
+		var entitiesMap = {
+			'<': '&lt;',
+			'>': '&gt;',
+			'&': '&amp;'
+		};
+		return str.replace(/[&<>]/g, function(key) {
+			return entitiesMap[key];
+		});
+	}
+
 	function easeTransitionText(newValue, textElement, duration) {
 
 		var currentValue = $(textElement).text();
@@ -1440,7 +1451,7 @@
 				plot = null;
 			}
 
-			freeboard.addStyle('#flotTip', _.escape(currentSettings.tooltip_style));
+			freeboard.addStyle('#flotTip', currentSettings.tooltip_style);
 
 			flotchartElement.css({
 				"height": 60 * currentSettings.blocks - 25 + "px",
@@ -1452,7 +1463,7 @@
 			var options;
 			if (currentSettings.options) {
 				try {
-					options = _.escape(currentSettings.options);
+					options = jsonEscapeEntities(currentSettings.options);
 					options = JSON.parse(options, function(k,v) {
 						return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v;
 					});
