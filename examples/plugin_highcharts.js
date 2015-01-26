@@ -266,8 +266,7 @@
 
 			if (currentSettings.options) {
 				try {
-					options = jsonEscapeEntities(currentSettings.options);
-					options = JSON.parse(options, function(k,v) {
+					options = JSON.parse(_.escape(currentSettings.options), function(k,v) {
 						return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v;
 					});
 				}
@@ -280,7 +279,7 @@
 
 			if (currentSettings.theme) {
 				try {
-					theme = JSON.parse(currentSettings.theme, function(k,v) {
+					theme = JSON.parse(_.escape(currentSettings.theme), function(k,v) {
 						return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v;
 					});
 				}
