@@ -3035,12 +3035,12 @@ var freeboard = (function()
 								if(options.type == 'datasource')
 								{
 									viewModel.name(newSettings.settings.name);
+									viewModel.isEditing(false);
 									delete newSettings.settings.name;
 								}
 
 								viewModel.type(newSettings.type);
 								viewModel.settings(newSettings.settings);
-								viewModel.isEditing(false);
 							}
 						}
 					});
