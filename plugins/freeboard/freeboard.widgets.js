@@ -3,6 +3,7 @@
 // ├────────────────────────────────────────────────────────────────────┤ \\
 // │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
 // │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
 // ├────────────────────────────────────────────────────────────────────┤ \\
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
@@ -295,7 +296,9 @@
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "size",
@@ -315,7 +318,9 @@
 			{
 				name: "value",
 				display_name: "値",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "sparkline",
@@ -331,7 +336,9 @@
 			{
 				name: "units",
 				display_name: "単位",
-				type: "text"
+				validate: "optional,maxSize[20]",
+				type: "text",
+				description: "最大20文字"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
@@ -443,12 +450,16 @@
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "value",
 				display_name: "値",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "shape",
@@ -472,12 +483,15 @@
 			{
 				name: "units",
 				display_name: "単位",
-				type: "text"
+				validate: "optional,maxSize[20]",
+				type: "text",
+				description: "最大20文字"
 			},
 			{
 				name: "value_fontcolor",
 				display_name: "値フォント色",
 				type: "color",
+				validate: "required,custom[hexcolor]",
 				default_value: "#d3d4d4",
 				description: "デフォルト色: #d3d4d4"
 			},
@@ -485,6 +499,7 @@
 				name: "gauge_upper_color",
 				display_name: "ゲージ色 Upper",
 				type: "color",
+				validate: "required,custom[hexcolor]",
 				default_value: "#ff0000",
 				description: "デフォルト色: #ff0000"
 			},
@@ -492,6 +507,7 @@
 				name: "gauge_mid_color",
 				display_name: "ゲージ色 Mid",
 				type: "color",
+				validate: "required,custom[hexcolor]",
 				default_value: "#f9c802",
 				description: "デフォルト色: #f9c802"
 			},
@@ -499,6 +515,7 @@
 				name: "gauge_lower_color",
 				display_name: "ゲージ色 Lower",
 				type: "color",
+				validate: "required,custom[hexcolor]",
 				default_value: "#a9d70b",
 				description: "デフォルト色: #a9d70b"
 			},
@@ -506,29 +523,33 @@
 				name: "gauge_color",
 				display_name: "ゲージ背景色",
 				type: "color",
+				validate: "required,custom[hexcolor]",
 				default_value: "#edebeb",
 				description: "デフォルト色: #edebeb"
 			},
 			{
 				name: "gauge_widthscale",
 				display_name: "ゲージ太さ",
-				type: "number",
-				required : true,
+				type: "text",
+				validate: "required,custom[integer],min[0],max[200]",
 				default_value: 100,
 				description: "0から200まで"
 			},
 			{
 				name: "min_value",
 				display_name: "最小値",
-				type: "number",
-				default_value: 0
+				type: "text",
+				validate: "required,custom[integer],min[0]",
+				default_value: 0,
+				description: "0以上"
 			},
 			{
 				name: "max_value",
 				display_name: "最大値",
-				required : true,
-				type: "number",
-				default_value: 100
+				type: "text",
+				validate: "required,custom[integer],min[0]",
+				default_value: 100,
+				description: "最小値以上"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
@@ -654,24 +675,29 @@
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "blocks",
 				display_name: "高さ (ブロック数)",
-				type: "number",
-				required : true,
+				validate: "required,custom[integer],min[1],max[20]",
+				type: "text",
 				default_value: 4,
-				description: "1ブロック60ピクセル。"
+				description: "1ブロック60ピクセル。20ブロックまで"
 			},
 			{
 				name: "value",
 				display_name: "値",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "options",
 				display_name: "チャートオプション",
+				validate: "optional,maxSize[5000]",
 				type: "json",
 				default_value: '{\n\
 	"grid": {\n\
@@ -715,14 +741,15 @@
 		}\n\
 	]\n\
 }',
-				description: "JSON形式文字列。 参考URL: <a href='https://github.com/flot/flot/blob/master/API.md#plot-options' target='_blank'>https://github.com/flot/flot/blob/master/API.md#plot-options</a>"
+				description: "最大5000文字<br>JSON形式文字列。 参考URL: <a href='https://github.com/flot/flot/blob/master/API.md#plot-options' target='_blank'>https://github.com/flot/flot/blob/master/API.md#plot-options</a>"
 			},
 			{
 				name: "tooltip_style",
 				display_name: "ツールチップスタイル",
+				validate: "optional,maxSize[300]",
 				type: "text",
 				default_value: 'padding:3px 5px; color:#000000; background-color:#ffffff; box-shadow:0 0 10px #555; opacity:.7; filter:alpha(opacity=70); z-index:100; -webkit-border-radius:4px; -moz-border-radius:4px; border-radius:4px; font-size:12px;',
-				description: "チャートオプションでtooltip:trueの場合のみ有効。CSS形式"
+				description: "最大300文字br>チャートオプションでtooltip:trueの場合のみ有効。CSS形式"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
@@ -769,12 +796,16 @@
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "value",
 				display_name: "値",
+				validate: "optional,maxSize[500]",
 				type: "calculated",
+				description: "最大500文字",
 				multi_input: true
 			}
 		],
@@ -891,27 +922,35 @@
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "direction",
 				display_name: "方向",
+				validate: "optional,maxSize[2000]",
 				type: "calculated",
-				description: "角度"
+				description: "最大2000文字<br>角度を入力して下さい。"
 			},
 			{
 				name: "value_text",
 				display_name: "値テキスト",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "units",
 				display_name: "単位",
-				type: "text"
+				validate: "optional,maxSize[20]",
+				type: "text",
+				description: "最大20文字"
 			},
 			{
 				name: "circle_color",
 				display_name: "サークル色",
+				validate: "required,custom[hexcolor]",
 				type: "color",
 				default_value: "#ff9900",
 				description: "デフォルト色: #ff9900"
@@ -919,6 +958,7 @@
 			{
 				name: "pointer_color",
 				display_name: "ポインタ色",
+				validate: "required,custom[hexcolor]",
 				type: "color",
 				default_value: "#fff",
 				description: "デフォルト色: #fff"
@@ -1010,12 +1050,15 @@
 			{
 				name: "src",
 				display_name: "画像URL",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				type: "number",
 				display_name: "更新頻度",
-				name: "refresh",
+				validate: "optional,custom[integer],min[1]",
+				name: "text",
 				suffix: "秒",
 				description:"更新する必要がない場合は空白のまま"
 			}
@@ -1082,22 +1125,30 @@
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "value",
 				display_name: "値",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "on_text",
 				display_name: "ON時テキスト",
-				type: "calculated"
+				validate: "optional,maxSize[500]",
+				type: "calculated",
+				description: "最大500文字"
 			},
 			{
 				name: "off_text",
 				display_name: "OFF時テキスト",
-				type: "calculated"
+				validate: "optional,maxSize[500]",
+				type: "calculated",
+				description: "最大500文字"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
@@ -1195,12 +1246,16 @@
 			{
 				name: "lat",
 				display_name: "緯度",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "lon",
 				display_name: "経度",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
@@ -1245,18 +1300,19 @@
 		"fill_size": true,
 		"settings": [
 			{
-				"name": "html",
-				"display_name": "HTML",
-				"type": "calculated",
-				"description": "HTML文字列かjavascriptが使用できます。"
+				name: "html",
+				display_name: "HTML",
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字<br>HTML文字列かjavascriptが使用できます。"
 			},
 			{
-				"name": "height",
-				"display_name": "ブロック高さ",
-				"type": "number",
-				"required" : true,
-				"default_value": 4,
-				"description": "1ブロック高さは約60pixel"
+				name: "height",
+				display_name: "ブロック高さ",
+				validate: "required,custom[integer],min[1],max[20]",
+				type: "text",
+				default_value: 4,
+				description: "1ブロック60ピクセル。20ブロックまで"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {

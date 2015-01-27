@@ -4,6 +4,7 @@
 // │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
 // │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
 // │ Copyright © 2014 Hugo Sequeira (https://github.com/hugocore)       │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
 // ├────────────────────────────────────────────────────────────────────┤ \\
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
@@ -107,7 +108,7 @@
 			{
 				name: "url",
 				display_name: "URL",
-				required : true,
+				validate: "required,custom[url]",
 				type: "text"
 			},
 			{
@@ -120,8 +121,8 @@
 			{
 				name: "refresh",
 				display_name: "更新頻度",
-				type: "number",
-				required : true,
+				validate: "required,custom[integer],min[1]",
+				type: "text",
 				suffix: "秒",
 				default_value: 5
 			},
@@ -152,7 +153,8 @@
 				name: "body",
 				display_name: "Body",
 				type: "json",
-				description: "リクエスト本文。通常はPOSTメソッド時に使用される。"
+				validate: "optional,maxSize[2000]",
+				description: "リクエスト本文。通常はPOSTメソッド時に使用される。最大2000文字"
 			},
 			{
 				name: "headers",
@@ -162,12 +164,16 @@
 					{
 						name: "name",
 						display_name: "名前",
-						type: "text"
+						type: "text",
+						validate: "optional,maxSize[500]",
+						description: "最大500文字"
 					},
 					{
 						name: "value",
 						display_name: "値",
-						type: "text"
+						type: "text",
+						validate: "optional,maxSize[500]",
+						description: "最大500文字"
 					}
 				]
 			}
@@ -248,9 +254,9 @@
 			{
 				name: "location",
 				display_name: "場所",
+				validate: "required,maxSize[200]",
 				type: "text",
-				required : true,
-				description: "例: London, UK"
+				description: "最大200文字<br>例: London, UK"
 			},
 			{
 				name: "units",
@@ -271,8 +277,8 @@
 			{
 				name: "refresh",
 				display_name: "更新頻度",
-				type: "number",
-				required : true,
+				validate: "required,custom[integer],min[1]",
+				type: "text",
 				suffix: "秒",
 				default_value: 5
 			}
@@ -328,9 +334,9 @@
 			{
 				name: "thing_id",
 				display_name: "物の名前",
-				description: "例: ソルティドッグ1",
-				required : true,
-				type: "text"
+				validate: "required,maxSize[100]",
+				type: "text",
+				description: "最大100文字 例: ソルティドッグ1"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback, updateCallback) {
@@ -413,11 +419,11 @@
 		"display_name": "Playback",
 		"settings": [
 			{
-				"name": "datafile",
-				"display_name": "データファイルURL",
-				"required" : true,
-				"type": "text",
-				"description": "JSON配列データへのリンク"
+				name: "datafile",
+				display_name: "データファイルURL",
+				validate: "required,custom[url]",
+				type: "text",
+				description: "JSON配列データへのリンク"
 			},
 			{
 				name: "is_jsonp",
@@ -425,18 +431,18 @@
 				type: "boolean"
 			},
 			{
-				"name": "loop",
-				"display_name": "ループ再生",
-				"type": "boolean",
-				"description": "巻戻しとループ再生時終了"
+				name: "loop",
+				display_name: "ループ再生",
+				type: "boolean",
+				description: "巻戻しとループ再生時終了"
 			},
 			{
-				"name": "refresh",
-				"display_name": "更新頻度",
-				"required" : true,
-				"type": "number",
-				"suffix": "秒",
-				"default_value": 5
+				name: "refresh",
+				display_name: "更新頻度",
+				validate: "required,custom[integer],min[1]",
+				type: "text",
+				suffix: "秒",
+				default_value: 5
 			}
 		],
 		newInstance: function (settings, newInstanceCallback, updateCallback) {
@@ -492,12 +498,12 @@
 		"display_name": "時計",
 		"settings": [
 			{
-				"name": "refresh",
-				"display_name": "更新頻度",
-				"type": "number",
-				"required" : true,
-				"suffix": "秒",
-				"default_value": 1
+				name: "refresh",
+				display_name: "更新頻度",
+				validate: "required,custom[integer],min[1]",
+				type: "text",
+				suffix: "秒",
+				default_value: 1
 			}
 		],
 		newInstance: function (settings, newInstanceCallback, updateCallback) {
@@ -580,10 +586,11 @@
 		description : "ブラウザ内蔵のWebSocket APIを使用しJSON形式のデータを取得します。",
 		settings   : [
 			{
-				name        : "url",
-				display_name: "サーバーURL",
-				required : true,
-				type        : "text"
+				name: "url",
+				display_name: "DNSホスト名",
+				validate: "required,maxSize[1000]",
+				type: "text",
+				description: "最大1000文字"
 			}
 		],
 		newInstance: function(settings, newInstanceCallback, updateCallback)
@@ -705,11 +712,11 @@
 		external_scripts : [ "https://cdn.socket.io/socket.io-1.2.1.js" ],
 		settings : [
 			{
-				name : "url",
-				display_name : "サーバーURL",
-				required : true,
-				description : "(オプション) カスタム名前空間を使用する場合、URLの最後に名前空間を追加して下さい。<br>例: http://localhost/chat",
-				type : "text"
+				name: "url",
+				display_name: "DNSホスト名",
+				validate: "required,maxSize[1000]",
+				type: "text",
+				description: "最大1000文字 (オプション) カスタム名前空間を使用する場合、URLの最後に名前空間を追加して下さい。<br>例: http://localhost/chat"
 			},
 			{
 				name : "events",
@@ -719,7 +726,8 @@
 				settings : [ {
 					name : "eventName",
 					display_name : "イベント名",
-					type : "text"
+					validate: "optional,maxSize[100]",
+					type: "text"
 				} ]
 			},
 			{
@@ -730,11 +738,13 @@
 				settings : [ {
 					name : "roomName",
 					display_name : "ルーム名",
-					type : "text"
+					validate: "optional,maxSize[100]",
+					type: "text"
 				}, {
 					name : "roomEvent",
 					display_name : "ルームに参加するイベント名",
-					type : "text"
+					validate: "optional,maxSize[100]",
+					type: "text"
 				} ]
 			}
 		],
@@ -844,43 +854,45 @@
 			{
 				name : "url",
 				display_name : "DNSホスト名",
-				required : true,
-				description : "MQTTブローカーサーバーのDNSホスト名を設定して下さい。<br>例: location.hostname",
-				type : "text"
+				validate: "required,maxSize[1000]",
+				type: "text",
+				description: "最大1000文字<br>MQTTブローカーサーバーのDNSホスト名を設定して下さい。<br>例: location.hostname"
 			},
 			{
 				name : "port",
 				display_name : "ポート番号",
-				required : true,
-				type : "number",
+				validate: "required,custom[integer],min[1]",
 				default_value: 8080
 			},
 			{
 				name : "clientID",
 				display_name : "クライアントID",
-				required : true,
-				description : "任意のクライアントID文字列 23文字まで",
-				type : "text",
+				validate: "required,maxSize[23]",
+				type: "text",
+				description: "最大23文字<br>任意のクライアントID文字列",
 				default_value: "SensorCorpus"
 			},
 			{
 				name : "topic",
 				display_name : "トピック",
-				required : true,
-				type : "text",
-				description : "購読するトピック名を設定して下さい。<br>例: my/topic",
+				validate: "required,maxSize[500]",
+				type: "text",
+				description: "最大500文字<br>購読するトピック名を設定して下さい。<br>例: my/topic",
+				default_value: "SensorCorpus"
 			},
 			{
 				name : "username",
 				display_name : "(オプション) ユーザー名",
-				description : "必要ない場合は空白。",
-				type : "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字<br>必要ない場合は空白。"
 			},
 			{
 				name : "password",
 				display_name : "(オプション) パスワード",
-				description : "必要ない場合は空白。",
-				type : "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字<br>必要ない場合は空白。"
 			},
 			{
 				name : "reconnect",

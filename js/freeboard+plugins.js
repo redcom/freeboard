@@ -1,3 +1,13 @@
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
+
 DatasourceModel = function(theFreeboardModel, datasourcePlugins) {
 	var self = this;
 
@@ -106,6 +116,16 @@ DatasourceModel = function(theFreeboardModel, datasourcePlugins) {
 	}
 }
 
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
+
 DeveloperConsole = function(theFreeboardModel)
 {
 	function showDeveloperConsole()
@@ -124,7 +144,7 @@ DeveloperConsole = function(theFreeboardModel)
 		container.append($("<p>Here you can add references to other scripts to load datasource or widget plugins.</p>"))
 			.append(table)
 			.append(addScript)
-            .append('<p>To learn how to build plugins for freeboard, please visit <a target="_blank" href="http://freeboard.github.io/freeboard/docs/plugin_example.html">http://freeboard.github.io/freeboard/docs/plugin_example.html</a></p>');
+			.append('<p>To learn how to build plugins for freeboard, please visit <a target="_blank" href="http://freeboard.github.io/freeboard/docs/plugin_example.html">http://freeboard.github.io/freeboard/docs/plugin_example.html</a></p>');
 
 		function refreshScript(scriptURL)
 		{
@@ -202,6 +222,16 @@ DeveloperConsole = function(theFreeboardModel)
 	}
 }
 
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
+
 function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
 {
 	var modal_width = 900;
@@ -233,6 +263,10 @@ function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
 		{
 			var hold = false;
 
+			if(!$("#plugin-editor").validationEngine('validate')){
+				return false;
+			}
+
 			if(_.isFunction(closeCallback))
 			{
 				hold = closeCallback("ok");
@@ -257,7 +291,20 @@ function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
 	overlay.append(modalDialog);
 	$("body").append(overlay);
 	overlay.fadeIn(200);
+
+	// ValidationEngine initialize
+	$("#plugin-editor").validationEngine();
 }
+
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
 
 function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 {
@@ -685,7 +732,6 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 			$(".gridster .gs_w").css({cursor: "default"});
 			elems["main"].css("transform", "translateY(-" + barHeight + "px)");
 			elems["board"].css("transform", "translateY(20px)");
-
 			$("#main-header").data().shown = false;
 			$(".sub-section").unbind();
 			freeboardUI.disableGrid();
@@ -805,6 +851,16 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		self.setVisibilityBoardTools(visibility);
 	}
 }
+
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
 
 function FreeboardUI()
 {
@@ -960,7 +1016,7 @@ function FreeboardUI()
 
 		if(newCols === grid.cols)
 		{
-			return false; 
+			return false;
 		}
 		else
 		{
@@ -1034,11 +1090,11 @@ function FreeboardUI()
 			{
 				if(event.attributeName == "data-row")
 				{
-                    updatePositionForScreenSize(viewModel, Number(event.newValue), undefined);
+					updatePositionForScreenSize(viewModel, Number(event.newValue), undefined);
 				}
 				else if(event.attributeName == "data-col")
 				{
-                    updatePositionForScreenSize(viewModel, undefined, Number(event.newValue));
+					updatePositionForScreenSize(viewModel, undefined, Number(event.newValue));
 				}
 			}
 		});
@@ -1076,7 +1132,7 @@ function FreeboardUI()
 		}
 		else
 		{
-	    		loadingIndicator.fadeOut(500).remove();
+			loadingIndicator.fadeOut(500).remove();
 		}
 	}
 
@@ -1247,6 +1303,16 @@ function FreeboardUI()
 	}
 }
 
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
+
 JSEditor = function () {
 	var assetRoot = ""
 
@@ -1331,6 +1397,16 @@ JSEditor = function () {
 		}
 	}
 }
+
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
 
 function PaneModel(theFreeboardModel, widgetPlugins) {
 	var self = this;
@@ -1443,14 +1519,18 @@ function PaneModel(theFreeboardModel, widgetPlugins) {
 	}
 }
 
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
+
 PluginEditor = function(jsEditor, valueEditor)
 {
-	function _displayValidationError(settingName, errorMessage)
-	{
-		var errorElement = $('<div class="validation-error"></div>').html(errorMessage);
-		$("#setting-value-container-" + settingName).append(errorElement);
-	}
-
 	function _removeSettingsRows()
 	{
 		if($("#setting-row-instance-name").length)
@@ -1463,6 +1543,17 @@ PluginEditor = function(jsEditor, valueEditor)
 		}
 	}
 
+	function _toValidateClassString(validate, type) {
+		var ret = "";
+		if (!_.isUndefined(validate)) {
+			var types = "";
+			if (!_.isUndefined(type))
+				types = " " + type;
+			ret = "validate[" + validate + "]" + types;
+		}
+		return ret;
+	}
+
 	function _isNumerical(n)
 	{
 		return !isNaN(parseFloat(n)) && isFinite(n);
@@ -1470,7 +1561,7 @@ PluginEditor = function(jsEditor, valueEditor)
 
 	function _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, includeRemove)
 	{
-		var input = $('<textarea></textarea>');
+		var input = $('<textarea></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input"));
 
 		if(settingDef.multi_input) {
 			input.change(function() {
@@ -1497,6 +1588,7 @@ PluginEditor = function(jsEditor, valueEditor)
 
 		var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
 		var wrapperDiv = $('<div class="calculated-setting-row"></div>');
+
 		wrapperDiv.append(input).append(datasourceToolbox);
 
 		var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>データソース</label></li>')
@@ -1545,7 +1637,7 @@ PluginEditor = function(jsEditor, valueEditor)
 		}
 
 		var selectedType;
-		var form = $('<div></div>');
+		var form = $('<form id="plugin-editor"></form>');
 
 		var pluginDescriptionElement = $('<div id="plugin-description"></div>').hide();
 		form.append(pluginDescriptionElement);
@@ -1567,6 +1659,13 @@ PluginEditor = function(jsEditor, valueEditor)
 				if(!_.isUndefined(settingDef.display_name))
 				{
 					displayName = settingDef.display_name;
+				}
+
+				// modify required field name
+				if(!_.isUndefined(settingDef.validate)) {
+					if (settingDef.validate.indexOf("required") != -1) {
+						displayName = "* " + displayName;
+					}
 				}
 
 				var valueCell = createSettingRow(settingDef.name, displayName);
@@ -1639,7 +1738,7 @@ PluginEditor = function(jsEditor, valueEditor)
 
 								newSetting[subSettingDef.name] = subsettingValueString;
 
-								$('<input class="table-row-value" type="text">').appendTo(subsettingCol).val(subsettingValueString).change(function()
+								$('<input class="table-row-value" type="text">').addClass(_toValidateClassString(subSettingDef.validate, "text-input")).appendTo(subsettingCol).val(subsettingValueString).change(function()
 								{
 									newSetting[subSettingDef.name] = $(this).val();
 								});
@@ -1704,7 +1803,7 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						var defaultValue = currentSettingsValues[settingDef.name];
 
-						var input = $('<select></select>').appendTo($('<div class="styled-select"></div>').appendTo(valueCell)).change(function()
+						var input = $('<select></select>').addClass(_toValidateClassString(settingDef.validate)).appendTo($('<div class="styled-select"></div>').appendTo(valueCell)).change(function()
 						{
 							newSettings.settings[settingDef.name] = $(this).val();
 						});
@@ -1752,7 +1851,7 @@ PluginEditor = function(jsEditor, valueEditor)
 						var curColorPickerID = "picker-" + colorPickerID++;
 						var thisColorPickerID = "#" + curColorPickerID;
 						var defaultValue = currentSettingsValues[settingDef.name];
-						var input = $('<input id="' + curColorPickerID + '" type="text">').appendTo(valueCell);
+						var input = $('<input id="' + curColorPickerID + '" type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell);
 
 						newSettings.settings[settingDef.name] = defaultValue;
 
@@ -1792,7 +1891,7 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
 
-						var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>').appendTo(valueCell).change(function()
+						var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell).change(function()
 						{
 							newSettings.settings[settingDef.name] = $(this).val();
 						});
@@ -1852,7 +1951,7 @@ PluginEditor = function(jsEditor, valueEditor)
 						}
 						else
 						{
-							var input = $('<input type="text">').appendTo(valueCell).change(function()
+							var input = $('<input type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell).change(function()
 							{
 								if(settingDef.type == "number")
 								{
@@ -1886,34 +1985,9 @@ PluginEditor = function(jsEditor, valueEditor)
 			});
 		}
 
-
 		new DialogBox(form, title, "保存", "キャンセル", function(okcancel)
 		{
 			if (okcancel == "ok") {
-				$(".validation-error").remove();
-
-				// Loop through each setting and validate it
-				for(var index = 0; index < selectedType.settings.length; index++)
-				{
-					var settingDef = selectedType.settings[index];
-
-					if(settingDef.required && (_.isUndefined(newSettings.settings[settingDef.name]) || newSettings.settings[settingDef.name] == ""))
-					{
-						_displayValidationError(settingDef.name, "必須項目です。");
-						return true;
-					}
-					else if(settingDef.type == "number" && !_isNumerical(newSettings.settings[settingDef.name]))
-					{
-						_displayValidationError(settingDef.name, "数値のみです。");
-						return true;
-					}
-					else if (settingDef.type == "color" && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newSettings.settings[settingDef.name]) == false)
-					{
-						_displayValidationError(settingDef.name, "無効な色です。");
-						return true;
-					}
-				}
-
 				if(_.isFunction(settingsSavedCallback))
 				{
 					settingsSavedCallback(newSettings);
@@ -2011,6 +2085,16 @@ PluginEditor = function(jsEditor, valueEditor)
 		}
 	}
 }
+
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
 
 ValueEditor = function(theFreeboardModel)
 {
@@ -2358,6 +2442,16 @@ ValueEditor = function(theFreeboardModel)
 		EXPECTED_TYPE : EXPECTED_TYPE
 	}
 }
+
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
 
 function WidgetModel(theFreeboardModel, widgetPlugins) {
 	function disposeWidgetInstance() {
@@ -2803,16 +2897,16 @@ var freeboard = (function()
 			if(options.type == 'datasource')
 			{
 				types = datasourcePlugins;
-				title = "データソース設定";
+				title = "データソース";
 			}
 			else if(options.type == 'widget')
 			{
 				types = widgetPlugins;
-				title = "ウィジェット設定";
+				title = "ウィジェット";
 			}
 			else if(options.type == 'pane')
 			{
-				title = "ペイン設定";
+				title = "ペイン";
 			}
 
 			$(element).click(function(event)
@@ -2881,16 +2975,19 @@ var freeboard = (function()
 							settings: {
 								settings: [
 									{
-										name        : "title",
+										name: "title",
 										display_name: "タイトル",
-										type        : "text"
+										validate: "optional,maxSize[100]",
+										type: "text",
+										description: "最大100文字"
 									},
 									{
 										name : "col_width",
 										display_name : "カラム幅",
-										type : "number",
+										validate: "required,custom[integer],min[1],max[10]",
+										type: "text",
 										default_value : 1,
-										required : true
+										description: "最大10ブロック"
 									}
 								]
 							}
@@ -3087,14 +3184,23 @@ var freeboard = (function()
 				plugin.display_name = plugin.type_name;
 			}
 
+			// Datasource name must be unique
+			window.freeboard.isUniqueDatasourceName = function(field, rules, i, options) {
+				var res = _.find(theFreeboardModel.datasources(), function(datasource) {
+					return datasource.name() == field.val();
+				});
+				if (!_.isUndefined(res))
+					return options.allrules.alreadyusedname.alertText;
+			}
+
 			// Add a required setting called name to the beginning
 			plugin.settings.unshift({
 				name : "name",
 				display_name : "名前",
-				type : "text",
-				required : true
+				validate: "funcCall[freeboard.isUniqueDatasourceName],required,maxSize[100]",
+				type: "text",
+				description: "最大100文字まで"
 			});
-
 
 			theFreeboardModel.addPluginSource(plugin.source);
 			datasourcePlugins[plugin.type_name] = plugin;
@@ -3215,6 +3321,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 // │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
 // │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
 // │ Copyright © 2014 Hugo Sequeira (https://github.com/hugocore)       │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
 // ├────────────────────────────────────────────────────────────────────┤ \\
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
@@ -3318,7 +3425,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "url",
 				display_name: "URL",
-				required : true,
+				validate: "required,custom[url]",
 				type: "text"
 			},
 			{
@@ -3331,8 +3438,8 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "refresh",
 				display_name: "更新頻度",
-				type: "number",
-				required : true,
+				validate: "required,custom[integer],min[1]",
+				type: "text",
 				suffix: "秒",
 				default_value: 5
 			},
@@ -3363,7 +3470,8 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "body",
 				display_name: "Body",
 				type: "json",
-				description: "リクエスト本文。通常はPOSTメソッド時に使用される。"
+				validate: "optional,maxSize[2000]",
+				description: "リクエスト本文。通常はPOSTメソッド時に使用される。最大2000文字"
 			},
 			{
 				name: "headers",
@@ -3373,12 +3481,16 @@ $.extend(freeboard, jQuery.eventEmitter);
 					{
 						name: "name",
 						display_name: "名前",
-						type: "text"
+						type: "text",
+						validate: "optional,maxSize[500]",
+						description: "最大500文字"
 					},
 					{
 						name: "value",
 						display_name: "値",
-						type: "text"
+						type: "text",
+						validate: "optional,maxSize[500]",
+						description: "最大500文字"
 					}
 				]
 			}
@@ -3459,9 +3571,9 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "location",
 				display_name: "場所",
+				validate: "required,maxSize[200]",
 				type: "text",
-				required : true,
-				description: "例: London, UK"
+				description: "最大200文字<br>例: London, UK"
 			},
 			{
 				name: "units",
@@ -3482,8 +3594,8 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "refresh",
 				display_name: "更新頻度",
-				type: "number",
-				required : true,
+				validate: "required,custom[integer],min[1]",
+				type: "text",
 				suffix: "秒",
 				default_value: 5
 			}
@@ -3539,9 +3651,9 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "thing_id",
 				display_name: "物の名前",
-				description: "例: ソルティドッグ1",
-				required : true,
-				type: "text"
+				validate: "required,maxSize[100]",
+				type: "text",
+				description: "最大100文字 例: ソルティドッグ1"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback, updateCallback) {
@@ -3624,11 +3736,11 @@ $.extend(freeboard, jQuery.eventEmitter);
 		"display_name": "Playback",
 		"settings": [
 			{
-				"name": "datafile",
-				"display_name": "データファイルURL",
-				"required" : true,
-				"type": "text",
-				"description": "JSON配列データへのリンク"
+				name: "datafile",
+				display_name: "データファイルURL",
+				validate: "required,custom[url]",
+				type: "text",
+				description: "JSON配列データへのリンク"
 			},
 			{
 				name: "is_jsonp",
@@ -3636,18 +3748,18 @@ $.extend(freeboard, jQuery.eventEmitter);
 				type: "boolean"
 			},
 			{
-				"name": "loop",
-				"display_name": "ループ再生",
-				"type": "boolean",
-				"description": "巻戻しとループ再生時終了"
+				name: "loop",
+				display_name: "ループ再生",
+				type: "boolean",
+				description: "巻戻しとループ再生時終了"
 			},
 			{
-				"name": "refresh",
-				"display_name": "更新頻度",
-				"required" : true,
-				"type": "number",
-				"suffix": "秒",
-				"default_value": 5
+				name: "refresh",
+				display_name: "更新頻度",
+				validate: "required,custom[integer],min[1]",
+				type: "text",
+				suffix: "秒",
+				default_value: 5
 			}
 		],
 		newInstance: function (settings, newInstanceCallback, updateCallback) {
@@ -3703,12 +3815,12 @@ $.extend(freeboard, jQuery.eventEmitter);
 		"display_name": "時計",
 		"settings": [
 			{
-				"name": "refresh",
-				"display_name": "更新頻度",
-				"type": "number",
-				"required" : true,
-				"suffix": "秒",
-				"default_value": 1
+				name: "refresh",
+				display_name: "更新頻度",
+				validate: "required,custom[integer],min[1]",
+				type: "text",
+				suffix: "秒",
+				default_value: 1
 			}
 		],
 		newInstance: function (settings, newInstanceCallback, updateCallback) {
@@ -3791,10 +3903,11 @@ $.extend(freeboard, jQuery.eventEmitter);
 		description : "ブラウザ内蔵のWebSocket APIを使用しJSON形式のデータを取得します。",
 		settings   : [
 			{
-				name        : "url",
-				display_name: "サーバーURL",
-				required : true,
-				type        : "text"
+				name: "url",
+				display_name: "DNSホスト名",
+				validate: "required,maxSize[1000]",
+				type: "text",
+				description: "最大1000文字"
 			}
 		],
 		newInstance: function(settings, newInstanceCallback, updateCallback)
@@ -3916,11 +4029,11 @@ $.extend(freeboard, jQuery.eventEmitter);
 		external_scripts : [ "https://cdn.socket.io/socket.io-1.2.1.js" ],
 		settings : [
 			{
-				name : "url",
-				display_name : "サーバーURL",
-				required : true,
-				description : "(オプション) カスタム名前空間を使用する場合、URLの最後に名前空間を追加して下さい。<br>例: http://localhost/chat",
-				type : "text"
+				name: "url",
+				display_name: "DNSホスト名",
+				validate: "required,maxSize[1000]",
+				type: "text",
+				description: "最大1000文字 (オプション) カスタム名前空間を使用する場合、URLの最後に名前空間を追加して下さい。<br>例: http://localhost/chat"
 			},
 			{
 				name : "events",
@@ -3930,7 +4043,8 @@ $.extend(freeboard, jQuery.eventEmitter);
 				settings : [ {
 					name : "eventName",
 					display_name : "イベント名",
-					type : "text"
+					validate: "optional,maxSize[100]",
+					type: "text"
 				} ]
 			},
 			{
@@ -3941,11 +4055,13 @@ $.extend(freeboard, jQuery.eventEmitter);
 				settings : [ {
 					name : "roomName",
 					display_name : "ルーム名",
-					type : "text"
+					validate: "optional,maxSize[100]",
+					type: "text"
 				}, {
 					name : "roomEvent",
 					display_name : "ルームに参加するイベント名",
-					type : "text"
+					validate: "optional,maxSize[100]",
+					type: "text"
 				} ]
 			}
 		],
@@ -4055,43 +4171,45 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name : "url",
 				display_name : "DNSホスト名",
-				required : true,
-				description : "MQTTブローカーサーバーのDNSホスト名を設定して下さい。<br>例: location.hostname",
-				type : "text"
+				validate: "required,maxSize[1000]",
+				type: "text",
+				description: "最大1000文字<br>MQTTブローカーサーバーのDNSホスト名を設定して下さい。<br>例: location.hostname"
 			},
 			{
 				name : "port",
 				display_name : "ポート番号",
-				required : true,
-				type : "number",
+				validate: "required,custom[integer],min[1]",
 				default_value: 8080
 			},
 			{
 				name : "clientID",
 				display_name : "クライアントID",
-				required : true,
-				description : "任意のクライアントID文字列 23文字まで",
-				type : "text",
+				validate: "required,maxSize[23]",
+				type: "text",
+				description: "最大23文字<br>任意のクライアントID文字列",
 				default_value: "SensorCorpus"
 			},
 			{
 				name : "topic",
 				display_name : "トピック",
-				required : true,
-				type : "text",
-				description : "購読するトピック名を設定して下さい。<br>例: my/topic",
+				validate: "required,maxSize[500]",
+				type: "text",
+				description: "最大500文字<br>購読するトピック名を設定して下さい。<br>例: my/topic",
+				default_value: "SensorCorpus"
 			},
 			{
 				name : "username",
 				display_name : "(オプション) ユーザー名",
-				description : "必要ない場合は空白。",
-				type : "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字<br>必要ない場合は空白。"
 			},
 			{
 				name : "password",
 				display_name : "(オプション) パスワード",
-				description : "必要ない場合は空白。",
-				type : "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字<br>必要ない場合は空白。"
 			},
 			{
 				name : "reconnect",
@@ -4111,6 +4229,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 // ├────────────────────────────────────────────────────────────────────┤ \\
 // │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
 // │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
 // ├────────────────────────────────────────────────────────────────────┤ \\
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
@@ -4403,7 +4522,9 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "size",
@@ -4423,7 +4544,9 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "value",
 				display_name: "値",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "sparkline",
@@ -4439,7 +4562,9 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "units",
 				display_name: "単位",
-				type: "text"
+				validate: "optional,maxSize[20]",
+				type: "text",
+				description: "最大20文字"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
@@ -4551,12 +4676,16 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "value",
 				display_name: "値",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "shape",
@@ -4580,12 +4709,15 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "units",
 				display_name: "単位",
-				type: "text"
+				validate: "optional,maxSize[20]",
+				type: "text",
+				description: "最大20文字"
 			},
 			{
 				name: "value_fontcolor",
 				display_name: "値フォント色",
 				type: "color",
+				validate: "required,custom[hexcolor]",
 				default_value: "#d3d4d4",
 				description: "デフォルト色: #d3d4d4"
 			},
@@ -4593,6 +4725,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "gauge_upper_color",
 				display_name: "ゲージ色 Upper",
 				type: "color",
+				validate: "required,custom[hexcolor]",
 				default_value: "#ff0000",
 				description: "デフォルト色: #ff0000"
 			},
@@ -4600,6 +4733,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "gauge_mid_color",
 				display_name: "ゲージ色 Mid",
 				type: "color",
+				validate: "required,custom[hexcolor]",
 				default_value: "#f9c802",
 				description: "デフォルト色: #f9c802"
 			},
@@ -4607,6 +4741,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "gauge_lower_color",
 				display_name: "ゲージ色 Lower",
 				type: "color",
+				validate: "required,custom[hexcolor]",
 				default_value: "#a9d70b",
 				description: "デフォルト色: #a9d70b"
 			},
@@ -4614,29 +4749,33 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "gauge_color",
 				display_name: "ゲージ背景色",
 				type: "color",
+				validate: "required,custom[hexcolor]",
 				default_value: "#edebeb",
 				description: "デフォルト色: #edebeb"
 			},
 			{
 				name: "gauge_widthscale",
 				display_name: "ゲージ太さ",
-				type: "number",
-				required : true,
+				type: "text",
+				validate: "required,custom[integer],min[0],max[200]",
 				default_value: 100,
 				description: "0から200まで"
 			},
 			{
 				name: "min_value",
 				display_name: "最小値",
-				type: "number",
-				default_value: 0
+				type: "text",
+				validate: "required,custom[integer],min[0]",
+				default_value: 0,
+				description: "0以上"
 			},
 			{
 				name: "max_value",
 				display_name: "最大値",
-				required : true,
-				type: "number",
-				default_value: 100
+				type: "text",
+				validate: "required,custom[integer],min[0]",
+				default_value: 100,
+				description: "最小値以上"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
@@ -4762,24 +4901,29 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "blocks",
 				display_name: "高さ (ブロック数)",
-				type: "number",
-				required : true,
+				validate: "required,custom[integer],min[1],max[20]",
+				type: "text",
 				default_value: 4,
-				description: "1ブロック60ピクセル。"
+				description: "1ブロック60ピクセル。20ブロックまで"
 			},
 			{
 				name: "value",
 				display_name: "値",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "options",
 				display_name: "チャートオプション",
+				validate: "optional,maxSize[5000]",
 				type: "json",
 				default_value: '{\n\
 	"grid": {\n\
@@ -4823,14 +4967,15 @@ $.extend(freeboard, jQuery.eventEmitter);
 		}\n\
 	]\n\
 }',
-				description: "JSON形式文字列。 参考URL: <a href='https://github.com/flot/flot/blob/master/API.md#plot-options' target='_blank'>https://github.com/flot/flot/blob/master/API.md#plot-options</a>"
+				description: "最大5000文字<br>JSON形式文字列。 参考URL: <a href='https://github.com/flot/flot/blob/master/API.md#plot-options' target='_blank'>https://github.com/flot/flot/blob/master/API.md#plot-options</a>"
 			},
 			{
 				name: "tooltip_style",
 				display_name: "ツールチップスタイル",
+				validate: "optional,maxSize[300]",
 				type: "text",
 				default_value: 'padding:3px 5px; color:#000000; background-color:#ffffff; box-shadow:0 0 10px #555; opacity:.7; filter:alpha(opacity=70); z-index:100; -webkit-border-radius:4px; -moz-border-radius:4px; border-radius:4px; font-size:12px;',
-				description: "チャートオプションでtooltip:trueの場合のみ有効。CSS形式"
+				description: "最大300文字br>チャートオプションでtooltip:trueの場合のみ有効。CSS形式"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
@@ -4877,12 +5022,16 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "value",
 				display_name: "値",
+				validate: "optional,maxSize[500]",
 				type: "calculated",
+				description: "最大500文字",
 				multi_input: true
 			}
 		],
@@ -4999,27 +5148,35 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "direction",
 				display_name: "方向",
+				validate: "optional,maxSize[2000]",
 				type: "calculated",
-				description: "角度"
+				description: "最大2000文字<br>角度を入力して下さい。"
 			},
 			{
 				name: "value_text",
 				display_name: "値テキスト",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "units",
 				display_name: "単位",
-				type: "text"
+				validate: "optional,maxSize[20]",
+				type: "text",
+				description: "最大20文字"
 			},
 			{
 				name: "circle_color",
 				display_name: "サークル色",
+				validate: "required,custom[hexcolor]",
 				type: "color",
 				default_value: "#ff9900",
 				description: "デフォルト色: #ff9900"
@@ -5027,6 +5184,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "pointer_color",
 				display_name: "ポインタ色",
+				validate: "required,custom[hexcolor]",
 				type: "color",
 				default_value: "#fff",
 				description: "デフォルト色: #fff"
@@ -5118,12 +5276,15 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "src",
 				display_name: "画像URL",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				type: "number",
 				display_name: "更新頻度",
-				name: "refresh",
+				validate: "optional,custom[integer],min[1]",
+				name: "text",
 				suffix: "秒",
 				description:"更新する必要がない場合は空白のまま"
 			}
@@ -5190,22 +5351,30 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "title",
 				display_name: "タイトル",
-				type: "text"
+				validate: "optional,maxSize[100]",
+				type: "text",
+				description: "最大100文字"
 			},
 			{
 				name: "value",
 				display_name: "値",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "on_text",
 				display_name: "ON時テキスト",
-				type: "calculated"
+				validate: "optional,maxSize[500]",
+				type: "calculated",
+				description: "最大500文字"
 			},
 			{
 				name: "off_text",
 				display_name: "OFF時テキスト",
-				type: "calculated"
+				validate: "optional,maxSize[500]",
+				type: "calculated",
+				description: "最大500文字"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
@@ -5303,12 +5472,16 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "lat",
 				display_name: "緯度",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "lon",
 				display_name: "経度",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
@@ -5353,18 +5526,19 @@ $.extend(freeboard, jQuery.eventEmitter);
 		"fill_size": true,
 		"settings": [
 			{
-				"name": "html",
-				"display_name": "HTML",
-				"type": "calculated",
-				"description": "HTML文字列かjavascriptが使用できます。"
+				name: "html",
+				display_name: "HTML",
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字<br>HTML文字列かjavascriptが使用できます。"
 			},
 			{
-				"name": "height",
-				"display_name": "ブロック高さ",
-				"type": "number",
-				"required" : true,
-				"default_value": 4,
-				"description": "1ブロック高さは約60pixel"
+				name: "height",
+				display_name: "ブロック高さ",
+				validate: "required,custom[integer],min[1],max[20]",
+				type: "text",
+				default_value: 4,
+				description: "1ブロック60ピクセル。20ブロックまで"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {

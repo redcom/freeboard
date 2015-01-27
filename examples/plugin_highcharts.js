@@ -20,18 +20,22 @@
 			{
 				name: "blocks",
 				display_name: "高さ (ブロック数)",
-				type: "number",
+				validate: "required,custom[integer],min[1],max[20]",
+				type: "text",
 				default_value: 4,
-				description: "1ブロック60ピクセル。"
+				description: "1ブロック60ピクセル。20ブロックまで"
 			},
 			{
 				name: "value",
 				display_name: "値",
-				type: "calculated"
+				validate: "optional,maxSize[2000]",
+				type: "calculated",
+				description: "最大2000文字"
 			},
 			{
 				name: "options",
 				display_name: "チャートオプション",
+				validate: "optional,maxSize[5000]",
 				type: "json",
 				default_value: '{\n\
 	"chart": {\n\
@@ -63,11 +67,12 @@
 	}\n\
 }',
 
-				description: "JSON形式文字列。 参考URL: <a href='http://www.highcharts.com/' target='_blank'>http://www.highcharts.com/</a>"
+				description: "最大5000文字<br>JSON形式文字列。 参考URL: <a href='http://www.highcharts.com/' target='_blank'>http://www.highcharts.com/</a>"
 			},
 			{
 				name: "theme",
 				display_name: "チャートテーマ",
+				validate: "optional,maxSize[5000]",
 				type: "json",
 				default_value: '{\n\
 	"colors": [\n\
@@ -237,7 +242,7 @@
 	"contrastTextColor": "#F0F0F3",\n\
 	"maskColor": "rgba(255,255,255,0.3)"\n\
 }',
-				description: "JSON形式文字列。 参考URL: <a href='http://www.highcharts.com/' target='_blank'>http://www.highcharts.com/</a>"
+				description: "最大5000文字<br>JSON形式文字列。 参考URL: <a href='http://www.highcharts.com/' target='_blank'>http://www.highcharts.com/</a>"
 			}
 		],
 
@@ -343,4 +348,5 @@
 
 		this.onSettingsChanged(settings);
 	};
+
 }());

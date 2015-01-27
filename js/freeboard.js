@@ -1,3 +1,13 @@
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
+
 DatasourceModel = function(theFreeboardModel, datasourcePlugins) {
 	var self = this;
 
@@ -106,6 +116,16 @@ DatasourceModel = function(theFreeboardModel, datasourcePlugins) {
 	}
 }
 
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
+
 DeveloperConsole = function(theFreeboardModel)
 {
 	function showDeveloperConsole()
@@ -124,7 +144,7 @@ DeveloperConsole = function(theFreeboardModel)
 		container.append($("<p>Here you can add references to other scripts to load datasource or widget plugins.</p>"))
 			.append(table)
 			.append(addScript)
-            .append('<p>To learn how to build plugins for freeboard, please visit <a target="_blank" href="http://freeboard.github.io/freeboard/docs/plugin_example.html">http://freeboard.github.io/freeboard/docs/plugin_example.html</a></p>');
+			.append('<p>To learn how to build plugins for freeboard, please visit <a target="_blank" href="http://freeboard.github.io/freeboard/docs/plugin_example.html">http://freeboard.github.io/freeboard/docs/plugin_example.html</a></p>');
 
 		function refreshScript(scriptURL)
 		{
@@ -202,6 +222,16 @@ DeveloperConsole = function(theFreeboardModel)
 	}
 }
 
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
+
 function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
 {
 	var modal_width = 900;
@@ -233,6 +263,10 @@ function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
 		{
 			var hold = false;
 
+			if(!$("#plugin-editor").validationEngine('validate')){
+				return false;
+			}
+
 			if(_.isFunction(closeCallback))
 			{
 				hold = closeCallback("ok");
@@ -257,7 +291,20 @@ function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
 	overlay.append(modalDialog);
 	$("body").append(overlay);
 	overlay.fadeIn(200);
+
+	// ValidationEngine initialize
+	$("#plugin-editor").validationEngine();
 }
+
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
 
 function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 {
@@ -685,7 +732,6 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 			$(".gridster .gs_w").css({cursor: "default"});
 			elems["main"].css("transform", "translateY(-" + barHeight + "px)");
 			elems["board"].css("transform", "translateY(20px)");
-
 			$("#main-header").data().shown = false;
 			$(".sub-section").unbind();
 			freeboardUI.disableGrid();
@@ -805,6 +851,16 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		self.setVisibilityBoardTools(visibility);
 	}
 }
+
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
 
 function FreeboardUI()
 {
@@ -960,7 +1016,7 @@ function FreeboardUI()
 
 		if(newCols === grid.cols)
 		{
-			return false; 
+			return false;
 		}
 		else
 		{
@@ -1034,11 +1090,11 @@ function FreeboardUI()
 			{
 				if(event.attributeName == "data-row")
 				{
-                    updatePositionForScreenSize(viewModel, Number(event.newValue), undefined);
+					updatePositionForScreenSize(viewModel, Number(event.newValue), undefined);
 				}
 				else if(event.attributeName == "data-col")
 				{
-                    updatePositionForScreenSize(viewModel, undefined, Number(event.newValue));
+					updatePositionForScreenSize(viewModel, undefined, Number(event.newValue));
 				}
 			}
 		});
@@ -1076,7 +1132,7 @@ function FreeboardUI()
 		}
 		else
 		{
-	    		loadingIndicator.fadeOut(500).remove();
+			loadingIndicator.fadeOut(500).remove();
 		}
 	}
 
@@ -1247,6 +1303,16 @@ function FreeboardUI()
 	}
 }
 
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
+
 JSEditor = function () {
 	var assetRoot = ""
 
@@ -1331,6 +1397,16 @@ JSEditor = function () {
 		}
 	}
 }
+
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
 
 function PaneModel(theFreeboardModel, widgetPlugins) {
 	var self = this;
@@ -1443,14 +1519,18 @@ function PaneModel(theFreeboardModel, widgetPlugins) {
 	}
 }
 
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
+
 PluginEditor = function(jsEditor, valueEditor)
 {
-	function _displayValidationError(settingName, errorMessage)
-	{
-		var errorElement = $('<div class="validation-error"></div>').html(errorMessage);
-		$("#setting-value-container-" + settingName).append(errorElement);
-	}
-
 	function _removeSettingsRows()
 	{
 		if($("#setting-row-instance-name").length)
@@ -1463,6 +1543,17 @@ PluginEditor = function(jsEditor, valueEditor)
 		}
 	}
 
+	function _toValidateClassString(validate, type) {
+		var ret = "";
+		if (!_.isUndefined(validate)) {
+			var types = "";
+			if (!_.isUndefined(type))
+				types = " " + type;
+			ret = "validate[" + validate + "]" + types;
+		}
+		return ret;
+	}
+
 	function _isNumerical(n)
 	{
 		return !isNaN(parseFloat(n)) && isFinite(n);
@@ -1470,7 +1561,7 @@ PluginEditor = function(jsEditor, valueEditor)
 
 	function _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, includeRemove)
 	{
-		var input = $('<textarea></textarea>');
+		var input = $('<textarea></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input"));
 
 		if(settingDef.multi_input) {
 			input.change(function() {
@@ -1497,6 +1588,7 @@ PluginEditor = function(jsEditor, valueEditor)
 
 		var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
 		var wrapperDiv = $('<div class="calculated-setting-row"></div>');
+
 		wrapperDiv.append(input).append(datasourceToolbox);
 
 		var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>データソース</label></li>')
@@ -1545,7 +1637,7 @@ PluginEditor = function(jsEditor, valueEditor)
 		}
 
 		var selectedType;
-		var form = $('<div></div>');
+		var form = $('<form id="plugin-editor"></form>');
 
 		var pluginDescriptionElement = $('<div id="plugin-description"></div>').hide();
 		form.append(pluginDescriptionElement);
@@ -1567,6 +1659,13 @@ PluginEditor = function(jsEditor, valueEditor)
 				if(!_.isUndefined(settingDef.display_name))
 				{
 					displayName = settingDef.display_name;
+				}
+
+				// modify required field name
+				if(!_.isUndefined(settingDef.validate)) {
+					if (settingDef.validate.indexOf("required") != -1) {
+						displayName = "* " + displayName;
+					}
 				}
 
 				var valueCell = createSettingRow(settingDef.name, displayName);
@@ -1639,7 +1738,7 @@ PluginEditor = function(jsEditor, valueEditor)
 
 								newSetting[subSettingDef.name] = subsettingValueString;
 
-								$('<input class="table-row-value" type="text">').appendTo(subsettingCol).val(subsettingValueString).change(function()
+								$('<input class="table-row-value" type="text">').addClass(_toValidateClassString(subSettingDef.validate, "text-input")).appendTo(subsettingCol).val(subsettingValueString).change(function()
 								{
 									newSetting[subSettingDef.name] = $(this).val();
 								});
@@ -1704,7 +1803,7 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						var defaultValue = currentSettingsValues[settingDef.name];
 
-						var input = $('<select></select>').appendTo($('<div class="styled-select"></div>').appendTo(valueCell)).change(function()
+						var input = $('<select></select>').addClass(_toValidateClassString(settingDef.validate)).appendTo($('<div class="styled-select"></div>').appendTo(valueCell)).change(function()
 						{
 							newSettings.settings[settingDef.name] = $(this).val();
 						});
@@ -1752,7 +1851,7 @@ PluginEditor = function(jsEditor, valueEditor)
 						var curColorPickerID = "picker-" + colorPickerID++;
 						var thisColorPickerID = "#" + curColorPickerID;
 						var defaultValue = currentSettingsValues[settingDef.name];
-						var input = $('<input id="' + curColorPickerID + '" type="text">').appendTo(valueCell);
+						var input = $('<input id="' + curColorPickerID + '" type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell);
 
 						newSettings.settings[settingDef.name] = defaultValue;
 
@@ -1792,7 +1891,7 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
 
-						var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>').appendTo(valueCell).change(function()
+						var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell).change(function()
 						{
 							newSettings.settings[settingDef.name] = $(this).val();
 						});
@@ -1852,7 +1951,7 @@ PluginEditor = function(jsEditor, valueEditor)
 						}
 						else
 						{
-							var input = $('<input type="text">').appendTo(valueCell).change(function()
+							var input = $('<input type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell).change(function()
 							{
 								if(settingDef.type == "number")
 								{
@@ -1886,34 +1985,9 @@ PluginEditor = function(jsEditor, valueEditor)
 			});
 		}
 
-
 		new DialogBox(form, title, "保存", "キャンセル", function(okcancel)
 		{
 			if (okcancel == "ok") {
-				$(".validation-error").remove();
-
-				// Loop through each setting and validate it
-				for(var index = 0; index < selectedType.settings.length; index++)
-				{
-					var settingDef = selectedType.settings[index];
-
-					if(settingDef.required && (_.isUndefined(newSettings.settings[settingDef.name]) || newSettings.settings[settingDef.name] == ""))
-					{
-						_displayValidationError(settingDef.name, "必須項目です。");
-						return true;
-					}
-					else if(settingDef.type == "number" && !_isNumerical(newSettings.settings[settingDef.name]))
-					{
-						_displayValidationError(settingDef.name, "数値のみです。");
-						return true;
-					}
-					else if (settingDef.type == "color" && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newSettings.settings[settingDef.name]) == false)
-					{
-						_displayValidationError(settingDef.name, "無効な色です。");
-						return true;
-					}
-				}
-
 				if(_.isFunction(settingsSavedCallback))
 				{
 					settingsSavedCallback(newSettings);
@@ -2011,6 +2085,16 @@ PluginEditor = function(jsEditor, valueEditor)
 		}
 	}
 }
+
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
 
 ValueEditor = function(theFreeboardModel)
 {
@@ -2358,6 +2442,16 @@ ValueEditor = function(theFreeboardModel)
 		EXPECTED_TYPE : EXPECTED_TYPE
 	}
 }
+
+// ┌────────────────────────────────────────────────────────────────────┐ \\
+// │ F R E E B O A R D                                                  │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Copyright © 2013 Jim Heising (https://github.com/jheising)         │ \\
+// │ Copyright © 2013 Bug Labs, Inc. (http://buglabs.net)               │ \\
+// │ Copyright © 2015 Daisuke Tanaka (https://github.com/tanaka0323)    │ \\
+// ├────────────────────────────────────────────────────────────────────┤ \\
+// │ Licensed under the MIT license.                                    │ \\
+// └────────────────────────────────────────────────────────────────────┘ \\
 
 function WidgetModel(theFreeboardModel, widgetPlugins) {
 	function disposeWidgetInstance() {
@@ -2803,16 +2897,16 @@ var freeboard = (function()
 			if(options.type == 'datasource')
 			{
 				types = datasourcePlugins;
-				title = "データソース設定";
+				title = "データソース";
 			}
 			else if(options.type == 'widget')
 			{
 				types = widgetPlugins;
-				title = "ウィジェット設定";
+				title = "ウィジェット";
 			}
 			else if(options.type == 'pane')
 			{
-				title = "ペイン設定";
+				title = "ペイン";
 			}
 
 			$(element).click(function(event)
@@ -2881,16 +2975,19 @@ var freeboard = (function()
 							settings: {
 								settings: [
 									{
-										name        : "title",
+										name: "title",
 										display_name: "タイトル",
-										type        : "text"
+										validate: "optional,maxSize[100]",
+										type: "text",
+										description: "最大100文字"
 									},
 									{
 										name : "col_width",
 										display_name : "カラム幅",
-										type : "number",
+										validate: "required,custom[integer],min[1],max[10]",
+										type: "text",
 										default_value : 1,
-										required : true
+										description: "最大10ブロック"
 									}
 								]
 							}
@@ -3087,14 +3184,23 @@ var freeboard = (function()
 				plugin.display_name = plugin.type_name;
 			}
 
+			// Datasource name must be unique
+			window.freeboard.isUniqueDatasourceName = function(field, rules, i, options) {
+				var res = _.find(theFreeboardModel.datasources(), function(datasource) {
+					return datasource.name() == field.val();
+				});
+				if (!_.isUndefined(res))
+					return options.allrules.alreadyusedname.alertText;
+			}
+
 			// Add a required setting called name to the beginning
 			plugin.settings.unshift({
 				name : "name",
 				display_name : "名前",
-				type : "text",
-				required : true
+				validate: "funcCall[freeboard.isUniqueDatasourceName],required,maxSize[100]",
+				type: "text",
+				description: "最大100文字まで"
 			});
-
 
 			theFreeboardModel.addPluginSource(plugin.source);
 			datasourcePlugins[plugin.type_name] = plugin;
