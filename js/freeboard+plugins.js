@@ -24,6 +24,7 @@ DatasourceModel = function(theFreeboardModel, datasourcePlugins) {
 		}
 	}
 
+	this.isEditing = ko.observable(false);	// editing by PluginEditor
 	this.name = ko.observable();
 	this.latestData = ko.observable();
 	this.settings = ko.observable({});
@@ -2947,6 +2948,7 @@ var freeboard = (function()
 							instanceType = viewModel.type();
 							settings = viewModel.settings();
 							settings.name = viewModel.name();
+							viewModel.isEditing(true);
 						}
 					}
 					else if(options.type == 'widget')
@@ -3038,6 +3040,7 @@ var freeboard = (function()
 
 								viewModel.type(newSettings.type);
 								viewModel.settings(newSettings.settings);
+								viewModel.isEditing(false);
 							}
 						}
 					});
@@ -3187,7 +3190,9 @@ var freeboard = (function()
 			// Datasource name must be unique
 			window.freeboard.isUniqueDatasourceName = function(field, rules, i, options) {
 				var res = _.find(theFreeboardModel.datasources(), function(datasource) {
-					return datasource.name() == field.val();
+					// except itself
+					if (datasource.isEditing() == false)
+						return datasource.name() == field.val();
 				});
 				if (!_.isUndefined(res))
 					return options.allrules.alreadyusedname.alertText;
