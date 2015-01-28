@@ -3123,13 +3123,13 @@ var freeboard = (function()
 	return {
 		initialize          : function(allowEdit, finishedCallback)
 		{
-			ko.applyBindings(theFreeboardModel);
-
 			// Check to see if we have a query param called load. If so, we should load that dashboard initially
 			var freeboardLocation = getParameterByName("load");
 
 			if(freeboardLocation != "")
 			{
+				ko.applyBindings(theFreeboardModel);
+
 				$.ajax({
 					url    : freeboardLocation,
 					success: function(data)
@@ -3146,6 +3146,9 @@ var freeboard = (function()
 			else
 			{
 				theFreeboardModel.allow_edit(allowEdit);
+
+				ko.applyBindings(theFreeboardModel);
+
 				theFreeboardModel.setEditing(allowEdit);
 
 				freeboardUI.showLoadingIndicator(false);

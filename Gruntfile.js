@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                         'lib/js/thirdparty/jquery.ba-resize.js',
                         'lib/js/thirdparty/jquery-ui.js',
                         'lib/js/thirdparty/knockout.js',
-                        'lib/js/thirdparty/lodash.min.js',
+                        'lib/js/thirdparty/lodash.js',
                         'lib/js/thirdparty/jquery.gridster.js',
                         'lib/js/thirdparty/jquery.caret.js',
                         'lib/js/thirdparty/jquery.xdomainrequest.js',
