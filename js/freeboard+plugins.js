@@ -264,7 +264,7 @@ function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
 		{
 			var hold = false;
 
-			if(!$("#plugin-editor").validationEngine('validate')){
+			if (!$("#plugin-editor").validationEngine('validate')) {
 				return false;
 			}
 
@@ -836,20 +836,17 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 
 	this.toggleEditing = function()
 	{
-		var editing = !self.isEditing();
-		self.setEditing(editing);
+		self.setEditing(!self.isEditing());
 	}
 
 	this.toggleDatasources = function()
 	{
-		var visibility = !self.isVisibleDatasources();
-		self.setVisibilityDatasources(visibility);
+		self.setVisibilityDatasources(!self.isVisibleDatasources());
 	}
 
 	this.toggleBoardTools = function()
 	{
-		var visibility = !self.isVisibleBoardTools();
-		self.setVisibilityBoardTools(visibility);
+		self.setVisibilityBoardTools(!self.isVisibleBoardTools());
 	}
 }
 
