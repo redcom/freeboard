@@ -321,10 +321,12 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		if(newValue)
 		{
 			$("#main-header").show();
+			$("#datasources").show();
 		}
 		else
 		{
 			$("#main-header").hide();
+			$("#datasources").hide();
 		}
 	});
 
