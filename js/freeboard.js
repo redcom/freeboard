@@ -1559,7 +1559,7 @@ PluginEditor = function(jsEditor, valueEditor)
 
 	function _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, includeRemove)
 	{
-		var input = $('<textarea></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input"));
+		var input = $('<textarea></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input")).attr("style", settingDef.style);
 
 		if(settingDef.multi_input) {
 			input.change(function() {
@@ -1659,6 +1659,8 @@ PluginEditor = function(jsEditor, valueEditor)
 					displayName = settingDef.display_name;
 				}
 
+				settingDef.style = _.isUndefined(settingDef.style) ? '' : settingDef.style;
+
 				// modify required field name
 				if(!_.isUndefined(settingDef.validate)) {
 					if (settingDef.validate.indexOf("required") != -1) {
@@ -1736,7 +1738,10 @@ PluginEditor = function(jsEditor, valueEditor)
 
 								newSetting[subSettingDef.name] = subsettingValueString;
 
-								$('<input class="table-row-value" type="text">').addClass(_toValidateClassString(subSettingDef.validate, "text-input")).appendTo(subsettingCol).val(subsettingValueString).change(function()
+								$('<input class="table-row-value" type="text">')
+										.addClass(_toValidateClassString(subSettingDef.validate, "text-input"))
+										.attr("style", settingDef.style)
+										.appendTo(subsettingCol).val(subsettingValueString).change(function()
 								{
 									newSetting[subSettingDef.name] = $(this).val();
 								});
@@ -1801,7 +1806,9 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						var defaultValue = currentSettingsValues[settingDef.name];
 
-						var input = $('<select></select>').addClass(_toValidateClassString(settingDef.validate))
+						var input = $('<select></select>')
+											.addClass(_toValidateClassString(settingDef.validate))
+											.attr("style", settingDef.style)
 											.appendTo($('<div class="styled-select"></div>')
 											.appendTo(valueCell)).change(function()
 						{
@@ -1891,7 +1898,10 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
 
-						var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell).change(function()
+						var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>')
+								.addClass(_toValidateClassString(settingDef.validate, "text-input"))
+								.attr("style", settingDef.style)
+								.appendTo(valueCell).change(function()
 						{
 							newSettings.settings[settingDef.name] = $(this).val();
 						});
@@ -1951,8 +1961,9 @@ PluginEditor = function(jsEditor, valueEditor)
 						}
 						else
 						{
-							var input = $('<input type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input"))
-												.css({"width":"auto"})
+							var input = $('<input type="text">')
+												.addClass(_toValidateClassString(settingDef.validate, "text-input"))
+												.attr("style", settingDef.style)
 												.appendTo(valueCell).change(function() {
 								newSettings.settings[settingDef.name] = $(this).val();
 							});

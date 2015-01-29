@@ -1559,7 +1559,7 @@ PluginEditor = function(jsEditor, valueEditor)
 
 	function _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, includeRemove)
 	{
-		var input = $('<textarea></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input"));
+		var input = $('<textarea></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input")).attr("style", settingDef.style);
 
 		if(settingDef.multi_input) {
 			input.change(function() {
@@ -1659,6 +1659,8 @@ PluginEditor = function(jsEditor, valueEditor)
 					displayName = settingDef.display_name;
 				}
 
+				settingDef.style = _.isUndefined(settingDef.style) ? '' : settingDef.style;
+
 				// modify required field name
 				if(!_.isUndefined(settingDef.validate)) {
 					if (settingDef.validate.indexOf("required") != -1) {
@@ -1736,7 +1738,10 @@ PluginEditor = function(jsEditor, valueEditor)
 
 								newSetting[subSettingDef.name] = subsettingValueString;
 
-								$('<input class="table-row-value" type="text">').addClass(_toValidateClassString(subSettingDef.validate, "text-input")).appendTo(subsettingCol).val(subsettingValueString).change(function()
+								$('<input class="table-row-value" type="text">')
+										.addClass(_toValidateClassString(subSettingDef.validate, "text-input"))
+										.attr("style", settingDef.style)
+										.appendTo(subsettingCol).val(subsettingValueString).change(function()
 								{
 									newSetting[subSettingDef.name] = $(this).val();
 								});
@@ -1801,7 +1806,9 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						var defaultValue = currentSettingsValues[settingDef.name];
 
-						var input = $('<select></select>').addClass(_toValidateClassString(settingDef.validate))
+						var input = $('<select></select>')
+											.addClass(_toValidateClassString(settingDef.validate))
+											.attr("style", settingDef.style)
 											.appendTo($('<div class="styled-select"></div>')
 											.appendTo(valueCell)).change(function()
 						{
@@ -1891,7 +1898,10 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
 
-						var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell).change(function()
+						var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>')
+								.addClass(_toValidateClassString(settingDef.validate, "text-input"))
+								.attr("style", settingDef.style)
+								.appendTo(valueCell).change(function()
 						{
 							newSettings.settings[settingDef.name] = $(this).val();
 						});
@@ -1951,8 +1961,9 @@ PluginEditor = function(jsEditor, valueEditor)
 						}
 						else
 						{
-							var input = $('<input type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input"))
-												.css({"width":"auto"})
+							var input = $('<input type="text">')
+												.addClass(_toValidateClassString(settingDef.validate, "text-input"))
+												.attr("style", settingDef.style)
 												.appendTo(valueCell).change(function() {
 								newSettings.settings[settingDef.name] = $(this).val();
 							});
@@ -3382,6 +3393,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "refresh",
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
+				style: "width:100px",
 				type: "text",
 				suffix: "秒",
 				default_value: 1
@@ -3575,6 +3587,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "refresh",
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
+				style: "width:100px",
 				type: "text",
 				suffix: "秒",
 				default_value: 5
@@ -3583,6 +3596,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "method",
 				display_name: "メソッド",
 				type: "option",
+				style: "width:200px",
 				options: [
 					{
 						name: "GET",
@@ -3715,6 +3729,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "units",
 				display_name: "単位",
+				style: "width:200px",
 				type: "option",
 				default: "metric",
 				options: [
@@ -3732,6 +3747,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "refresh",
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
+				style: "width:100px",
 				type: "text",
 				suffix: "秒",
 				default_value: 5
@@ -3805,6 +3821,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "refresh",
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
+				style: "width:100px",
 				type: "text",
 				suffix: "秒",
 				default_value: 5
@@ -4097,6 +4114,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name : "port",
 				display_name : "ポート番号",
 				validate: "required,custom[integer],min[1]",
+				style: "width:100px",
 				default_value: 8080
 			},
 			{
@@ -4482,6 +4500,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				display_name: "単位",
 				validate: "optional,maxSize[20]",
 				type: "text",
+				style: "width:150px",
 				description: "最大20文字"
 			}
 		],
@@ -4628,6 +4647,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "units",
 				display_name: "単位",
 				validate: "optional,maxSize[20]",
+				style: "width:150px",
 				type: "text",
 				description: "最大20文字"
 			},
@@ -4675,6 +4695,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "gauge_widthscale",
 				display_name: "ゲージ太さ",
 				type: "text",
+				style: "width:100px",
 				validate: "required,custom[integer],min[0],max[200]",
 				default_value: 100,
 				description: "0から200まで"
@@ -4683,6 +4704,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "min_value",
 				display_name: "最小値",
 				type: "text",
+				style: "width:100px",
 				validate: "required,custom[integer],min[0]",
 				default_value: 0,
 				description: "0以上"
@@ -4691,6 +4713,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "max_value",
 				display_name: "最大値",
 				type: "text",
+				style: "width:100px",
 				validate: "required,custom[integer],min[0]",
 				default_value: 100,
 				description: "最小値以上"
@@ -4827,6 +4850,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "blocks",
 				display_name: "高さ (ブロック数)",
 				validate: "required,custom[integer],min[1],max[20]",
+				style: "width:100px",
 				type: "text",
 				default_value: 4,
 				description: "1ブロック60ピクセル。20ブロックまで"
@@ -5088,6 +5112,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "units",
 				display_name: "単位",
 				validate: "optional,maxSize[20]",
+				style: "width:150px",
 				type: "text",
 				description: "最大20文字"
 			},
@@ -5202,6 +5227,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				type: "number",
 				display_name: "更新頻度",
 				validate: "optional,custom[integer],min[1]",
+				style: "width:100px",
 				name: "text",
 				suffix: "秒",
 				description:"更新する必要がない場合は空白のまま"
@@ -5454,6 +5480,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name: "height",
 				display_name: "ブロック高さ",
 				validate: "required,custom[integer],min[1],max[20]",
+				style: "width:100px",
 				type: "text",
 				default_value: 4,
 				description: "1ブロック60ピクセル。20ブロックまで"

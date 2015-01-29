@@ -1806,6 +1806,10 @@ td.form-table-value > input[type="checkbox"] {
 	margin-top: 3px;
 }
 
+#menutitle {
+	display: none;
+}
+
 ul.board-toolbar {
 	padding: 0px;
 	margin: 0px;
@@ -1959,6 +1963,12 @@ ul.datasource-input-suffix {
 	color: #d3d4d4;
 }
 
+.title.menu {
+	text-align: center;
+	font-size: 16px;
+	color: #A6A6A6;
+}
+
 .title.bordered {
 	border: solid 3px #d3d4d4;
 	display: inline-block;
@@ -2070,6 +2080,10 @@ html.boardtools-opening #hamburger:after
 
 @media screen and (max-width : 960px) {
 
+	#menutitle {
+		display: block;
+	}
+
 	#admin-menu {
 		padding-left: 50px;
 	}
@@ -2096,7 +2110,6 @@ html.boardtools-opening #hamburger:after
 	#board-actions {
 		display: block;
 		vertical-align: top;
-		padding-top: 30px;
 	}
 
 	#board-actions ul > li {

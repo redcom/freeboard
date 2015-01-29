@@ -63,6 +63,7 @@
 				name: "refresh",
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
+				style: "width:100px",
 				type: "text",
 				suffix: "秒",
 				default_value: 1
@@ -256,6 +257,7 @@
 				name: "refresh",
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
+				style: "width:100px",
 				type: "text",
 				suffix: "秒",
 				default_value: 5
@@ -264,6 +266,7 @@
 				name: "method",
 				display_name: "メソッド",
 				type: "option",
+				style: "width:200px",
 				options: [
 					{
 						name: "GET",
@@ -396,6 +399,7 @@
 			{
 				name: "units",
 				display_name: "単位",
+				style: "width:200px",
 				type: "option",
 				default: "metric",
 				options: [
@@ -413,6 +417,7 @@
 				name: "refresh",
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
+				style: "width:100px",
 				type: "text",
 				suffix: "秒",
 				default_value: 5
@@ -486,6 +491,7 @@
 				name: "refresh",
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
+				style: "width:100px",
 				type: "text",
 				suffix: "秒",
 				default_value: 5
@@ -778,6 +784,7 @@
 				name : "port",
 				display_name : "ポート番号",
 				validate: "required,custom[integer],min[1]",
+				style: "width:100px",
 				default_value: 8080
 			},
 			{
