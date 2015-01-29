@@ -24,7 +24,7 @@ DatasourceModel = function(theFreeboardModel, datasourcePlugins) {
 		}
 	}
 
-	this.isEditing = ko.observable(false);	// editing by PluginEditor
+	this.isEditing = ko.observable(false); // editing by PluginEditor
 	this.name = ko.observable();
 	this.latestData = ko.observable();
 	this.settings = ko.observable({});
@@ -264,19 +264,14 @@ function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
 		{
 			var hold = false;
 
-			if (!$("#plugin-editor").validationEngine('validate')) {
+			if (!$("#plugin-editor").validationEngine('validate'))
 				return false;
-			}
 
 			if(_.isFunction(closeCallback))
-			{
 				hold = closeCallback("ok");
-			}
 
 			if(!hold)
-			{
 				closeModal();
-			}
 		});
 	}
 
@@ -294,6 +289,9 @@ function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
 	overlay.fadeIn(200);
 
 	// ValidationEngine initialize
+	$.validationEngine.defaults.autoPositionUpdate = true;
+	// media query max-width : 960px
+	$.validationEngine.defaults.promptPosition = ($("#hamburger").css("display") == "none") ? "topRight" : "topLeft";
 	$("#plugin-editor").validationEngine();
 }
 
@@ -2465,6 +2463,7 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
 	this.datasourceRefreshNotifications = {};
 	this.calculatedSettingScripts = {};
 
+	this.isEditing = ko.observable(false); // editing by PluginEditor
 	this.title = ko.observable();
 	this.fillSize = ko.observable(false);
 
@@ -2956,6 +2955,7 @@ var freeboard = (function()
 						{
 							instanceType = viewModel.type();
 							settings = viewModel.settings();
+							viewModel.isEditing(true);
 						}
 					}
 					else if(options.type == 'pane')
@@ -3030,10 +3030,9 @@ var freeboard = (function()
 								if(options.type == 'datasource')
 								{
 									viewModel.name(newSettings.settings.name);
-									viewModel.isEditing(false);
 									delete newSettings.settings.name;
 								}
-
+								viewModel.isEditing(true);
 								viewModel.type(newSettings.type);
 								viewModel.settings(newSettings.settings);
 							}
