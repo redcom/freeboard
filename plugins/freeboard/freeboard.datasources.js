@@ -10,6 +10,138 @@
 // └────────────────────────────────────────────────────────────────────┘ \\
 
 (function () {
+
+	var clockDatasource = function (settings, updateCallback) {
+		var self = this;
+		var currentSettings = settings;
+		var timer;
+
+		function stopTimer() {
+			if (timer) {
+				clearTimeout(timer);
+				timer = null;
+			}
+		}
+
+		function updateTimer() {
+			stopTimer();
+			timer = setInterval(self.updateNow, currentSettings.refresh * 1000);
+		}
+
+		this.updateNow = function () {
+			var date = new Date();
+
+			var data = {
+				numeric_value: date.getTime(),
+				full_string_value: date.toLocaleString(),
+				date_string_value: date.toLocaleDateString(),
+				time_string_value: date.toLocaleTimeString(),
+				date_object: date
+			};
+
+			updateCallback(data);
+		}
+
+		this.onDispose = function () {
+			stopTimer();
+		}
+
+		this.onSettingsChanged = function (newSettings) {
+			currentSettings = newSettings;
+			updateTimer();
+		}
+
+		updateTimer();
+	};
+
+	freeboard.loadDatasourcePlugin({
+		"type_name": "clock",
+		"display_name": "時計",
+		"description": "指定の間隔で更新され、異なるフォーマットで現在の時刻を返します。画面上にタイマーを表示したり、ウィジェットが一定の間隔でリフレッシュさせるために使用することができます。",
+		"settings": [
+			{
+				name: "refresh",
+				display_name: "更新頻度",
+				validate: "required,custom[integer],min[1]",
+				type: "text",
+				suffix: "秒",
+				default_value: 1
+			}
+		],
+		newInstance: function (settings, newInstanceCallback, updateCallback) {
+			newInstanceCallback(new clockDatasource(settings, updateCallback));
+		}
+	});
+
+	var jsonWebSocketDatasource = function(settings, updateCallback)
+	{
+		var self = this;
+		var currentSettings = settings;
+		var ws;
+
+		var onOpen = function()
+		{
+			console.info("WebSocket(%s) Opened", currentSettings.url);
+		}
+
+		var onClose = function()
+		{
+			console.info("WebSocket Closed");
+		}
+
+		var onMessage = function(event)
+		{
+			var data = event.data;
+
+			console.info("WebSocket received %s",data);
+
+			var objdata = JSON.parse(data);
+
+			if(typeof objdata == "object")
+			{
+				updateCallback(objdata);
+			}
+			else
+			{
+				updateCallback(data);
+			}
+
+		}
+
+		function createWebSocket()
+		{
+			if(ws) {
+				ws.close();
+			}
+
+			var url = currentSettings.url;
+			ws = new WebSocket(url);
+
+			ws.onopen = onOpen;
+			ws.onclose = onClose;
+			ws.onmessage = onMessage;
+		}
+
+		createWebSocket();
+
+		this.updateNow = function()
+		{
+			createWebSocket();
+		}
+
+		this.onDispose = function()
+		{
+			ws.close();
+		}
+
+		this.onSettingsChanged = function(newSettings)
+		{
+			currentSettings = newSettings;
+
+			createWebSocket();
+		}
+	};
+
 	var jsonDatasource = function (settings, updateCallback) {
 		var self = this;
 		var updateTimer = null;
@@ -104,6 +236,8 @@
 
 	freeboard.loadDatasourcePlugin({
 		type_name: "JSON",
+		display_name: "JSON",
+		description: "指定のURLからJSONデータを受信します。",
 		settings: [
 			{
 				name: "url",
@@ -250,6 +384,7 @@
 	freeboard.loadDatasourcePlugin({
 		type_name: "openweathermap",
 		display_name: "Open Weather Map API",
+		description: "天候や予測履歴を含む各種気象データを受信します。",
 		settings: [
 			{
 				name: "location",
@@ -325,98 +460,9 @@
 	};
 
 	freeboard.loadDatasourcePlugin({
-		"type_name": "dweet_io",
-		"display_name": "Dweet.io",
-		"external_scripts": [
-			"http://dweet.io/client/dweet.io.min.js"
-		],
-		"settings": [
-			{
-				name: "thing_id",
-				display_name: "物の名前",
-				validate: "required,maxSize[100]",
-				type: "text",
-				description: "最大100文字 例: ソルティドッグ1"
-			}
-		],
-		newInstance: function (settings, newInstanceCallback, updateCallback) {
-			newInstanceCallback(new dweetioDatasource(settings, updateCallback));
-		}
-	});
-
-	var playbackDatasource = function (settings, updateCallback) {
-		var self = this;
-		var currentSettings = settings;
-		var currentDataset = [];
-		var currentIndex = 0;
-		var currentTimeout;
-
-		function moveNext() {
-			if (currentDataset.length > 0) {
-				if (currentIndex < currentDataset.length) {
-					updateCallback(currentDataset[currentIndex]);
-					currentIndex++;
-				}
-
-				if (currentIndex >= currentDataset.length && currentSettings.loop) {
-					currentIndex = 0;
-				}
-
-				if (currentIndex < currentDataset.length) {
-					currentTimeout = setTimeout(moveNext, currentSettings.refresh * 1000);
-				}
-			}
-			else {
-				updateCallback({});
-			}
-		}
-
-		function stopTimeout() {
-			currentDataset = [];
-			currentIndex = 0;
-
-			if (currentTimeout) {
-				clearTimeout(currentTimeout);
-				currentTimeout = null;
-			}
-		}
-
-		this.updateNow = function () {
-			stopTimeout();
-
-			$.ajax({
-				url: currentSettings.datafile,
-				dataType: (currentSettings.is_jsonp) ? "JSONP" : "JSON",
-				success: function (data) {
-					if (_.isArray(data)) {
-						currentDataset = data;
-					}
-					else {
-						currentDataset = [];
-					}
-
-					currentIndex = 0;
-
-					moveNext();
-				},
-				error: function (xhr, status, error) {
-				}
-			});
-		}
-
-		this.onDispose = function () {
-			stopTimeout();
-		}
-
-		this.onSettingsChanged = function (newSettings) {
-			currentSettings = newSettings;
-			self.updateNow();
-		}
-	};
-
-	freeboard.loadDatasourcePlugin({
 		"type_name": "playback",
 		"display_name": "Playback",
+		"description": "指定された間隔で連続したデータを再生します。オブジェクトの配列を含む有効なJSONファイルを待ち受けします。",
 		"settings": [
 			{
 				name: "datafile",
@@ -449,136 +495,6 @@
 			newInstanceCallback(new playbackDatasource(settings, updateCallback));
 		}
 	});
-
-	var clockDatasource = function (settings, updateCallback) {
-		var self = this;
-		var currentSettings = settings;
-		var timer;
-
-		function stopTimer() {
-			if (timer) {
-				clearTimeout(timer);
-				timer = null;
-			}
-		}
-
-		function updateTimer() {
-			stopTimer();
-			timer = setInterval(self.updateNow, currentSettings.refresh * 1000);
-		}
-
-		this.updateNow = function () {
-			var date = new Date();
-
-			var data = {
-				numeric_value: date.getTime(),
-				full_string_value: date.toLocaleString(),
-				date_string_value: date.toLocaleDateString(),
-				time_string_value: date.toLocaleTimeString(),
-				date_object: date
-			};
-
-			updateCallback(data);
-		}
-
-		this.onDispose = function () {
-			stopTimer();
-		}
-
-		this.onSettingsChanged = function (newSettings) {
-			currentSettings = newSettings;
-			updateTimer();
-		}
-
-		updateTimer();
-	};
-
-	freeboard.loadDatasourcePlugin({
-		"type_name": "clock",
-		"display_name": "時計",
-		"settings": [
-			{
-				name: "refresh",
-				display_name: "更新頻度",
-				validate: "required,custom[integer],min[1]",
-				type: "text",
-				suffix: "秒",
-				default_value: 1
-			}
-		],
-		newInstance: function (settings, newInstanceCallback, updateCallback) {
-			newInstanceCallback(new clockDatasource(settings, updateCallback));
-		}
-	});
-
-	var jsonWebSocketDatasource = function(settings, updateCallback)
-	{
-		var self = this;
-		var currentSettings = settings;
-		var ws;
-
-		var onOpen = function()
-		{
-			console.info("WebSocket(%s) Opened", currentSettings.url);
-		}
-
-		var onClose = function()
-		{
-			console.info("WebSocket Closed");
-		}
-
-		var onMessage = function(event)
-		{
-			var data = event.data;
-
-			console.info("WebSocket received %s",data);
-
-			var objdata = JSON.parse(data);
-
-			if(typeof objdata == "object")
-			{
-				updateCallback(objdata);
-			}
-			else
-			{
-				updateCallback(data);
-			}
-
-		}
-
-		function createWebSocket()
-		{
-			if(ws) {
-				ws.close();
-			}
-
-			var url = currentSettings.url;
-			ws = new WebSocket(url);
-
-			ws.onopen = onOpen;
-			ws.onclose = onClose;
-			ws.onmessage = onMessage;
-		}
-
-		createWebSocket();
-
-		this.updateNow = function()
-		{
-			createWebSocket();
-		}
-
-		this.onDispose = function()
-		{
-			ws.close();
-		}
-
-		this.onSettingsChanged = function(newSettings)
-		{
-			currentSettings = newSettings;
-
-			createWebSocket();
-		}
-	};
 
 	freeboard.loadDatasourcePlugin({
 		type_name  : "JSON WebSocket",

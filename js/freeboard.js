@@ -1803,7 +1803,9 @@ PluginEditor = function(jsEditor, valueEditor)
 					{
 						var defaultValue = currentSettingsValues[settingDef.name];
 
-						var input = $('<select></select>').addClass(_toValidateClassString(settingDef.validate)).appendTo($('<div class="styled-select"></div>').appendTo(valueCell)).change(function()
+						var input = $('<select></select>').addClass(_toValidateClassString(settingDef.validate))
+											.appendTo($('<div class="styled-select"></div>')
+											.appendTo(valueCell)).change(function()
 						{
 							newSettings.settings[settingDef.name] = $(this).val();
 						});
@@ -1951,16 +1953,10 @@ PluginEditor = function(jsEditor, valueEditor)
 						}
 						else
 						{
-							var input = $('<input type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell).change(function()
-							{
-								if(settingDef.type == "number")
-								{
-									newSettings.settings[settingDef.name] = Number($(this).val());
-								}
-								else
-								{
-									newSettings.settings[settingDef.name] = $(this).val();
-								}
+							var input = $('<input type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input"))
+												.css({"width":"auto"})
+												.appendTo(valueCell).change(function() {
+								newSettings.settings[settingDef.name] = $(this).val();
 							});
 
 							if(settingDef.name in currentSettingsValues)
