@@ -1343,7 +1343,9 @@ JSEditor = function () {
 					indentUnit: 4,
 					lineNumbers: true,
 					matchBrackets: true,
-					autoCloseBrackets: true
+					autoCloseBrackets: true,
+					gutters: ["CodeMirror-lint-markers"],
+					lint: true
 				};
 				break;
 			case 'json':
@@ -1358,7 +1360,9 @@ JSEditor = function () {
 					indentUnit: 4,
 					lineNumbers: true,
 					matchBrackets: true,
-					autoCloseBrackets: true
+					autoCloseBrackets: true,
+					gutters: ["CodeMirror-lint-markers"],
+					lint: true
 				};
 				break;
 		}
@@ -1377,6 +1381,24 @@ JSEditor = function () {
 					newValue = "";
 				}
 
+				var error = null;
+				switch (mode) {
+					case 'javascript':
+						error = _.find(JSHINT.errors, function(v) {
+							return v.severity == 'error';
+						});
+						if (error) {
+							alert("Please correct the javascript error.");
+							return;
+						}
+						break;
+					case 'json':
+						if (JSHINT.errors.length > 1) {
+							alert("Please correct the json error.");
+							return;
+						}
+						break;
+				}
 				callback(newValue);
 				codeWindow.remove();
 			}

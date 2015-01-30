@@ -24,6 +24,8 @@ module.exports = function(grunt) {
                         'lib/js/thirdparty/jquery.validationEngine-ja.js',
                         'lib/js/thirdparty/jquery.validationEngine.js',
                         'lib/js/thirdparty/codemirror.js',
+                        'lib/js/thirdparty/codemirror-jshint.js',
+                        'lib/js/thirdparty/codemirror-csslint.js',
                         'lib/js/thirdparty/colpick.js',
                         'lib/js/thirdparty/webfont.js',
                     ]
