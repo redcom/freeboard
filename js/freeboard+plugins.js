@@ -2993,6 +2993,7 @@ var freeboard = (function()
 										name : "col_width",
 										display_name : "カラム幅",
 										validate: "required,custom[integer],min[1],max[10]",
+										style: "width:100px",
 										type: "text",
 										default_value : 1,
 										description: "最大10ブロック"
@@ -4742,10 +4743,13 @@ $.extend(freeboard, jQuery.eventEmitter);
 				plot = null;
 			}
 
+			titleElement.html(currentSettings.title);
+
 			freeboard.addStyle('#flotTip', currentSettings.tooltip_style);
 
+			var height = 60 * currentSettings.blocks - titleElement.outerHeight() - 5;
 			flotchartElement.css({
-				"height": 60 * currentSettings.blocks - 25 + "px",
+				"height": height + "px",
 				"width": "100%"
 			});
 
@@ -4792,13 +4796,13 @@ $.extend(freeboard, jQuery.eventEmitter);
 			if (newSettings.options != currentSettings.options ||
 				newSettings.value != currentSettings.value ||
 				newSettings.blocks != currentSettings.blocks ||
-				newSettings.tooltip_style != currentSettings.tooltip_style) {
+				newSettings.tooltip_style != currentSettings.tooltip_style ||
+				newSettings.title != currentSettings.title) {
 				currentSettings = newSettings;
 				createWidget();
 			} else {
 				currentSettings = newSettings;
 			}
-			titleElement.html(newSettings.title);
 		}
 
 		this.onCalculatedValueChanged = function (settingName, newValue) {
@@ -4890,7 +4894,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 		"show":true,\n\
 		"position":"sw",\n\
 		"backgroundColor":"null",\n\
-		"labelFormatter":"function(label, series){return (\\\"&nbsp;\\\"+label);}"\n\
+		"labelFormatter":"function(label, series){return (label);}"\n\
 	},\n\
 	"xaxes": [\n\
 		{\n\

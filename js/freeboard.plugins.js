@@ -1412,10 +1412,13 @@
 				plot = null;
 			}
 
+			titleElement.html(currentSettings.title);
+
 			freeboard.addStyle('#flotTip', currentSettings.tooltip_style);
 
+			var height = 60 * currentSettings.blocks - titleElement.outerHeight() - 5;
 			flotchartElement.css({
-				"height": 60 * currentSettings.blocks - 25 + "px",
+				"height": height + "px",
 				"width": "100%"
 			});
 
@@ -1462,13 +1465,13 @@
 			if (newSettings.options != currentSettings.options ||
 				newSettings.value != currentSettings.value ||
 				newSettings.blocks != currentSettings.blocks ||
-				newSettings.tooltip_style != currentSettings.tooltip_style) {
+				newSettings.tooltip_style != currentSettings.tooltip_style ||
+				newSettings.title != currentSettings.title) {
 				currentSettings = newSettings;
 				createWidget();
 			} else {
 				currentSettings = newSettings;
 			}
-			titleElement.html(newSettings.title);
 		}
 
 		this.onCalculatedValueChanged = function (settingName, newValue) {
@@ -1560,7 +1563,7 @@
 		"show":true,\n\
 		"position":"sw",\n\
 		"backgroundColor":"null",\n\
-		"labelFormatter":"function(label, series){return (\\\"&nbsp;\\\"+label);}"\n\
+		"labelFormatter":"function(label, series){return (label);}"\n\
 	},\n\
 	"xaxes": [\n\
 		{\n\

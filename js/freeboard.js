@@ -2993,6 +2993,7 @@ var freeboard = (function()
 										name : "col_width",
 										display_name : "カラム幅",
 										validate: "required,custom[integer],min[1],max[10]",
+										style: "width:100px",
 										type: "text",
 										default_value : 1,
 										description: "最大10ブロック"
