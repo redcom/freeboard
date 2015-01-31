@@ -1964,9 +1964,10 @@ ul.datasource-input-suffix {
 }
 
 .title.menu {
-	text-align: center;
 	font-size: 16px;
-	color: #A6A6A6;
+	padding-top: 20px;
+	padding-left: 30px;
+	color: #626262;
 }
 
 .title.bordered {
