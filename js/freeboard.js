@@ -3057,7 +3057,7 @@ var freeboard = (function()
 									viewModel.name(newSettings.settings.name);
 									delete newSettings.settings.name;
 								}
-								viewModel.isEditing(true);
+								viewModel.isEditing(false);
 								viewModel.type(newSettings.type);
 								viewModel.settings(newSettings.settings);
 							}
