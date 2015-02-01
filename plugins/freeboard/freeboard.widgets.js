@@ -445,7 +445,7 @@
 		display_name: "ゲージ",
 		"external_scripts" : [
 			"plugins/thirdparty/raphael.2.1.0.min.js",
-			"plugins/thirdparty/justgage.1.0.2.js"
+			"plugins/thirdparty/justgage.min.js"
 		],
 		settings: [
 			{
