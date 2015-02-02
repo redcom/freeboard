@@ -5568,6 +5568,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				display_name: "高さ (ブロック数)",
 				validate: "required,custom[integer],min[1],max[20]",
 				type: "text",
+				style: "width:100px",
 				default_value: 4,
 				description: "1ブロック60ピクセル。20ブロックまで"
 			},
@@ -5657,8 +5658,12 @@ $.extend(freeboard, jQuery.eventEmitter);
 
 			chart = c3.generate(_.merge(bind, options));
 			chartElement.resize(function() {
-				console.log(chartElement.outerHeight());
-				_.throttle(function() { chart.resize(); }, 1000);
+				_.throttle(function() {
+					chart.resize({
+						height: chartElement.outerHeight(),
+						width: chartElement.outerWidth()
+					});
+				}, 50);
 			});
 		}
 
