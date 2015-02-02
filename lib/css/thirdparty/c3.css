@@ -8,7 +8,6 @@
 .c3 path, .c3 line {
   fill: none;
   stroke: #8b8b8b;
-  stroke-width: 2;
 }
 .c3 text {
   fill: #8b8b8b;
@@ -22,7 +21,7 @@
 .c3-ygrid,
 .c3-event-rect,
 .c3-bars path {
-  shape-rendering: crispEdges;
+  shape-rendering: optimizeSpeed;
 }
 
 .c3-chart-arc path {
@@ -78,7 +77,7 @@
 /*-- Line --*/
 
 .c3-line {
-  stroke-width: 1px;
+  stroke-width: 2px;
 }
 /*-- Point --*/
 

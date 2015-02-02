@@ -5553,7 +5553,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 		display_name: "C3.jsチャート",
 		"external_scripts" : [
 			"http://d3js.org/d3.v3.min.js",
-			"plugins/thirdparty/c3.min.js"
+			"plugins/thirdparty/c3.js"
 		],
 		settings: [
 			{
@@ -5657,13 +5657,12 @@ $.extend(freeboard, jQuery.eventEmitter);
 				chart.destroy();
 
 			chart = c3.generate(_.merge(bind, options));
+
+			// svg chart fit to container
 			chartElement.resize(function() {
-				_.throttle(function() {
-					chart.resize({
-						height: chartElement.outerHeight(),
-						width: chartElement.outerWidth()
-					});
-				}, 50);
+				_.defer(function() {
+					chart.resize();
+				});
 			});
 		}
 
@@ -5697,6 +5696,8 @@ $.extend(freeboard, jQuery.eventEmitter);
 		}
 
 		this.onDispose = function () {
+			if (!_.isUndefined(chart))
+				chart.destroy();
 		}
 
 		this.getHeight = function () {
