@@ -798,19 +798,13 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 
 		var animateLength = (animate) ? 0.25 : 0;
 
-		var timer = false;
-		var hookresize = function(){
-			if (timer !== false) {
-				clearTimeout(timer);
+		var debounce = _.debounce(function() {
+			// media query max-width : 960px
+			if ($("#hamburger").css("display") == "none") {
+				self.setVisibilityBoardTools(false);
+				$(window).off("resize", debounce);
 			}
-			timer = setTimeout(function() {
-				// media query max-width : 960px
-				if ($("#hamburger").css("display") == "none") {
-					self.setVisibilityBoardTools(false);
-					$(window).off("resize", hookresize);
-				}
-			}, 200);
-		}
+		}, 200);
 
 		_.each(elems, function(elem) {
 			elem.css("transition", "transform");
@@ -823,14 +817,14 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 			_.each(elems, function(elem) {
 				elem.css("transform", "translate(" + barWidth + "px, " + elem.transform('y') + "px)");
 			});
-			$(window).resize(hookresize);
+			$(window).resize(debounce);
 		} else {
 			$("html").removeClass("boardtools-opening");
 			$("#board-actions > ul").addClass("collapse");
 			_.each(elems, function(elem) {
 				elem.css("transform", "translate(0px, " + elem.transform('y') + "px)");
 			});
-			$(window).off("resize", hookresize);
+			$(window).off("resize", debounce);
 		}
 	}
 

@@ -709,7 +709,7 @@
 		function onConnectionLost(responseObject) {
 			console.info("MQTT ConnectionLost %s %s", currentSettings.url, responseObject.errorMessage);
 			if (dispose == false && currentSettings.reconnect == true) {
-				setTimeout(function() {
+				_.delay(function() {
 					connectToServer();
 				}, CONNECTION_DELAY);
 			}
@@ -819,7 +819,7 @@
 				validate: "required,maxSize[500]",
 				type: "text",
 				description: "最大500文字<br>購読するトピック名を設定して下さい。<br>例: my/topic",
-				default_value: "SensorCorpus"
+				default_value: ""
 			},
 			{
 				name : "username",
