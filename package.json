@@ -1,7 +1,22 @@
 {
   "name": "freeboard",
   "title": "freeboard",
+  "description": "freeboard extension for sensorcorpus",
   "version": "1.1.0",
+  "author": "tanaka0323",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/infocorpus/freeboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/infocorpus/freeboard/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/infocorpus/freeboard/LICENSE"
+    }
+  ],
   "devDependencies": {
     "grunt": "0.4.1",
     "grunt-contrib-concat": "0.1.3",

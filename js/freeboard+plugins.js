@@ -798,19 +798,13 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 
 		var animateLength = (animate) ? 0.25 : 0;
 
-		var timer = false;
-		var hookresize = function(){
-			if (timer !== false) {
-				clearTimeout(timer);
+		var debounce = _.debounce(function() {
+			// media query max-width : 960px
+			if ($("#hamburger").css("display") == "none") {
+				self.setVisibilityBoardTools(false);
+				$(window).off("resize", debounce);
 			}
-			timer = setTimeout(function() {
-				// media query max-width : 960px
-				if ($("#hamburger").css("display") == "none") {
-					self.setVisibilityBoardTools(false);
-					$(window).off("resize", hookresize);
-				}
-			}, 200);
-		}
+		}, 200);
 
 		_.each(elems, function(elem) {
 			elem.css("transition", "transform");
@@ -823,14 +817,14 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 			_.each(elems, function(elem) {
 				elem.css("transform", "translate(" + barWidth + "px, " + elem.transform('y') + "px)");
 			});
-			$(window).resize(hookresize);
+			$(window).resize(debounce);
 		} else {
 			$("html").removeClass("boardtools-opening");
 			$("#board-actions > ul").addClass("collapse");
 			_.each(elems, function(elem) {
 				elem.css("transform", "translate(0px, " + elem.transform('y') + "px)");
 			});
-			$(window).off("resize", hookresize);
+			$(window).off("resize", debounce);
 		}
 	}
 
@@ -3373,32 +3367,15 @@ $.extend(freeboard, jQuery.eventEmitter);
 			timer = setInterval(self.updateNow, currentSettings.refresh * 1000);
 		}
 
-		function formatDate(date, format) {
-			if (!format)
-				format = 'YYYY/MM/DD hh:mm:ss';
-			format = format.replace(/YYYY/g, date.getFullYear());
-			format = format.replace(/MM/g, ('0' + (date.getMonth() + 1)).slice(-2));
-			format = format.replace(/DD/g, ('0' + date.getDate()).slice(-2));
-			format = format.replace(/hh/g, ('0' + date.getHours()).slice(-2));
-			format = format.replace(/mm/g, ('0' + date.getMinutes()).slice(-2));
-			format = format.replace(/ss/g, ('0' + date.getSeconds()).slice(-2));
-			if (format.match(/S/g)) {
-				var milliSeconds = ('00' + date.getMilliseconds()).slice(-3);
-				var length = format.match(/S/g).length;
-				for (var i = 0; i < length; i++)
-					format = format.replace(/S/, milliSeconds.substring(i, i + 1));
-			}
-			return format;
-		}
-
 		this.updateNow = function () {
 			var date = new Date();
+			var ts = date.getTime()/1000;
 
 			var data = {
-				numeric_value: date.getTime(),
-				full_string_value: formatDate(date),
-				date_string_value: formatDate(date, 'YYYY/MM/DD'),
-				time_string_value: formatDate(date, 'hh:mm:ss'),
+				numeric_value: ts,
+				full_string_value: moment.unix(ts).format("YYYY/MM/DD hh:mm:ss"),
+				date_string_value: moment.unix(ts).format("YYYY/MM/DD"),
+				time_string_value: moment.unix(ts).format("hh:mm:ss"),
 				date_object: date
 			};
 
@@ -4054,7 +4031,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 		function onConnectionLost(responseObject) {
 			console.info("MQTT ConnectionLost %s %s", currentSettings.url, responseObject.errorMessage);
 			if (dispose == false && currentSettings.reconnect == true) {
-				setTimeout(function() {
+				_.delay(function() {
 					connectToServer();
 				}, CONNECTION_DELAY);
 			}
@@ -4164,7 +4141,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				validate: "required,maxSize[500]",
 				type: "text",
 				description: "最大500文字<br>購読するトピック名を設定して下さい。<br>例: my/topic",
-				default_value: "SensorCorpus"
+				default_value: ""
 			},
 			{
 				name : "username",
