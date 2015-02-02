@@ -123,10 +123,13 @@
 			};
 			options = _.merge(bind, _.merge(data, options));
 
-			if (!_.isUndefined(chart))
+			if (!_.isUndefined(chart)) {
+				chartElement.resize(function(){});
 				chart.destroy();
+				chart = undefined;
+			}
 
-			chart = c3.generate(_.merge(bind, options));
+			chart = c3.generate(options);
 
 			// svg chart fit to container
 			chartElement.resize(function() {

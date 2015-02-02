@@ -21,7 +21,7 @@
 .c3-ygrid,
 .c3-event-rect,
 .c3-bars path {
-  shape-rendering: optimizeSpeed;
+  shape-rendering: crispEdges;
 }
 
 .c3-chart-arc path {
@@ -164,26 +164,24 @@
   background-color:#fff;
   empty-cells:show;
   width:auto;
-  -webkit-box-shadow: 7px 7px 12px -9px rgb(119,119,119);
-     -moz-box-shadow: 7px 7px 12px -9px rgb(119,119,119);
-          box-shadow: 7px 7px 12px -9px rgb(119,119,119);
-  opacity: 0.9;
+  -webkit-box-shadow: 0 0 10px #000;
+     -moz-box-shadow: 0 0 10px #000;
+          box-shadow: 0 0 10px #000;
+  opacity: 0.8;
 }
 .c3-tooltip tr {
-  border:1px solid #CCC;
 }
 .c3-tooltip th {
-  background-color: #aaa;
-  font-size:14px;
+  background-color: #272727;
+  font-size:12px;
   padding:2px 5px;
   text-align:left;
   color:#FFF;
 }
 .c3-tooltip td {
-  font-size:13px;
+  font-size:12px;
   padding: 3px 6px;
   background-color:#fff;
-  border-left:1px dotted #999;
   color: #000;
 }
 .c3-tooltip td > span {
