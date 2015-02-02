@@ -650,7 +650,7 @@
 		}
 
 		this.getHeight = function () {
-			return currentSettings.blocks;
+			return Number(currentSettings.blocks);
 		}
 
 		this.onSettingsChanged(settings);
