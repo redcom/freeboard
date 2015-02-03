@@ -65,7 +65,7 @@
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				suffix: "秒",
 				default_value: 1
 			}
@@ -259,7 +259,7 @@
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				suffix: "秒",
 				default_value: 5
 			},
@@ -419,7 +419,7 @@
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				suffix: "秒",
 				default_value: 5
 			}
@@ -493,7 +493,7 @@
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				suffix: "秒",
 				default_value: 5
 			}
@@ -785,6 +785,7 @@
 				name : "port",
 				display_name : "ポート番号",
 				validate: "required,custom[integer],min[1]",
+				type: "number",
 				style: "width:100px",
 				default_value: 8080
 			},

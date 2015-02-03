@@ -16160,7 +16160,7 @@ Ct[X]=Ct[H]=Ct[Q]=Ct[nt]=Ct[tt]=Ct[rt]=Ct[et]=Ct[ut]=Ct[ot]=true,Ct[z]=Ct[D]=Ct[
 		this.player_width = this.$player.width();
 		this.player_height = this.$player.height();
 
-		var container_width = this.$container.width();
+		var container_width = this.options.container_width || this.$container.width();
 		this.player_max_left = (container_width - this.player_width + this.options.offset_left);
 
 		if(this.options.start)
