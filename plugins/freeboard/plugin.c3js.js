@@ -20,7 +20,7 @@
 
 	freeboard.loadWidgetPlugin({
 		type_name: "c3js",
-		display_name: "C3.jsチャート",
+		display_name: "C3チャート",
 		"external_scripts" : [
 			"http://d3js.org/d3.v3.min.js",
 			"plugins/thirdparty/c3.min.js"
@@ -37,7 +37,7 @@
 				name: "blocks",
 				display_name: "高さ (ブロック数)",
 				validate: "required,custom[integer],min[1],max[20]",
-				type: "text",
+				type: "number",
 				style: "width:100px",
 				default_value: 4,
 				description: "1ブロック60ピクセル。20ブロックまで"
@@ -110,8 +110,7 @@
 					options = JSON.parse(options, function(k,v) {
 						return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v;
 					});
-				}
-				catch (e) {
+				} catch (e) {
 					alert("チャートオプションが不正です。 " + e);
 					console.error(e);
 					return;
@@ -129,14 +128,18 @@
 				chart = undefined;
 			}
 
-			chart = c3.generate(options);
-
-			// svg chart fit to container
-			chartElement.resize(function() {
-				_.defer(function() {
-					chart.resize();
+			try {
+				chart = c3.generate(options);
+				// svg chart fit to container
+				chartElement.resize(function() {
+					_.defer(function() {
+						chart.resize();
+					});
 				});
-			});
+			} catch (e) {
+				console.error(e);
+				return;
+			}
 		}
 
 		this.render = function (element) {
@@ -174,7 +177,7 @@
 		}
 
 		this.getHeight = function () {
-			return Number(currentSettings.blocks);
+			return currentSettings.blocks;
 		}
 
 		this.onSettingsChanged(settings);
