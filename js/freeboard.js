@@ -1473,7 +1473,7 @@ function PaneModel(theFreeboardModel, widgetPlugins) {
 	this.getCalculatedHeight = function () {
 		var memo = 0;
 		var sumHeights = _.reduce(self.widgets(), function (memo, widget) {
-			return Number(memo) + (widget.height());
+			return memo + widget.height();
 		}, 0);
 
 		sumHeights *= 6;
@@ -1973,7 +1973,10 @@ PluginEditor = function(jsEditor, valueEditor)
 												.addClass(_toValidateClassString(settingDef.validate, "text-input"))
 												.attr("style", settingDef.style)
 												.appendTo(valueCell).change(function() {
-								newSettings.settings[settingDef.name] = $(this).val();
+								if (settingDef.type == "number")
+									newSettings.settings[settingDef.name] = Number($(this).val());
+								else
+									newSettings.settings[settingDef.name] = $(this).val();
 							});
 
 							if(settingDef.name in currentSettingsValues)
@@ -3002,7 +3005,7 @@ var freeboard = (function()
 										display_name : "カラム幅",
 										validate: "required,custom[integer],min[1],max[10]",
 										style: "width:100px",
-										type: "text",
+										type: "number",
 										default_value : 1,
 										description: "最大10ブロック"
 									}

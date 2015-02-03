@@ -532,7 +532,7 @@
 			{
 				name: "gauge_widthscale",
 				display_name: "ゲージ太さ",
-				type: "text",
+				type: "number",
 				style: "width:100px",
 				validate: "required,custom[integer],min[0],max[200]",
 				default_value: 100,
@@ -541,18 +541,18 @@
 			{
 				name: "min_value",
 				display_name: "最小値",
-				type: "text",
+				type: "number",
 				style: "width:100px",
-				validate: "required,custom[integer],min[0]",
+				validate: "required,custom[number],min[-10000]",
 				default_value: 0,
-				description: "0以上"
+				description: "数値のみ"
 			},
 			{
 				name: "max_value",
 				display_name: "最大値",
-				type: "text",
+				type: "number",
 				style: "width:100px",
-				validate: "required,custom[integer],min[0]",
+				validate: "required,custom[number],min[-10000]",
 				default_value: 100,
 				description: "最小値以上"
 			}
@@ -690,9 +690,9 @@
 			{
 				name: "blocks",
 				display_name: "高さ (ブロック数)",
-				validate: "required,custom[integer],min[1],max[20]",
+				validate: "required,custom[integer],min[2],max[20]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				default_value: 4,
 				description: "1ブロック60ピクセル。20ブロックまで"
 			},
@@ -1069,7 +1069,7 @@
 				display_name: "更新頻度",
 				validate: "optional,custom[integer],min[1]",
 				style: "width:100px",
-				name: "text",
+				name: "number",
 				suffix: "秒",
 				description:"更新する必要がない場合は空白のまま"
 			}
@@ -1320,9 +1320,9 @@
 			{
 				name: "height",
 				display_name: "ブロック高さ",
-				validate: "required,custom[integer],min[1],max[20]",
+				validate: "required,custom[integer],min[3],max[20]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				default_value: 4,
 				description: "1ブロック60ピクセル。20ブロックまで"
 			}

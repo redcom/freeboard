@@ -1473,7 +1473,7 @@ function PaneModel(theFreeboardModel, widgetPlugins) {
 	this.getCalculatedHeight = function () {
 		var memo = 0;
 		var sumHeights = _.reduce(self.widgets(), function (memo, widget) {
-			return Number(memo) + (widget.height());
+			return memo + widget.height();
 		}, 0);
 
 		sumHeights *= 6;
@@ -1973,7 +1973,10 @@ PluginEditor = function(jsEditor, valueEditor)
 												.addClass(_toValidateClassString(settingDef.validate, "text-input"))
 												.attr("style", settingDef.style)
 												.appendTo(valueCell).change(function() {
-								newSettings.settings[settingDef.name] = $(this).val();
+								if (settingDef.type == "number")
+									newSettings.settings[settingDef.name] = Number($(this).val());
+								else
+									newSettings.settings[settingDef.name] = $(this).val();
 							});
 
 							if(settingDef.name in currentSettingsValues)
@@ -3002,7 +3005,7 @@ var freeboard = (function()
 										display_name : "カラム幅",
 										validate: "required,custom[integer],min[1],max[10]",
 										style: "width:100px",
-										type: "text",
+										type: "number",
 										default_value : 1,
 										description: "最大10ブロック"
 									}
@@ -3404,7 +3407,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				suffix: "秒",
 				default_value: 1
 			}
@@ -3598,7 +3601,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				suffix: "秒",
 				default_value: 5
 			},
@@ -3758,7 +3761,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				suffix: "秒",
 				default_value: 5
 			}
@@ -3832,7 +3835,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				display_name: "更新頻度",
 				validate: "required,custom[integer],min[1]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				suffix: "秒",
 				default_value: 5
 			}
@@ -4124,6 +4127,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				name : "port",
 				display_name : "ポート番号",
 				validate: "required,custom[integer],min[1]",
+				type: "number",
 				style: "width:100px",
 				default_value: 8080
 			},
@@ -4704,7 +4708,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "gauge_widthscale",
 				display_name: "ゲージ太さ",
-				type: "text",
+				type: "number",
 				style: "width:100px",
 				validate: "required,custom[integer],min[0],max[200]",
 				default_value: 100,
@@ -4713,18 +4717,18 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "min_value",
 				display_name: "最小値",
-				type: "text",
+				type: "number",
 				style: "width:100px",
-				validate: "required,custom[integer],min[0]",
+				validate: "required,custom[number],min[-10000]",
 				default_value: 0,
-				description: "0以上"
+				description: "数値のみ"
 			},
 			{
 				name: "max_value",
 				display_name: "最大値",
-				type: "text",
+				type: "number",
 				style: "width:100px",
-				validate: "required,custom[integer],min[0]",
+				validate: "required,custom[number],min[-10000]",
 				default_value: 100,
 				description: "最小値以上"
 			}
@@ -4862,9 +4866,9 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "blocks",
 				display_name: "高さ (ブロック数)",
-				validate: "required,custom[integer],min[1],max[20]",
+				validate: "required,custom[integer],min[2],max[20]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				default_value: 4,
 				description: "1ブロック60ピクセル。20ブロックまで"
 			},
@@ -5241,7 +5245,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				display_name: "更新頻度",
 				validate: "optional,custom[integer],min[1]",
 				style: "width:100px",
-				name: "text",
+				name: "number",
 				suffix: "秒",
 				description:"更新する必要がない場合は空白のまま"
 			}
@@ -5492,9 +5496,9 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "height",
 				display_name: "ブロック高さ",
-				validate: "required,custom[integer],min[1],max[20]",
+				validate: "required,custom[integer],min[3],max[20]",
 				style: "width:100px",
-				type: "text",
+				type: "number",
 				default_value: 4,
 				description: "1ブロック60ピクセル。20ブロックまで"
 			}
