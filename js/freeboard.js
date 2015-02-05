@@ -1671,7 +1671,7 @@ PluginEditor = function(jsEditor, valueEditor)
 
 				// modify required field name
 				if(!_.isUndefined(settingDef.validate)) {
-					if (settingDef.validate.indexOf("required") != -1) {
+					if (_.indexOf(settingDef.validate, "required") != -1) {
 						displayName = "* " + displayName;
 					}
 				}

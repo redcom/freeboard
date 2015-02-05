@@ -1671,7 +1671,7 @@ PluginEditor = function(jsEditor, valueEditor)
 
 				// modify required field name
 				if(!_.isUndefined(settingDef.validate)) {
-					if (settingDef.validate.indexOf("required") != -1) {
+					if (_.indexOf(settingDef.validate, "required") != -1) {
 						displayName = "* " + displayName;
 					}
 				}
@@ -5518,20 +5518,9 @@ $.extend(freeboard, jQuery.eventEmitter);
 
 (function() {
 
-	function jsonEscapeEntities(str) {
-		var entitiesMap = {
-			'<': '&lt;',
-			'>': '&gt;',
-			'&': '&amp;'
-		};
-		return str.replace(/[&<>]/g, function(key) {
-			return entitiesMap[key];
-		});
-	}
-
 	freeboard.loadWidgetPlugin({
 		type_name: "c3js",
-		display_name: "C3.jsチャート",
+		display_name: "C3チャート",
 		"external_scripts" : [
 			"http://d3js.org/d3.v3.min.js",
 			"plugins/thirdparty/c3.min.js"
@@ -5547,8 +5536,8 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "blocks",
 				display_name: "高さ (ブロック数)",
-				validate: "required,custom[integer],min[1],max[20]",
-				type: "text",
+				validate: "required,custom[integer],min[2],max[20]",
+				type: "number",
 				style: "width:100px",
 				default_value: 4,
 				description: "1ブロック60ピクセル。20ブロックまで"
@@ -5556,9 +5545,9 @@ $.extend(freeboard, jQuery.eventEmitter);
 			{
 				name: "value",
 				display_name: "値",
-				validate: "optional,maxSize[2000]",
+				validate: "optional,maxSize[5000]",
 				type: "calculated",
-				description: "最大2000文字"
+				description: "最大5000文字"
 			},
 			{
 				name: "options",
@@ -5581,11 +5570,9 @@ $.extend(freeboard, jQuery.eventEmitter);
 
 	var valueStyle = freeboard.getStyleObject("values");
 
-	var c3jsID = 0;
-
 	var c3jsWidget = function (settings) {
 		var self = this;
-		var currentID = "c3js" + c3jsID++;
+		var currentID = _.uniqueId("c3js_");
 		var titleElement = $('<h2 class="section-title"></h2>');
 		var chartElement = $('<div id="' + currentID + '"></div>');
 		var currentSettings;
@@ -5613,16 +5600,17 @@ $.extend(freeboard, jQuery.eventEmitter);
 
 			var options;
 
+			// No need for the first load
+			data = _.omit(data, '_op');
+
 			Function.prototype.toJSON = Function.prototype.toString;
 
 			if (!_.isUndefined(chartsettings.options)) {
 				try {
-					options = jsonEscapeEntities(chartsettings.options);
-					options = JSON.parse(options, function(k,v) {
+					options = JSON.parse(chartsettings.options, function(k,v) {
 						return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v;
 					});
-				}
-				catch (e) {
+				} catch (e) {
 					alert("チャートオプションが不正です。 " + e);
 					console.error(e);
 					return;
@@ -5633,21 +5621,94 @@ $.extend(freeboard, jQuery.eventEmitter);
 				bindto: '#' + currentID,
 			};
 			options = _.merge(bind, _.merge(data, options));
-
 			if (!_.isUndefined(chart)) {
-				chartElement.resize(function(){});
+				chartElement.resize(null);
 				chart.destroy();
-				chart = undefined;
+				chart = null;
 			}
 
-			chart = c3.generate(options);
-
-			// svg chart fit to container
-			chartElement.resize(function() {
-				_.defer(function() {
-					chart.resize();
+			try {
+				chart = c3.generate(options);
+				// svg chart fit to container
+				chartElement.resize(function() {
+					_.defer(function() {
+						chart.resize();
+					});
 				});
-			});
+			} catch (e) {
+				console.error(e);
+				return;
+			}
+		}
+
+		function plotData(data) {
+			if (_.isUndefined(chart))
+				return;
+
+			var op = data._op;
+			data = _.omit(data, '_op');
+
+			try {
+				switch (op) {
+					case 'load':
+						chart.load(data);
+						break;
+					case 'unload':
+						chart.unload(data);
+						break;
+					case 'groups':
+						chart.groups(data);
+						break;
+					case 'flow':
+						chart.flow(data);
+						break;
+					case 'data.names':
+						chart.data.names(data);
+						break;
+					case 'data.colors':
+						chart.data.colors(data);
+						break;
+					case 'axis.labels':
+						chart.axis.labels(data);
+						break;
+					case 'axis.max':
+						chart.axis.max(data);
+						break;
+					case 'axis.min':
+						chart.axis.min(data);
+						break;
+					case 'axis.range':
+						chart.axis.range(data);
+						break;
+					case 'xgrids':
+						if (!_.isUndefined(data.xgrids))
+							chart.xgrids(data.xgrids);
+						break;
+					case 'xgrids.add':
+						if (!_.isUndefined(data.xgrids))
+							chart.xgrids.add(data.xgrids);
+						break;
+					case 'xgrids.remove':
+						if (!_.isUndefined(data.xgrids))
+							chart.xgrids.remove(data.xgrids);
+						else
+							chart.xgrids.remove();
+						break;
+					case 'transform':
+						if (!_.isUndefined(data.type)) {
+							if (!_.isUndefined(data.name))
+								chart.transform(data.type, data.name);
+							else
+								chart.transform(data.type);
+						}
+						break;
+					default:
+						chart.load(data);
+						break;
+				}
+			} catch (e) {
+				console.error(e);
+			}
 		}
 
 		this.render = function (element) {
@@ -5663,29 +5724,33 @@ $.extend(freeboard, jQuery.eventEmitter);
 			}
 			setTitle(newSettings.title);
 			setBlocks(newSettings.blocks);
-			if (!_.isUndefined(chart)) {
-				if (newSettings.options != currentSettings.options) {
-					createWidget(chartdata, newSettings);
-				}
-			}
+			if (newSettings.options != currentSettings.options)
+				createWidget(chartdata, newSettings);
 			currentSettings = newSettings;
 		}
 
 		this.onCalculatedValueChanged = function (settingName, newValue) {
+
+			if (!_.isObject(newValue))
+				return;
+
 			if (_.isUndefined(chart))
 				createWidget(newValue, currentSettings);
 			else
-				chart.load(newValue);
+				plotData(newValue);
+
 			chartdata = newValue;
 		}
 
 		this.onDispose = function () {
-			if (!_.isUndefined(chart))
+			if (!_.isUndefined(chart)) {
 				chart.destroy();
+				chart = null;
+			}
 		}
 
 		this.getHeight = function () {
-			return Number(currentSettings.blocks);
+			return currentSettings.blocks;
 		}
 
 		this.onSettingsChanged(settings);
