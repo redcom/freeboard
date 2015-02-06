@@ -3125,18 +3125,9 @@ var freeboard = (function()
 		// Show the loading indicator when we first load
 		freeboardUI.showLoadingIndicator(true);
 
-		var resizeTimer;
-
-		function resizeEnd()
-		{
+		$(window).resize(_.debounce(function() {
 			freeboardUI.processResize(true);
-		}
-
-		$(window).resize(function() {
-			clearTimeout(resizeTimer);
-			resizeTimer = setTimeout(resizeEnd, 500);
-		});
-
+		}, 500));
 	});
 
 	// PUBLIC FUNCTIONS
