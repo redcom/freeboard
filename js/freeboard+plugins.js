@@ -5364,8 +5364,6 @@ $.extend(freeboard, jQuery.eventEmitter);
 		}
 	});
 
-	var valueStyle = freeboard.getStyleObject("values");
-
 	var c3jsWidget = function (settings) {
 		var self = this;
 		var currentID = _.uniqueId("c3js_");
@@ -5413,15 +5411,16 @@ $.extend(freeboard, jQuery.eventEmitter);
 				}
 			}
 
-			var bind = {
-				bindto: '#' + currentID,
-			};
-			options = _.merge(bind, _.merge(data, options));
 			if (!_.isUndefined(chart)) {
 				chartElement.resize(null);
 				chart.destroy();
 				chart = null;
 			}
+
+			var bind = {
+				bindto: '#' + currentID,
+			};
+			options = _.merge(bind, _.merge(data, options));
 
 			try {
 				chart = c3.generate(options);
@@ -5526,7 +5525,6 @@ $.extend(freeboard, jQuery.eventEmitter);
 		}
 
 		this.onCalculatedValueChanged = function (settingName, newValue) {
-
 			if (!_.isObject(newValue))
 				return;
 

@@ -2022,8 +2022,6 @@
 		}
 	});
 
-	var valueStyle = freeboard.getStyleObject("values");
-
 	var c3jsWidget = function (settings) {
 		var self = this;
 		var currentID = _.uniqueId("c3js_");
@@ -2071,15 +2069,16 @@
 				}
 			}
 
-			var bind = {
-				bindto: '#' + currentID,
-			};
-			options = _.merge(bind, _.merge(data, options));
 			if (!_.isUndefined(chart)) {
 				chartElement.resize(null);
 				chart.destroy();
 				chart = null;
 			}
+
+			var bind = {
+				bindto: '#' + currentID,
+			};
+			options = _.merge(bind, _.merge(data, options));
 
 			try {
 				chart = c3.generate(options);
@@ -2184,7 +2183,6 @@
 		}
 
 		this.onCalculatedValueChanged = function (settingName, newValue) {
-
 			if (!_.isObject(newValue))
 				return;
 
