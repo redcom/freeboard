@@ -126,11 +126,9 @@
 			try {
 				chart = c3.generate(options);
 				// svg chart fit to container
-				chartElement.resize(function() {
-					_.defer(function() {
+				chartElement.resize(_.debounce(function() {
 						chart.resize();
-					});
-				});
+				}, 500));
 			} catch (e) {
 				console.error(e);
 				return;
