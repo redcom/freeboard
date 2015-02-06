@@ -2060,7 +2060,15 @@
 			if (!_.isUndefined(chartsettings.options)) {
 				try {
 					options = JSON.parse(chartsettings.options, function(k,v) {
-						return v.toString().indexOf('function') === 0 ? eval('('+v+')') : v;
+						var ret;
+						var str = v.toString();
+						if (str.indexOf('function') === 0)
+							ret = eval('('+v+')');
+						else if (str.indexOf('d3.') === 0)
+							ret = eval('('+v+')');
+						else
+							ret = v;
+						return ret;
 					});
 				} catch (e) {
 					alert("チャートオプションが不正です。 " + e);
