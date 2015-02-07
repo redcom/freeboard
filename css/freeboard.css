@@ -1833,7 +1833,7 @@ body {
 	line-height: 20px;
 	height: 100%;
 	overflow-x: hidden;
-	overflow-y: auto;
+	overflow-y: scroll;
 }
 
 .modal {
@@ -3639,6 +3639,18 @@ html.boardtools-opening #hamburger:after
 	left: 50%;
 	margin-left: -100px;
 	z-index: 2000;
+	opacity: 0;
+	-webkit-transition: opacity 0.2s ease-in-out;
+	-moz-transition: opacity 0.2s ease-in-out;
+	transition: opacity 0.2s ease-in-out;
+}
+
+.show.wrapperloading {
+	opacity: 1;
+}
+
+.hide.wrapperloading {
+	opacity: 0;
 }
 
 .wrapperloading .loading.up {

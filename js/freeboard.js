@@ -534,17 +534,19 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 	this.loadDashboard = function(dashboardData, callback)
 	{
 		freeboardUI.showLoadingIndicator(true);
-		self.deserialize(dashboardData, function()
-		{
-			freeboardUI.showLoadingIndicator(false);
-
-			if(_.isFunction(callback))
+		_.delay(function() {
+			self.deserialize(dashboardData, function()
 			{
-				callback();
-			}
+				if(_.isFunction(callback))
+				{
+					callback();
+				}
 
-			freeboard.emit("dashboard_loaded");
-		});
+				freeboardUI.showLoadingIndicator(false);
+
+				freeboard.emit("dashboard_loaded");
+			});
+		}, 100);
 	}
 
 	this.loadDashboardFromLocalFile = function()
@@ -1118,13 +1120,13 @@ function FreeboardUI()
 
 	function showLoadingIndicator(show)
 	{
-		if(show)
-		{
-			loadingIndicator.fadeOut(0).appendTo("body").fadeIn(500);
-		}
-		else
-		{
-			loadingIndicator.fadeOut(500).remove();
+		if (show === true)
+			loadingIndicator.removeClass('hide').appendTo("body").addClass('show');
+		else {
+			loadingIndicator.removeClass('show').addClass('hide');
+			_.delay(function() {
+				loadingIndicator.remove()
+			}, 500);
 		}
 	}
 
