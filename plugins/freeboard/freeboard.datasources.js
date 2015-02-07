@@ -429,42 +429,6 @@
 		}
 	});
 
-	var dweetioDatasource = function (settings, updateCallback) {
-		var self = this;
-		var currentSettings = settings;
-
-		function onNewDweet(dweet) {
-			updateCallback(dweet);
-		}
-
-		this.updateNow = function () {
-			dweetio.get_latest_dweet_for(currentSettings.thing_id, function (err, dweet) {
-				if (err) {
-					//onNewDweet({});
-				}
-				else {
-					onNewDweet(dweet[0].content);
-				}
-			});
-		}
-
-		this.onDispose = function () {
-
-		}
-
-		this.onSettingsChanged = function (newSettings) {
-			dweetio.stop_listening();
-
-			currentSettings = newSettings;
-
-			dweetio.listen_for(currentSettings.thing_id, function (dweet) {
-				onNewDweet(dweet.content);
-			});
-		}
-
-		self.onSettingsChanged(settings);
-	};
-
 	freeboard.loadDatasourcePlugin({
 		"type_name": "playback",
 		"display_name": "Playback",
