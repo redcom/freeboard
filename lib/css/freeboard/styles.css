@@ -420,7 +420,7 @@ body {
 	line-height: 20px;
 	height: 100%;
 	overflow-x: hidden;
-	overflow-y: auto;
+	overflow-y: scroll;
 }
 
 .modal {
