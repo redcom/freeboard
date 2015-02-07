@@ -970,6 +970,7 @@
 		var currentSettings = settings;
 		var map;
 		var marker;
+		var mapElement = $('<div></div>')
 		var currentPosition = {};
 
 		function updatePosition() {
@@ -980,7 +981,20 @@
 			}
 		}
 
-		this.render = function (element) {
+		function setBlocks(blocks) {
+			if (_.isUndefined(mapElement) || _.isUndefined(blocks))
+				return;
+			var height = 60 * blocks;
+			mapElement.css({
+				"height": height + "px",
+				"width": "100%"
+			});
+		}
+
+		function createWidget() {
+			if (_.isUndefined(mapElement))
+				return;
+
 			function initializeMap() {
 				var mapOptions = {
 					zoom: 13,
@@ -989,9 +1003,9 @@
 					draggable: false
 				};
 
-				map = new google.maps.Map(element, mapOptions);
+				map = new google.maps.Map(mapElement[0], mapOptions);
 
-				google.maps.event.addDomListener(element, 'mouseenter', function (e) {
+				google.maps.event.addDomListener(mapElement[0], 'mouseenter', function (e) {
 					e.cancelBubble = true;
 					if (!map.hover) {
 						map.hover = true;
@@ -999,7 +1013,7 @@
 					}
 				});
 
-				google.maps.event.addDomListener(element, 'mouseleave', function (e) {
+				google.maps.event.addDomListener(mapElement[0], 'mouseleave', function (e) {
 					if (map.hover) {
 						map.setOptions({zoomControl: false});
 						map.hover = false;
@@ -1008,38 +1022,56 @@
 
 				marker = new google.maps.Marker({map: map});
 
+				// map fitting to container
+				mapElement.resize(_.debounce(function() {
+					google.maps.event.trigger(mapElement[0], 'resize');
+					updatePosition();
+				}, 500));
+
 				updatePosition();
 			}
 
 			if (window.google && window.google.maps) {
 				initializeMap();
-			}
-			else {
+			} else {
 				window.gmap_initialize = initializeMap;
 				head.js("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&callback=gmap_initialize");
 			}
 		}
 
+		this.render = function (element) {
+			$(element).append(mapElement);
+			setBlocks(currentSettings.blocks);
+			createWidget();
+		}
+
 		this.onSettingsChanged = function (newSettings) {
+			if (_.isNull(map)) {
+				currentSettings = newSettings;
+				return;
+			}
+			if (newSettings.blocks != currentSettings.blocks)
+				setBlocks(newSettings.blocks);
 			currentSettings = newSettings;
 		}
 
 		this.onCalculatedValueChanged = function (settingName, newValue) {
-			if (settingName == "lat") {
+			if (settingName == "lat")
 				currentPosition.lat = newValue;
-			}
-			else if (settingName == "lon") {
+			else if (settingName == "lon")
 				currentPosition.lon = newValue;
-			}
 
 			updatePosition();
 		}
 
 		this.onDispose = function () {
+			// for memoryleak
+			map = null;
+			marker = null;
 		}
 
 		this.getHeight = function () {
-			return 4;
+			return currentSettings.blocks;
 		}
 
 		this.onSettingsChanged(settings);
@@ -1063,6 +1095,15 @@
 				validate: "optional,maxSize[2000]",
 				type: "calculated",
 				description: "最大2000文字"
+			},
+			{
+				name: "blocks",
+				display_name: "高さ (ブロック数)",
+				validate: "required,custom[integer],min[4],max[20]",
+				type: "number",
+				style: "width:100px",
+				default_value: 4,
+				description: "1ブロック60ピクセル。20ブロックまで"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
