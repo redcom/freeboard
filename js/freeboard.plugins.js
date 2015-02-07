@@ -429,42 +429,6 @@
 		}
 	});
 
-	var dweetioDatasource = function (settings, updateCallback) {
-		var self = this;
-		var currentSettings = settings;
-
-		function onNewDweet(dweet) {
-			updateCallback(dweet);
-		}
-
-		this.updateNow = function () {
-			dweetio.get_latest_dweet_for(currentSettings.thing_id, function (err, dweet) {
-				if (err) {
-					//onNewDweet({});
-				}
-				else {
-					onNewDweet(dweet[0].content);
-				}
-			});
-		}
-
-		this.onDispose = function () {
-
-		}
-
-		this.onSettingsChanged = function (newSettings) {
-			dweetio.stop_listening();
-
-			currentSettings = newSettings;
-
-			dweetio.listen_for(currentSettings.thing_id, function (dweet) {
-				onNewDweet(dweet.content);
-			});
-		}
-
-		self.onSettingsChanged(settings);
-	};
-
 	freeboard.loadDatasourcePlugin({
 		"type_name": "playback",
 		"display_name": "Playback",
@@ -1804,6 +1768,7 @@
 		var currentSettings = settings;
 		var map;
 		var marker;
+		var mapElement = $('<div></div>')
 		var currentPosition = {};
 
 		function updatePosition() {
@@ -1814,7 +1779,20 @@
 			}
 		}
 
-		this.render = function (element) {
+		function setBlocks(blocks) {
+			if (_.isUndefined(mapElement) || _.isUndefined(blocks))
+				return;
+			var height = 60 * blocks;
+			mapElement.css({
+				"height": height + "px",
+				"width": "100%"
+			});
+		}
+
+		function createWidget() {
+			if (_.isUndefined(mapElement))
+				return;
+
 			function initializeMap() {
 				var mapOptions = {
 					zoom: 13,
@@ -1823,9 +1801,9 @@
 					draggable: false
 				};
 
-				map = new google.maps.Map(element, mapOptions);
+				map = new google.maps.Map(mapElement[0], mapOptions);
 
-				google.maps.event.addDomListener(element, 'mouseenter', function (e) {
+				google.maps.event.addDomListener(mapElement[0], 'mouseenter', function (e) {
 					e.cancelBubble = true;
 					if (!map.hover) {
 						map.hover = true;
@@ -1833,7 +1811,7 @@
 					}
 				});
 
-				google.maps.event.addDomListener(element, 'mouseleave', function (e) {
+				google.maps.event.addDomListener(mapElement[0], 'mouseleave', function (e) {
 					if (map.hover) {
 						map.setOptions({zoomControl: false});
 						map.hover = false;
@@ -1842,38 +1820,56 @@
 
 				marker = new google.maps.Marker({map: map});
 
+				// map fitting to container
+				mapElement.resize(_.debounce(function() {
+					google.maps.event.trigger(mapElement[0], 'resize');
+					updatePosition();
+				}, 500));
+
 				updatePosition();
 			}
 
 			if (window.google && window.google.maps) {
 				initializeMap();
-			}
-			else {
+			} else {
 				window.gmap_initialize = initializeMap;
 				head.js("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&callback=gmap_initialize");
 			}
 		}
 
+		this.render = function (element) {
+			$(element).append(mapElement);
+			setBlocks(currentSettings.blocks);
+			createWidget();
+		}
+
 		this.onSettingsChanged = function (newSettings) {
+			if (_.isNull(map)) {
+				currentSettings = newSettings;
+				return;
+			}
+			if (newSettings.blocks != currentSettings.blocks)
+				setBlocks(newSettings.blocks);
 			currentSettings = newSettings;
 		}
 
 		this.onCalculatedValueChanged = function (settingName, newValue) {
-			if (settingName == "lat") {
+			if (settingName == "lat")
 				currentPosition.lat = newValue;
-			}
-			else if (settingName == "lon") {
+			else if (settingName == "lon")
 				currentPosition.lon = newValue;
-			}
 
 			updatePosition();
 		}
 
 		this.onDispose = function () {
+			// for memoryleak
+			map = null;
+			marker = null;
 		}
 
 		this.getHeight = function () {
-			return 4;
+			return currentSettings.blocks;
 		}
 
 		this.onSettingsChanged(settings);
@@ -1897,6 +1893,15 @@
 				validate: "optional,maxSize[2000]",
 				type: "calculated",
 				description: "最大2000文字"
+			},
+			{
+				name: "blocks",
+				display_name: "高さ (ブロック数)",
+				validate: "required,custom[integer],min[4],max[20]",
+				type: "number",
+				style: "width:100px",
+				default_value: 4,
+				description: "1ブロック60ピクセル。20ブロックまで"
 			}
 		],
 		newInstance: function (settings, newInstanceCallback) {
@@ -2091,11 +2096,9 @@
 			try {
 				chart = c3.generate(options);
 				// svg chart fit to container
-				chartElement.resize(function() {
-					_.defer(function() {
+				chartElement.resize(_.debounce(function() {
 						chart.resize();
-					});
-				});
+				}, 500));
 			} catch (e) {
 				console.error(e);
 				return;
