@@ -4711,7 +4711,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				display_name: "最小値",
 				type: "number",
 				style: "width:100px",
-				validate: "required,custom[number],min[-10000]",
+				validate: "required,custom[number],min[-100000000],max[100000000]",
 				default_value: 0,
 				description: "数値のみ"
 			},
@@ -4720,7 +4720,7 @@ $.extend(freeboard, jQuery.eventEmitter);
 				display_name: "最大値",
 				type: "number",
 				style: "width:100px",
-				validate: "required,custom[number],min[-10000]",
+				validate: "required,custom[number],min[-100000000],max[100000000]",
 				default_value: 100,
 				description: "最小値以上"
 			}
