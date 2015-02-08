@@ -680,6 +680,14 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		widget.dispose();
 	}
 
+	this.updateDatasourceNameRef = function(newDatasourceName, oldDatasourceName) {
+		_.each(self.panes(), function(pane) {
+			_.each(pane.widgets(), function(widget) {
+				widget.updateDatasourceNameRef(newDatasourceName, oldDatasourceName);
+			});
+		});
+	}
+
 	$.fn.transform = function(axis){
 		var ret = 0;
 		var elem = this;
@@ -2578,6 +2586,28 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
 		}
 	}
 
+	this.updateDatasourceNameRef = function (newDatasourceName, oldDatasourceName) {
+		if (_.isUndefined(self.type()))
+			return;
+
+		var settingsDefs = widgetPlugins[self.type()].settings;
+		var oldRegex = new RegExp("datasources\\[['\"]" + oldDatasourceName + "['\"]\\]", "g");
+		var rep = "datasources[\"" + newDatasourceName + "\"]";
+		var currentSettings = self.settings();
+
+		_.each(settingsDefs, function (settingDef) {
+			if (settingDef.type == "calculated") {
+				var script = currentSettings[settingDef.name];
+
+				if (!_.isUndefined(script)) {
+					script = script.replace(oldRegex, rep);
+					currentSettings[settingDef.name] = script;
+					self.settings(currentSettings);
+				}
+			}
+		});
+	}
+
 	this.updateCalculatedSettings = function () {
 		self.datasourceRefreshNotifications = {};
 		self.calculatedSettingScripts = {};
@@ -3056,6 +3086,9 @@ var freeboard = (function()
 							{
 								if(options.type == 'datasource')
 								{
+									if (viewModel.name() != newSettings.settings.name) {
+										theFreeboardModel.updateDatasourceNameRef(newSettings.settings.name, viewModel.name());
+									}
 									viewModel.name(newSettings.settings.name);
 									delete newSettings.settings.name;
 								}
