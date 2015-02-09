@@ -1484,6 +1484,7 @@ html {
 	font-family: sans-serif; /* 1 */
 	-ms-text-size-adjust: 100%; /* 2 */
 	-webkit-text-size-adjust: 100%; /* 2 */
+	-webkit-font-smoothing: subpixel-antialiased;
 }
 
 /**
@@ -3481,9 +3482,11 @@ h2.title {
 #hamburger span
 {
 	-webkit-transition: none 0.5s ease 0.5s;
+	-moz-transition: none 0.5s ease 0.5s;
 	transition: none 0.5s ease 0.5s;
 
 	-webkit-transition-property: transform, top, bottom, left, opacity;
+	-moz-transition-property: transform, top, bottom, left, opacity;
 	transition-property: transform, top, bottom, left, opacity;
 }
 
@@ -3528,6 +3531,7 @@ html.boardtools-opening #hamburger:after
 	}
 
 	#board-tools {
+		display: none;
 		position: absolute;
 		top: 0;
 		left: -250px;
