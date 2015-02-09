@@ -795,6 +795,9 @@ header h1 {
 	overflow: visible;
 	position: relative;
 	padding-top: 10px;
+	-webkit-transition: -webkit-transform 0.25s;
+	-moz-transition: -moz-transform 0.25s;
+	transition: transform 0.25s;
 }
 
 #main-header {
@@ -802,6 +805,9 @@ header h1 {
 	position: fixed;
 	z-index: 50;
 	display: none;
+	-webkit-transition: -webkit-transform 0.25s;
+	-moz-transition: -moz-transform 0.25s;
+	transition: transform 0.25s;
 }
 
 #admin-bar {
@@ -911,8 +917,12 @@ header h1 {
 	height: 100%;
 	background: #8b8b8b;
 	background: rgba(49, 49, 49, 0.8);
+	-webkit-box-shadow: 0 0 5px #000;
 	box-shadow: 0 0 5px #000;
 	z-index: 100;
+	-webkit-transition: -webkit-transform 0.25s;
+	-moz-transition: -moz-transform 0.25s;
+	transition: transform 0.25s;
 }
 
 #cam {
@@ -2016,14 +2026,16 @@ h2.title {
 */
 #hamburger
 {
-	box-sizing: border-box;
 	display: none;
 	width: 50px;
 	height: 45px;
-	position: fixed;
+	position: absolute;
 	top: 10px;
 	left: 0px;
 	z-index: 2;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
 }
 #hamburger:before,
 #hamburger:after,
@@ -2074,10 +2086,14 @@ html.boardtools-opening #hamburger span
 }
 html.boardtools-opening #hamburger:before
 {
+	-webkit-transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
 	transform: rotate(45deg);
 }
 html.boardtools-opening #hamburger:after
 {
+	-webkit-transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
 	transform: rotate(-45deg);
 }
 
@@ -2099,15 +2115,19 @@ html.boardtools-opening #hamburger:after
 	}
 
 	#board-tools {
-		position: fixed;
+		position: absolute;
 		top: 0;
 		left: -250px;
 		width: 250px;
 		height: 1500px;
 		background: #171717;
+		webkit-box-shadow: 0 0 5px #000;
 		box-shadow: 0 0 5px #000;
 		z-index: 100;
 		float: none;
+		-webkit-transition: -webkit-transform 0.25s;
+		-moz-transition: -moz-transform 0.25s;
+		transition: transform 0.25s;
 	}
 
 	#board-actions {
