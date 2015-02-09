@@ -581,11 +581,11 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 
 					reader.readAsText(file);
 				}
-				if (/*@cc_on ! @*/ false || document.documentMode) {   // for IE
+				if (freeboard.browsername.indexOf('ie') != -1) {
 					$("#myfile").remove();
 				}
 			});
-			if (/*@cc_on ! @*/ false || document.documentMode) {   // for IE
+			if (freeboard.browsername.indexOf('ie') != -1) {
 				document.body.appendChild(input);
 				var evt = document.createEvent('MouseEvents');
 				evt.initEvent('click',true,true,window,0,0,0,0,0,false,false,false,false,0,null);
@@ -606,7 +606,7 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		var blob = new Blob([JSON.stringify(self.serialize())], {'type': contentType});
 		var file = "dashboard.json";
 
-		if (/*@cc_on ! @*/ false || document.documentMode) {   // for IE
+		if (freeboard.browsername.indexOf('ie') != -1) {
 			window.navigator.msSaveBlob(blob, file);
 		} else {
 			var url = (window.URL || window.webkitURL);
@@ -704,9 +704,7 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 	{
 		// Don't allow editing if it's not allowed
 		if(!self.allow_edit() && editing)
-		{
 			return;
-		}
 
 		self.isEditing(editing);
 
@@ -717,49 +715,45 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 				self.setVisibilityBoardTools(false);
 		}
 
-		if(_.isUndefined(animate))
-		{
-			animate = true;
-		}
-
-		var elems = {
-			main: $("#main-header"),
-			board: $("#board-content")
-		};
-
-		var animateLength = (animate) ? 0.25 : 0;
 		var barHeight = $("#admin-bar").outerHeight();
 		var headerHeight = $("#main-header").outerHeight();
 
-		_.each(elems, function(elem) {
-			elem.css("transition", "transform");
-			elem.css("transition-duration", animateLength + "s");
-		});
-
 		if(!editing)
 		{
+			freeboardUI.disableGrid();
 			$("#toggle-header-icon").addClass("icon-wrench").removeClass("icon-chevron-up");
 			$(".gridster .gs_w").css({cursor: "default"});
-			elems["main"].css("transform", "translateY(-" + barHeight + "px)");
-			elems["board"].css("transform", "translateY(20px)");
-			_.delay(function() {
-				$("#admin-menu").css("display", "none");
-			}, 300);
+
+			if (freeboard.browsername.indexOf("ie") == -1) {
+				$("#main-header").css("transform", "translateY(-" + barHeight + "px)");
+				$("#board-content").css("transform", "translateY(20px)");
+				_.delay(function() {
+					$("#admin-menu").css("display", "none");
+				}, 300);
+			} else {
+				$("#main-header").css("top", "-" + barHeight + "px");
+				$("#board-content").css("top", "20px");
+			}
 			$(".sub-section").unbind();
-			freeboardUI.disableGrid();
 		}
 		else
 		{
 			$("#admin-menu").css("display", "block");
 			$("#toggle-header-icon").addClass("icon-chevron-up").removeClass("icon-wrench");
 			$(".gridster .gs_w").css({cursor: "pointer"});
-			elems["main"].css("transform", "translateY(0px)");
-			elems["board"].css("transform", "translateY(" + headerHeight + "px)");
+
+			if (freeboard.browsername.indexOf("ie") == -1) {
+				$("#main-header").css("transform", "translateY(0px)");
+				$("#board-content").css("transform", "translateY(" + headerHeight + "px)");
+			} else {
+				$("#main-header").css("top", "0px");
+				$("#board-content").css("top", headerHeight + "px");
+			}
 			freeboardUI.attachWidgetEditIcons($(".sub-section"));
 			freeboardUI.enableGrid();
 		}
 
-		freeboardUI.showPaneEditIcons(editing, animate);
+		freeboardUI.showPaneEditIcons(editing, true);
 	}
 
 	this.setVisibilityDatasources = function(visibility, animate)
@@ -768,27 +762,18 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		if(!self.allow_edit())
 			return;
 
-		if(_.isUndefined(animate))
-			animate = true;
-
 		self.isVisibleDatasources(visibility);
 
-		var barElem = $("#datasources");
-
-		var barWidth = barElem.outerWidth();
-
-		var animateLength = (animate) ? 0.25  : 0;
-
-		barElem.css("transition", "transform");
-		barElem.css("transition-duration", animateLength + "s");
+		var ds = $("#datasources");
+		var width = ds.outerWidth();
 
 		if (visibility == true) {
-			barElem.css("display", "block");
-			barElem.css("transform", "translateX(-" + barWidth + "px)");
+			ds.css("display", "block");
+			ds.css("transform", "translateX(-" + width + "px)");
 		} else {
-			barElem.css("transform", "translateX(" + barWidth + "px)");
+			ds.css("transform", "translateX(" + width + "px)");
 			_.delay(function() {
-				barElem.css("display", "none");
+				ds.css("display", "none");
 			}, 300);
 		}
 	}
@@ -799,19 +784,14 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		if (!self.allow_edit())
 			return;
 
-		if (_.isUndefined(animate))
-			animate = true;
-
 		self.isVisibleBoardTools(visibility);
 
-		var elems = {
-			main: $("#main-header"),
-			board: $("#board-content")
-		};
+		var mh = $("#main-header");
+		var bc = $("#board-content");
+		var bt = $("#board-tools");
 
-		var barWidth = $("#board-tools").outerWidth();
-
-		var animateLength = (animate) ? 0.25 : 0;
+		var mhHeight = mh.outerHeight();
+		var width = bt.outerWidth();
 
 		var debounce = _.debounce(function() {
 			// media query max-width : 960px
@@ -819,26 +799,33 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 				self.setVisibilityBoardTools(false);
 				$(window).off("resize", debounce);
 			}
-		}, 200);
-
-		_.each(elems, function(elem) {
-			elem.css("transition", "transform");
-			elem.css("transition-duration", animateLength + "s");
-		});
+		}, 500);
 
 		if (visibility == true) {
 			$("html").addClass("boardtools-opening");
 			$("#board-actions > ul").removeClass("collapse");
-			_.each(elems, function(elem) {
-				elem.css("transform", "translate(" + barWidth + "px, " + elem.transform('y') + "px)");
-			});
+
+			if (freeboard.browsername.indexOf("ie") == -1) {
+				mh.css("transform", "translate(" + width + "px, " + mh.transform('y') + "px)");
+				bc.css("transform", "translate(" + width + "px, " + bc.transform('y') + "px)");
+			} else {
+				mh.offset({ top: 0, left: width });
+				bc.offset({ top: mhHeight, left: width });
+			}
+
 			$(window).resize(debounce);
 		} else {
 			$("html").removeClass("boardtools-opening");
 			$("#board-actions > ul").addClass("collapse");
-			_.each(elems, function(elem) {
-				elem.css("transform", "translate(0px, " + elem.transform('y') + "px)");
-			});
+
+			if (freeboard.browsername.indexOf("ie") == -1) {
+				mh.css("transform", "translate(0px, " + mh.transform('y') + "px)");
+				bc.css("transform", "translate(0px, " + bc.transform('y') + "px)");
+			} else {
+				mh.offset({ top: 0, left: 0 });
+				bc.offset({ top: mhHeight, left: 0 });
+			}
+
 			$(window).off("resize", debounce);
 		}
 	}
@@ -2920,6 +2907,7 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
 
 var freeboard = (function()
 {
+	var browsername;
 	var datasourcePlugins = {};
 	var widgetPlugins = {};
 
@@ -3155,6 +3143,63 @@ var freeboard = (function()
 		}
 	}
 
+	/**
+	 *  Get the Browser name
+	 *
+	 *  @return     browsername(ie6、ie7、ie8、ie9、ie10、ie11、chrome、safari、opera、firefox、unknown)
+	 *
+	 */
+	var getBrowser = function(){
+		var ua = window.navigator.userAgent.toLowerCase();
+		var ver = window.navigator.appVersion.toLowerCase();
+		var name = 'unknown';
+
+		if (ua.indexOf("msie") != -1){
+			if (ver.indexOf("msie 6.") != -1){
+				name = 'ie6';
+			}else if (ver.indexOf("msie 7.") != -1){
+				name = 'ie7';
+			}else if (ver.indexOf("msie 8.") != -1){
+				name = 'ie8';
+			}else if (ver.indexOf("msie 9.") != -1){
+				name = 'ie9';
+			}else if (ver.indexOf("msie 10.") != -1){
+				name = 'ie10';
+			}else{
+				name = 'ie';
+			}
+		}else if(ua.indexOf('trident/7') != -1){
+			name = 'ie11';
+		}else if (ua.indexOf('chrome') != -1){
+			name = 'chrome';
+		}else if (ua.indexOf('safari') != -1){
+			name = 'safari';
+		}else if (ua.indexOf('opera') != -1){
+			name = 'opera';
+		}else if (ua.indexOf('firefox') != -1){
+			name = 'firefox';
+		}
+		return name;
+	};
+
+	/**
+	 *  Determining whether the corresponding browser
+	 *
+	 *  @param  browsers    supported browser name in the array(ie6、ie7、ie8、ie9、ie10、ie11、chrome、safari、opera、firefox)
+	 *  @return             returns whether support is in true / false
+	 *
+	 */
+	var isSupported = function(browsers){
+		var thusBrowser = getBrowser();
+		for(var i=0; i<browsers.length; i++){
+			if(browsers[i] == thusBrowser){
+				return true;
+				exit;
+			}
+		}
+		return false;
+	};
+
 	function getParameterByName(name)
 	{
 		name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -3176,6 +3221,8 @@ var freeboard = (function()
 	return {
 		initialize          : function(allowEdit, finishedCallback)
 		{
+			freeboard.browsername = getBrowser();
+
 			// Check to see if we have a query param called load. If so, we should load that dashboard initially
 			var freeboardLocation = getParameterByName("load");
 
