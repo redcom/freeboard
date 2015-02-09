@@ -2316,6 +2316,7 @@ header h1 {
 }
 
 #datasources {
+	display: none;
 	position: fixed;
 	top: 0;
 	right: -400px;
@@ -3525,6 +3526,10 @@ html.boardtools-opening #hamburger:after
 	#board-actions {
 		display: block;
 		vertical-align: top;
+	}
+
+	#board-logo {
+		width: 30%;
 	}
 
 	#board-actions ul > li {

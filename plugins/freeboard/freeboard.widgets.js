@@ -12,17 +12,6 @@
 	var SPARKLINE_HISTORY_LENGTH = 100;
 	var SPARKLINE_COLORS = ["#FF9900", "#FFFFFF", "#B3B4B4", "#6B6B6B", "#28DE28", "#13F7F9", "#E6EE18", "#C41204", "#CA3CB8", "#0B1CFB"];
 
-	function jsonEscapeEntities(str) {
-		var entitiesMap = {
-			'<': '&lt;',
-			'>': '&gt;',
-			'&': '&amp;'
-		};
-		return str.replace(/[&<>]/g, function(key) {
-			return entitiesMap[key];
-		});
-	}
-
 	function easeTransitionText(newValue, textElement, duration) {
 
 		var currentValue = $(textElement).text();

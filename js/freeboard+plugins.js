@@ -319,7 +319,6 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		if(newValue)
 		{
 			$("#main-header").show();
-			$("#datasources").show();
 		}
 		else
 		{
@@ -546,7 +545,7 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 
 				freeboard.emit("dashboard_loaded");
 			});
-		}, 100);
+		}, 50);
 	}
 
 	this.loadDashboardFromLocalFile = function()
@@ -743,17 +742,19 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 			$(".gridster .gs_w").css({cursor: "default"});
 			elems["main"].css("transform", "translateY(-" + barHeight + "px)");
 			elems["board"].css("transform", "translateY(20px)");
-			$("#main-header").data().shown = false;
+			_.delay(function() {
+				$("#admin-menu").css("display", "none");
+			}, 300);
 			$(".sub-section").unbind();
 			freeboardUI.disableGrid();
 		}
 		else
 		{
+			$("#admin-menu").css("display", "block");
 			$("#toggle-header-icon").addClass("icon-chevron-up").removeClass("icon-wrench");
 			$(".gridster .gs_w").css({cursor: "pointer"});
 			elems["main"].css("transform", "translateY(0px)");
 			elems["board"].css("transform", "translateY(" + headerHeight + "px)");
-			$("#main-header").data().shown = true;
 			freeboardUI.attachWidgetEditIcons($(".sub-section"));
 			freeboardUI.enableGrid();
 		}
@@ -782,9 +783,13 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		barElem.css("transition-duration", animateLength + "s");
 
 		if (visibility == true) {
+			barElem.css("display", "block");
 			barElem.css("transform", "translateX(-" + barWidth + "px)");
 		} else {
 			barElem.css("transform", "translateX(" + barWidth + "px)");
+			_.delay(function() {
+				barElem.css("display", "none");
+			}, 300);
 		}
 	}
 
@@ -4179,17 +4184,6 @@ $.extend(freeboard, jQuery.eventEmitter);
 (function () {
 	var SPARKLINE_HISTORY_LENGTH = 100;
 	var SPARKLINE_COLORS = ["#FF9900", "#FFFFFF", "#B3B4B4", "#6B6B6B", "#28DE28", "#13F7F9", "#E6EE18", "#C41204", "#CA3CB8", "#0B1CFB"];
-
-	function jsonEscapeEntities(str) {
-		var entitiesMap = {
-			'<': '&lt;',
-			'>': '&gt;',
-			'&': '&amp;'
-		};
-		return str.replace(/[&<>]/g, function(key) {
-			return entitiesMap[key];
-		});
-	}
 
 	function easeTransitionText(newValue, textElement, duration) {
 
