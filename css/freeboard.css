@@ -2451,8 +2451,8 @@ ul, ol {
 .column-icon {
 	display: inline-block;
 	background-color: white;
-	width: 5px;
-	height: 100%;
+	width: 3px;
+	height: 113%;
 }
 
 .column-icon.right {
