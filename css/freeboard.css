@@ -3531,7 +3531,6 @@ html.boardtools-opening #hamburger:after
 	}
 
 	#board-tools {
-		display: none;
 		position: absolute;
 		top: 0;
 		left: -250px;

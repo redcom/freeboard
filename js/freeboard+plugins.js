@@ -802,7 +802,6 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 		}, 500);
 
 		if (visibility == true) {
-			bt.css("display", "block");
 			$("html").addClass("boardtools-opening");
 			$("#board-actions > ul").removeClass("collapse");
 
@@ -822,13 +821,9 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 			if (freeboard.browsername.indexOf("ie") == -1) {
 				mh.css("transform", "translate(0px, " + mh.transform('y') + "px)");
 				bc.css("transform", "translate(0px, " + bc.transform('y') + "px)");
-				_.delay(function() {
-					bt.css("display", "none");
-				}, 300);
 			} else {
 				mh.offset({ top: 0, left: 0 });
 				bc.offset({ top: mhHeight, left: 0 });
-				bt.css("display", "none");
 			}
 
 			$(window).off("resize", debounce);
