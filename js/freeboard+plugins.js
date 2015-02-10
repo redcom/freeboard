@@ -2588,7 +2588,7 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
 			return;
 
 		var settingsDefs = widgetPlugins[self.type()].settings;
-		var oldRegex = new RegExp("datasources\\[['\"]" + oldDatasourceName + "['\"]\\]", "g");
+		var oldRegex = new RegExp("datasources\\[['\"]" + _.escapeRegExp(oldDatasourceName) + "['\"]\\]", "g");
 		var rep = "datasources[\"" + newDatasourceName + "\"]";
 		var currentSettings = self.settings();
 
