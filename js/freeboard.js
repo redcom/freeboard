@@ -1541,569 +1541,569 @@ function PaneModel(theFreeboardModel, widgetPlugins) {
 
 PluginEditor = function(jsEditor, valueEditor)
 {
-	function _removeSettingsRows()
-	{
-		if($("#setting-row-instance-name").length)
-		{
-			$("#setting-row-instance-name").nextAll().remove();
-		}
-		else
-		{
-			$("#setting-row-plugin-types").nextAll().remove();
-		}
-	}
-
-	function _toValidateClassString(validate, type) {
-		var ret = "";
-		if (!_.isUndefined(validate)) {
-			var types = "";
-			if (!_.isUndefined(type))
-				types = " " + type;
-			ret = "validate[" + validate + "]" + types;
-		}
-		return ret;
-	}
-
-	function _isNumerical(n)
-	{
-		return !isNaN(parseFloat(n)) && isFinite(n);
-	}
-
-	function _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, includeRemove)
-	{
-		var input = $('<textarea></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input")).attr("style", settingDef.style);
-
-		if(settingDef.multi_input) {
-			input.change(function() {
-				var arrayInput = [];
-				$(valueCell).find('textarea').each(function() {
-					var thisVal = $(this).val();
-					if(thisVal) {
-						arrayInput = arrayInput.concat(thisVal);
-					}
-				});
-				newSettings.settings[settingDef.name] = arrayInput;
-			});
-		} else {
-			input.change(function() {
-				newSettings.settings[settingDef.name] = $(this).val();
-			});
-		}
-
-		if(currentValue) {
-			input.val(currentValue);
-		}
-
-		valueEditor.createValueEditor(input);
-
-		var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
-		var wrapperDiv = $('<div class="calculated-setting-row"></div>');
-
-		wrapperDiv.append(input).append(datasourceToolbox);
-
-		var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>データソース</label></li>')
-			.mousedown(function(e) {
-				e.preventDefault();
-				$(input).val("").focus().insertAtCaret("datasources[\"").trigger("freeboard-eval");
-			});
-		datasourceToolbox.append(datasourceTool);
-
-		var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JS EDITOR</label></li>')
-			.mousedown(function(e) {
-				e.preventDefault();
-				jsEditor.displayJSEditor(input.val(), 'javascript', function(result) {
-					input.val(result);
-					input.change();
-				});
-			});
-		datasourceToolbox.append(jsEditorTool);
-
-		if(includeRemove) {
-			var removeButton = $('<li class="remove-setting-row"><i class="icon-minus icon-white"></i><label></label></li>')
-				.mousedown(function(e) {
-					e.preventDefault();
-					wrapperDiv.remove();
-					$(valueCell).find('textarea:first').change();
-			});
-			datasourceToolbox.prepend(removeButton);
-		}
-
-		$(valueCell).append(wrapperDiv);
-	}
-
-	function createPluginEditor(title, pluginTypes, currentTypeName, currentSettingsValues, settingsSavedCallback)
-	{
-		var newSettings = {
-			type    : currentTypeName,
-			settings: {}
-		};
-
-		function createSettingRow(name, displayName)
-		{
-			var tr = $('<div id="setting-row-' + name + '" class="form-row"></div>').appendTo(form);
-
-			tr.append('<div class="form-label"><label class="control-label">' + displayName + '</label></div>');
-			return $('<div id="setting-value-container-' + name + '" class="form-value"></div>').appendTo(tr);
-		}
-
-		var selectedType;
-		var form = $('<form id="plugin-editor"></form>');
-
-		var pluginDescriptionElement = $('<div id="plugin-description"></div>').hide();
-		form.append(pluginDescriptionElement);
-
-		function createSettingsFromDefinition(settingsDefs)
-		{
-			var colorPickerID = 0;
-
-			_.each(settingsDefs, function(settingDef)
-			{
-				// Set a default value if one doesn't exist
-				if(!_.isUndefined(settingDef.default_value) && _.isUndefined(currentSettingsValues[settingDef.name]))
-				{
-					currentSettingsValues[settingDef.name] = settingDef.default_value;
-				}
-
-				var displayName = settingDef.name;
-
-				if(!_.isUndefined(settingDef.display_name))
-				{
-					displayName = settingDef.display_name;
-				}
-
-				settingDef.style = _.isUndefined(settingDef.style) ? '' : settingDef.style;
-
-				// modify required field name
-				if(!_.isUndefined(settingDef.validate)) {
-					if (settingDef.validate.indexOf("required") != -1) {
-						displayName = "* " + displayName;
-					}
-				}
-
-				var valueCell = createSettingRow(settingDef.name, displayName);
-
-				switch (settingDef.type)
-				{
-					case "array":
-					{
-						var subTableDiv = $('<div class="form-table-value-subtable"></div>').appendTo(valueCell);
-
-						var subTable = $('<table class="table table-condensed sub-table"></table>').appendTo(subTableDiv);
-						var subTableHead = $("<thead></thead>").hide().appendTo(subTable);
-						var subTableHeadRow = $("<tr></tr>").appendTo(subTableHead);
-						var subTableBody = $('<tbody></tbody>').appendTo(subTable);
-
-						var currentSubSettingValues = [];
-
-						// Create our headers
-						_.each(settingDef.settings, function(subSettingDef)
-						{
-							var subsettingDisplayName = subSettingDef.name;
-
-							if(!_.isUndefined(subSettingDef.display_name))
-							{
-								subsettingDisplayName = subSettingDef.display_name;
-							}
-
-							$('<th>' + subsettingDisplayName + '</th>').appendTo(subTableHeadRow);
-						});
-
-						if(settingDef.name in currentSettingsValues)
-						{
-							currentSubSettingValues = currentSettingsValues[settingDef.name];
-						}
-
-						function processHeaderVisibility()
-						{
-							if(newSettings.settings[settingDef.name].length > 0)
-							{
-								subTableHead.show();
-							}
-							else
-							{
-								subTableHead.hide();
-							}
-						}
-
-						function createSubsettingRow(subsettingValue)
-						{
-							var subsettingRow = $('<tr></tr>').appendTo(subTableBody);
-
-							var newSetting = {};
-
-							if(!_.isArray(newSettings.settings[settingDef.name]))
-							{
-								newSettings.settings[settingDef.name] = [];
-							}
-
-							newSettings.settings[settingDef.name].push(newSetting);
-
-							_.each(settingDef.settings, function(subSettingDef)
-							{
-								var subsettingCol = $('<td></td>').appendTo(subsettingRow);
-								var subsettingValueString = "";
-
-								if(!_.isUndefined(subsettingValue[subSettingDef.name]))
-								{
-									subsettingValueString = subsettingValue[subSettingDef.name];
-								}
-
-								newSetting[subSettingDef.name] = subsettingValueString;
-
-								$('<input class="table-row-value" type="text">')
-										.addClass(_toValidateClassString(subSettingDef.validate, "text-input"))
-										.attr("style", settingDef.style)
-										.appendTo(subsettingCol).val(subsettingValueString).change(function()
-								{
-									newSetting[subSettingDef.name] = $(this).val();
-								});
-							});
-
-							subsettingRow.append($('<td class="table-row-operation"></td>').append($('<ul class="board-toolbar"></ul>').append($('<li></li>').append($('<i class="icon-trash icon-white"></i>').click(function()
-												{
-													var subSettingIndex = newSettings.settings[settingDef.name].indexOf(newSetting);
-
-													if(subSettingIndex != -1)
-													{
-														newSettings.settings[settingDef.name].splice(subSettingIndex, 1);
-														subsettingRow.remove();
-														processHeaderVisibility();
-													}
-												})))));
-
-							subTableDiv.scrollTop(subTableDiv[0].scrollHeight);
-
-							processHeaderVisibility();
-						}
-
-						$('<div class="table-operation text-button">追加</div>').appendTo(valueCell).click(function()
-						{
-							var newSubsettingValue = {};
-
-							_.each(settingDef.settings, function(subSettingDef)
-							{
-								newSubsettingValue[subSettingDef.name] = "";
-							});
-
-							createSubsettingRow(newSubsettingValue);
-						});
-
-						// Create our rows
-						_.each(currentSubSettingValues, function(currentSubSettingValue, subSettingIndex)
-						{
-							createSubsettingRow(currentSubSettingValue);
-						});
-
-						break;
-					}
-					case "boolean":
-					{
-						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
-
-						var onOffSwitch = $('<div class="onoffswitch"><label class="onoffswitch-label" for="' + settingDef.name + '-onoff"><div class="onoffswitch-inner"><span class="on">はい</span><span class="off">いいえ</span></div><div class="onoffswitch-switch"></div></label></div>').appendTo(valueCell);
-
-						var input = $('<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="' + settingDef.name + '-onoff">').prependTo(onOffSwitch).change(function()
-						{
-							newSettings.settings[settingDef.name] = this.checked;
-						});
-
-						if(settingDef.name in currentSettingsValues)
-						{
-							input.prop("checked", currentSettingsValues[settingDef.name]);
-						}
-
-						break;
-					}
-					case "option":
-					{
-						var defaultValue = currentSettingsValues[settingDef.name];
-
-						var input = $('<select></select>')
-											.addClass(_toValidateClassString(settingDef.validate))
-											.attr("style", settingDef.style)
-											.appendTo($('<div class="styled-select"></div>')
-											.appendTo(valueCell)).change(function()
-						{
-							newSettings.settings[settingDef.name] = $(this).val();
-						});
-
-						_.each(settingDef.options, function(option)
-						{
-
-							var optionName;
-							var optionValue;
-
-							if(_.isObject(option))
-							{
-								optionName = option.name;
-								optionValue = option.value;
-							}
-							else
-							{
-								optionName = option;
-							}
-
-							if(_.isUndefined(optionValue))
-							{
-								optionValue = optionName;
-							}
-
-							if(_.isUndefined(defaultValue))
-							{
-								defaultValue = optionValue;
-							}
-
-							$("<option></option>").text(optionName).attr("value", optionValue).appendTo(input);
-						});
-
-						newSettings.settings[settingDef.name] = defaultValue;
-
-						if(settingDef.name in currentSettingsValues)
-						{
-							input.val(currentSettingsValues[settingDef.name]);
-						}
-
-						break;
-					}
-					case "color":
-					{
-						var curColorPickerID = "picker-" + colorPickerID++;
-						var thisColorPickerID = "#" + curColorPickerID;
-						var defaultValue = currentSettingsValues[settingDef.name];
-						var input = $('<input id="' + curColorPickerID + '" type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell);
-
-						newSettings.settings[settingDef.name] = defaultValue;
-
-						$(thisColorPickerID).css({
-							"border-right":"30px solid green",
-							"width":"80px"
-						});
-
-						$(thisColorPickerID).css('border-color', defaultValue);
-
-						var defhex = defaultValue;
-						defhex.replace("#", "");
-
-						$(thisColorPickerID).colpick({
-							layout:'hex',
-							colorScheme:'dark',
-							color: defhex,
-							submit:0,
-							onChange:function(hsb,hex,rgb,el,bySetColor) {
-								$(el).css('border-color','#'+hex);
-								newSettings.settings[settingDef.name] = '#'+hex;
-								if(!bySetColor) {
-									$(el).val('#'+hex);
-								}
-							}
-						}).keyup(function(){
-							$(this).colpickSetColor(this.value);
-						});
-
-						if(settingDef.name in currentSettingsValues) {
-							input.val(currentSettingsValues[settingDef.name]);
-						}
-
-						break;
-					}
-					case 'json':
-					{
-						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
-
-						var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>')
-								.addClass(_toValidateClassString(settingDef.validate, "text-input"))
-								.attr("style", settingDef.style)
-								.appendTo(valueCell).change(function()
-						{
-							newSettings.settings[settingDef.name] = $(this).val();
-						});
-
-						if(settingDef.name in currentSettingsValues)
-						{
-							input.val(currentSettingsValues[settingDef.name]);
-						}
-
-						valueEditor.createValueEditor(input);
-
-						var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
-
-						var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JSON EDITOR</label></li>').mousedown(function(e)
-						{
-							e.preventDefault();
-
-							jsEditor.displayJSEditor(input.val(), 'json', function(result){
-								input.val(result);
-								input.change();
-							});
-						});
-
-						$(valueCell).append(datasourceToolbox.append(jsEditorTool));
-
-						break;
-					}
-					default:
-					{
-						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
-
-						if(settingDef.type == "calculated")
-						{
-							if(settingDef.name in currentSettingsValues) {
-								var currentValue = currentSettingsValues[settingDef.name];
-								if(settingDef.multi_input && _.isArray(currentValue)) {
-									var includeRemove = false;
-									for(var i=0; i<currentValue.length; i++) {
-										_appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue[i], includeRemove);
-										includeRemove = true;
-									}
-								} else {
-									_appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, false);
-								}
-							} else {
-								_appendCalculatedSettingRow(valueCell, newSettings, settingDef, null, false);
-							}
-
-							if(settingDef.multi_input) {
-								var inputAdder = $('<ul class="board-toolbar"><li class="add-setting-row"><i class="icon-plus icon-white"></i><label>追加</label></li></ul>')
-									.mousedown(function(e) {
-										e.preventDefault();
-										_appendCalculatedSettingRow(valueCell, newSettings, settingDef, null, true);
-									});
-								$(valueCell).siblings('.form-label').append(inputAdder);
-							}
-						}
-						else
-						{
-							var input = $('<input type="text">')
-												.addClass(_toValidateClassString(settingDef.validate, "text-input"))
-												.attr("style", settingDef.style)
-												.appendTo(valueCell).change(function() {
-								if (settingDef.type == "number")
-									newSettings.settings[settingDef.name] = Number($(this).val());
-								else
-									newSettings.settings[settingDef.name] = $(this).val();
-							});
-
-							if(settingDef.name in currentSettingsValues)
-							{
-								input.val(currentSettingsValues[settingDef.name]);
-							}
-						}
-
-						break;
-					}
-				}
-
-				if(!_.isUndefined(settingDef.suffix))
-				{
-					valueCell.append($('<div class="input-suffix">' + settingDef.suffix + '</div>'));
-				}
-
-				if(!_.isUndefined(settingDef.description))
-				{
-					valueCell.append($('<div class="setting-description">' + settingDef.description + '</div>'));
-				}
-			});
-		}
-
-		new DialogBox(form, title, "保存", "キャンセル", function(okcancel)
-		{
-			if (okcancel == "ok") {
-				if(_.isFunction(settingsSavedCallback))
-				{
-					settingsSavedCallback(newSettings);
-				}
-			}
-
-			// Remove colorpick dom objects
-			colorPickerID = 0;
-			$("[id^=collorpicker]").remove();
-		});
-
-		// Create our body
-		var pluginTypeNames = _.keys(pluginTypes);
-		var typeSelect;
-
-		if(pluginTypeNames.length > 1)
-		{
-			var typeRow = createSettingRow("plugin-types", "タイプ");
-			typeSelect = $('<select></select>').appendTo($('<div class="styled-select"></div>').appendTo(typeRow));
-
-			typeSelect.append($("<option>追加するタイプを選択してください。</option>").attr("value", "undefined"));
-
-			_.each(pluginTypes, function(pluginType)
-			{
-				typeSelect.append($("<option></option>").text(pluginType.display_name).attr("value", pluginType.type_name));
-			});
-
-			typeSelect.change(function()
-			{
-				newSettings.type = $(this).val();
-				newSettings.settings = {};
-
-				// Remove all the previous settings
-				_removeSettingsRows();
-
-				selectedType = pluginTypes[typeSelect.val()];
-
-				if(_.isUndefined(selectedType))
-				{
-					$("#setting-row-instance-name").hide();
-					$("#dialog-ok").hide();
-				}
-				else
-				{
-					$("#setting-row-instance-name").show();
-
-					if(selectedType.description && selectedType.description.length > 0)
-					{
-						pluginDescriptionElement.html(selectedType.description).show();
-					}
-					else
-					{
-						pluginDescriptionElement.hide();
-					}
-
-					$("#dialog-ok").show();
-					createSettingsFromDefinition(selectedType.settings);
-				}
-			});
-		}
-		else if(pluginTypeNames.length == 1)
-		{
-			selectedType = pluginTypes[pluginTypeNames[0]];
-			newSettings.type = selectedType.type_name;
-			newSettings.settings = {};
-			createSettingsFromDefinition(selectedType.settings);
-		}
-
-		if(typeSelect)
-		{
-			if(_.isUndefined(currentTypeName))
-			{
-				$("#setting-row-instance-name").hide();
-				$("#dialog-ok").hide();
-			}
-			else
-			{
-				$("#dialog-ok").show();
-				typeSelect.val(currentTypeName).trigger("change");
-			}
-		}
-	}
-
-	// Public API
-	return {
-		createPluginEditor : function(
-					title,
-					pluginTypes,
-					currentInstanceName,
-					currentTypeName,
-					currentSettingsValues,
-					settingsSavedCallback)
-		{
-			createPluginEditor(title, pluginTypes, currentInstanceName, currentTypeName, currentSettingsValues, settingsSavedCallback);
-		}
-	}
+    function _removeSettingsRows()
+    {
+        if($("#setting-row-instance-name").length)
+        {
+            $("#setting-row-instance-name").nextAll().remove();
+        }
+        else
+        {
+            $("#setting-row-plugin-types").nextAll().remove();
+        }
+    }
+
+    function _toValidateClassString(validate, type) {
+        var ret = "";
+        if (!_.isUndefined(validate)) {
+            var types = "";
+            if (!_.isUndefined(type))
+                types = " " + type;
+            ret = "validate[" + validate + "]" + types;
+        }
+        return ret;
+    }
+
+    function _isNumerical(n)
+    {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+
+    function _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, includeRemove)
+    {
+        var input = $('<textarea></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input")).attr("style", settingDef.style);
+
+        if(settingDef.multi_input) {
+            input.change(function() {
+                var arrayInput = [];
+                $(valueCell).find('textarea').each(function() {
+                    var thisVal = $(this).val();
+                    if(thisVal) {
+                        arrayInput = arrayInput.concat(thisVal);
+                    }
+                });
+                newSettings.settings[settingDef.name] = arrayInput;
+            });
+        } else {
+            input.change(function() {
+                newSettings.settings[settingDef.name] = $(this).val();
+            });
+        }
+
+        if(currentValue) {
+            input.val(currentValue);
+        }
+
+        valueEditor.createValueEditor(input);
+
+        var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
+        var wrapperDiv = $('<div class="calculated-setting-row"></div>');
+
+        wrapperDiv.append(input).append(datasourceToolbox);
+
+        var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>データソース</label></li>')
+            .mousedown(function(e) {
+                e.preventDefault();
+                $(input).val("").focus().insertAtCaret("datasources[\"").trigger("freeboard-eval");
+            });
+        datasourceToolbox.append(datasourceTool);
+
+        var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JS EDITOR</label></li>')
+            .mousedown(function(e) {
+                e.preventDefault();
+                jsEditor.displayJSEditor(input.val(), 'javascript', function(result) {
+                    input.val(result);
+                    input.change();
+                });
+            });
+        datasourceToolbox.append(jsEditorTool);
+
+        if(includeRemove) {
+            var removeButton = $('<li class="remove-setting-row"><i class="icon-minus icon-white"></i><label></label></li>')
+                .mousedown(function(e) {
+                    e.preventDefault();
+                    wrapperDiv.remove();
+                    $(valueCell).find('textarea:first').change();
+            });
+            datasourceToolbox.prepend(removeButton);
+        }
+
+        $(valueCell).append(wrapperDiv);
+    }
+
+    function createPluginEditor(title, pluginTypes, currentTypeName, currentSettingsValues, settingsSavedCallback)
+    {
+        var newSettings = {
+            type    : currentTypeName,
+            settings: {}
+        };
+
+        function createSettingRow(name, displayName)
+        {
+            var tr = $('<div id="setting-row-' + name + '" class="form-row"></div>').appendTo(form);
+
+            tr.append('<div class="form-label"><label class="control-label">' + displayName + '</label></div>');
+            return $('<div id="setting-value-container-' + name + '" class="form-value"></div>').appendTo(tr);
+        }
+
+        var selectedType;
+        var form = $('<form id="plugin-editor"></form>');
+
+        var pluginDescriptionElement = $('<div id="plugin-description"></div>').hide();
+        form.append(pluginDescriptionElement);
+
+        function createSettingsFromDefinition(settingsDefs)
+        {
+            var colorPickerID = 0;
+
+            _.each(settingsDefs, function(settingDef)
+            {
+                // Set a default value if one doesn't exist
+                if(!_.isUndefined(settingDef.default_value) && _.isUndefined(currentSettingsValues[settingDef.name]))
+                {
+                    currentSettingsValues[settingDef.name] = settingDef.default_value;
+                }
+
+                var displayName = settingDef.name;
+
+                if(!_.isUndefined(settingDef.display_name))
+                {
+                    displayName = settingDef.display_name;
+                }
+
+                settingDef.style = _.isUndefined(settingDef.style) ? '' : settingDef.style;
+
+                // modify required field name
+                if(!_.isUndefined(settingDef.validate)) {
+                    if (settingDef.validate.indexOf("required") != -1) {
+                        displayName = "* " + displayName;
+                    }
+                }
+
+                var valueCell = createSettingRow(settingDef.name, displayName);
+
+                switch (settingDef.type)
+                {
+                    case "array":
+                    {
+                        var subTableDiv = $('<div class="form-table-value-subtable"></div>').appendTo(valueCell);
+
+                        var subTable = $('<table class="table table-condensed sub-table"></table>').appendTo(subTableDiv);
+                        var subTableHead = $("<thead></thead>").hide().appendTo(subTable);
+                        var subTableHeadRow = $("<tr></tr>").appendTo(subTableHead);
+                        var subTableBody = $('<tbody></tbody>').appendTo(subTable);
+
+                        var currentSubSettingValues = [];
+
+                        // Create our headers
+                        _.each(settingDef.settings, function(subSettingDef)
+                        {
+                            var subsettingDisplayName = subSettingDef.name;
+
+                            if(!_.isUndefined(subSettingDef.display_name))
+                            {
+                                subsettingDisplayName = subSettingDef.display_name;
+                            }
+
+                            $('<th>' + subsettingDisplayName + '</th>').appendTo(subTableHeadRow);
+                        });
+
+                        if(settingDef.name in currentSettingsValues)
+                        {
+                            currentSubSettingValues = currentSettingsValues[settingDef.name];
+                        }
+
+                        function processHeaderVisibility()
+                        {
+                            if(newSettings.settings[settingDef.name].length > 0)
+                            {
+                                subTableHead.show();
+                            }
+                            else
+                            {
+                                subTableHead.hide();
+                            }
+                        }
+
+                        function createSubsettingRow(subsettingValue)
+                        {
+                            var subsettingRow = $('<tr></tr>').appendTo(subTableBody);
+
+                            var newSetting = {};
+
+                            if(!_.isArray(newSettings.settings[settingDef.name]))
+                            {
+                                newSettings.settings[settingDef.name] = [];
+                            }
+
+                            newSettings.settings[settingDef.name].push(newSetting);
+
+                            _.each(settingDef.settings, function(subSettingDef)
+                            {
+                                var subsettingCol = $('<td></td>').appendTo(subsettingRow);
+                                var subsettingValueString = "";
+
+                                if(!_.isUndefined(subsettingValue[subSettingDef.name]))
+                                {
+                                    subsettingValueString = subsettingValue[subSettingDef.name];
+                                }
+
+                                newSetting[subSettingDef.name] = subsettingValueString;
+
+                                $('<input class="table-row-value" type="text">')
+                                        .addClass(_toValidateClassString(subSettingDef.validate, "text-input"))
+                                        .attr("style", settingDef.style)
+                                        .appendTo(subsettingCol).val(subsettingValueString).change(function()
+                                {
+                                    newSetting[subSettingDef.name] = $(this).val();
+                                });
+                            });
+
+                            subsettingRow.append($('<td class="table-row-operation"></td>').append($('<ul class="board-toolbar"></ul>').append($('<li></li>').append($('<i class="icon-trash icon-white"></i>').click(function()
+                                                {
+                                                    var subSettingIndex = newSettings.settings[settingDef.name].indexOf(newSetting);
+
+                                                    if(subSettingIndex != -1)
+                                                    {
+                                                        newSettings.settings[settingDef.name].splice(subSettingIndex, 1);
+                                                        subsettingRow.remove();
+                                                        processHeaderVisibility();
+                                                    }
+                                                })))));
+
+                            subTableDiv.scrollTop(subTableDiv[0].scrollHeight);
+
+                            processHeaderVisibility();
+                        }
+
+                        $('<div class="table-operation text-button">追加</div>').appendTo(valueCell).click(function()
+                        {
+                            var newSubsettingValue = {};
+
+                            _.each(settingDef.settings, function(subSettingDef)
+                            {
+                                newSubsettingValue[subSettingDef.name] = "";
+                            });
+
+                            createSubsettingRow(newSubsettingValue);
+                        });
+
+                        // Create our rows
+                        _.each(currentSubSettingValues, function(currentSubSettingValue, subSettingIndex)
+                        {
+                            createSubsettingRow(currentSubSettingValue);
+                        });
+
+                        break;
+                    }
+                    case "boolean":
+                    {
+                        newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
+
+                        var onOffSwitch = $('<div class="onoffswitch"><label class="onoffswitch-label" for="' + settingDef.name + '-onoff"><div class="onoffswitch-inner"><span class="on">はい</span><span class="off">いいえ</span></div><div class="onoffswitch-switch"></div></label></div>').appendTo(valueCell);
+
+                        var input = $('<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="' + settingDef.name + '-onoff">').prependTo(onOffSwitch).change(function()
+                        {
+                            newSettings.settings[settingDef.name] = this.checked;
+                        });
+
+                        if(settingDef.name in currentSettingsValues)
+                        {
+                            input.prop("checked", currentSettingsValues[settingDef.name]);
+                        }
+
+                        break;
+                    }
+                    case "option":
+                    {
+                        var defaultValue = currentSettingsValues[settingDef.name];
+
+                        var input = $('<select></select>')
+                                            .addClass(_toValidateClassString(settingDef.validate))
+                                            .attr("style", settingDef.style)
+                                            .appendTo($('<div class="styled-select"></div>')
+                                            .appendTo(valueCell)).change(function()
+                        {
+                            newSettings.settings[settingDef.name] = $(this).val();
+                        });
+
+                        _.each(settingDef.options, function(option)
+                        {
+
+                            var optionName;
+                            var optionValue;
+
+                            if(_.isObject(option))
+                            {
+                                optionName = option.name;
+                                optionValue = option.value;
+                            }
+                            else
+                            {
+                                optionName = option;
+                            }
+
+                            if(_.isUndefined(optionValue))
+                            {
+                                optionValue = optionName;
+                            }
+
+                            if(_.isUndefined(defaultValue))
+                            {
+                                defaultValue = optionValue;
+                            }
+
+                            $("<option></option>").text(optionName).attr("value", optionValue).appendTo(input);
+                        });
+
+                        newSettings.settings[settingDef.name] = defaultValue;
+
+                        if(settingDef.name in currentSettingsValues)
+                        {
+                            input.val(currentSettingsValues[settingDef.name]);
+                        }
+
+                        break;
+                    }
+                    case "color":
+                    {
+                        var curColorPickerID = "picker-" + colorPickerID++;
+                        var thisColorPickerID = "#" + curColorPickerID;
+                        var defaultValue = currentSettingsValues[settingDef.name];
+                        var input = $('<input id="' + curColorPickerID + '" type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell);
+
+                        newSettings.settings[settingDef.name] = defaultValue;
+
+                        $(thisColorPickerID).css({
+                            "border-right":"30px solid green",
+                            "width":"80px"
+                        });
+
+                        $(thisColorPickerID).css('border-color', defaultValue);
+
+                        var defhex = defaultValue;
+                        defhex.replace("#", "");
+
+                        $(thisColorPickerID).colpick({
+                            layout:'hex',
+                            colorScheme:'dark',
+                            color: defhex,
+                            submit:0,
+                            onChange:function(hsb,hex,rgb,el,bySetColor) {
+                                $(el).css('border-color','#'+hex);
+                                newSettings.settings[settingDef.name] = '#'+hex;
+                                if(!bySetColor) {
+                                    $(el).val('#'+hex);
+                                }
+                            }
+                        }).keyup(function(){
+                            $(this).colpickSetColor(this.value);
+                        });
+
+                        if(settingDef.name in currentSettingsValues) {
+                            input.val(currentSettingsValues[settingDef.name]);
+                        }
+
+                        break;
+                    }
+                    case 'json':
+                    {
+                        newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
+
+                        var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>')
+                                .addClass(_toValidateClassString(settingDef.validate, "text-input"))
+                                .attr("style", settingDef.style)
+                                .appendTo(valueCell).change(function()
+                        {
+                            newSettings.settings[settingDef.name] = $(this).val();
+                        });
+
+                        if(settingDef.name in currentSettingsValues)
+                        {
+                            input.val(currentSettingsValues[settingDef.name]);
+                        }
+
+                        valueEditor.createValueEditor(input);
+
+                        var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
+
+                        var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JSON EDITOR</label></li>').mousedown(function(e)
+                        {
+                            e.preventDefault();
+
+                            jsEditor.displayJSEditor(input.val(), 'json', function(result){
+                                input.val(result);
+                                input.change();
+                            });
+                        });
+
+                        $(valueCell).append(datasourceToolbox.append(jsEditorTool));
+
+                        break;
+                    }
+                    default:
+                    {
+                        newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
+
+                        if(settingDef.type == "calculated")
+                        {
+                            if(settingDef.name in currentSettingsValues) {
+                                var currentValue = currentSettingsValues[settingDef.name];
+                                if(settingDef.multi_input && _.isArray(currentValue)) {
+                                    var includeRemove = false;
+                                    for(var i=0; i<currentValue.length; i++) {
+                                        _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue[i], includeRemove);
+                                        includeRemove = true;
+                                    }
+                                } else {
+                                    _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, false);
+                                }
+                            } else {
+                                _appendCalculatedSettingRow(valueCell, newSettings, settingDef, null, false);
+                            }
+
+                            if(settingDef.multi_input) {
+                                var inputAdder = $('<ul class="board-toolbar"><li class="add-setting-row"><i class="icon-plus icon-white"></i><label>追加</label></li></ul>')
+                                    .mousedown(function(e) {
+                                        e.preventDefault();
+                                        _appendCalculatedSettingRow(valueCell, newSettings, settingDef, null, true);
+                                    });
+                                $(valueCell).siblings('.form-label').append(inputAdder);
+                            }
+                        }
+                        else
+                        {
+                            var input = $('<input type="text">')
+                                                .addClass(_toValidateClassString(settingDef.validate, "text-input"))
+                                                .attr("style", settingDef.style)
+                                                .appendTo(valueCell).change(function() {
+                                if (settingDef.type == "number")
+                                    newSettings.settings[settingDef.name] = Number($(this).val());
+                                else
+                                    newSettings.settings[settingDef.name] = $(this).val();
+                            });
+
+                            if(settingDef.name in currentSettingsValues)
+                            {
+                                input.val(currentSettingsValues[settingDef.name]);
+                            }
+                        }
+
+                        break;
+                    }
+                }
+
+                if(!_.isUndefined(settingDef.suffix))
+                {
+                    valueCell.append($('<div class="input-suffix">' + settingDef.suffix + '</div>'));
+                }
+
+                if(!_.isUndefined(settingDef.description))
+                {
+                    valueCell.append($('<div class="setting-description">' + settingDef.description + '</div>'));
+                }
+            });
+        }
+
+        new DialogBox(form, title, "保存", "キャンセル", function(okcancel)
+        {
+            if (okcancel == "ok") {
+                if(_.isFunction(settingsSavedCallback))
+                {
+                    settingsSavedCallback(newSettings);
+                }
+            }
+
+            // Remove colorpick dom objects
+            colorPickerID = 0;
+            $("[id^=collorpicker]").remove();
+        });
+
+        // Create our body
+        var pluginTypeNames = _.keys(pluginTypes);
+        var typeSelect;
+
+        if(pluginTypeNames.length > 1)
+        {
+            var typeRow = createSettingRow("plugin-types", "タイプ");
+            typeSelect = $('<select></select>').appendTo($('<div class="styled-select"></div>').appendTo(typeRow));
+
+            typeSelect.append($("<option>追加するタイプを選択してください。</option>").attr("value", "undefined"));
+
+            _.each(pluginTypes, function(pluginType)
+            {
+                typeSelect.append($("<option></option>").text(pluginType.display_name).attr("value", pluginType.type_name));
+            });
+
+            typeSelect.change(function()
+            {
+                newSettings.type = $(this).val();
+                newSettings.settings = {};
+
+                // Remove all the previous settings
+                _removeSettingsRows();
+
+                selectedType = pluginTypes[typeSelect.val()];
+
+                if(_.isUndefined(selectedType))
+                {
+                    $("#setting-row-instance-name").hide();
+                    $("#dialog-ok").hide();
+                }
+                else
+                {
+                    $("#setting-row-instance-name").show();
+
+                    if(selectedType.description && selectedType.description.length > 0)
+                    {
+                        pluginDescriptionElement.html(selectedType.description).show();
+                    }
+                    else
+                    {
+                        pluginDescriptionElement.hide();
+                    }
+
+                    $("#dialog-ok").show();
+                    createSettingsFromDefinition(selectedType.settings);
+                }
+            });
+        }
+        else if(pluginTypeNames.length == 1)
+        {
+            selectedType = pluginTypes[pluginTypeNames[0]];
+            newSettings.type = selectedType.type_name;
+            newSettings.settings = {};
+            createSettingsFromDefinition(selectedType.settings);
+        }
+
+        if(typeSelect)
+        {
+            if(_.isUndefined(currentTypeName))
+            {
+                $("#setting-row-instance-name").hide();
+                $("#dialog-ok").hide();
+            }
+            else
+            {
+                $("#dialog-ok").show();
+                typeSelect.val(currentTypeName).trigger("change");
+            }
+        }
+    }
+
+    // Public API
+    return {
+        createPluginEditor : function(
+                    title,
+                    pluginTypes,
+                    currentInstanceName,
+                    currentTypeName,
+                    currentSettingsValues,
+                    settingsSavedCallback)
+        {
+            createPluginEditor(title, pluginTypes, currentInstanceName, currentTypeName, currentSettingsValues, settingsSavedCallback);
+        }
+    }
 }
 
 // ┌────────────────────────────────────────────────────────────────────┐ \\
@@ -2718,704 +2718,704 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
 // Jquery plugin to watch for attribute changes
 (function($)
 {
-	function isDOMAttrModifiedSupported()
-	{
-		var p = document.createElement('p');
-		var flag = false;
+    function isDOMAttrModifiedSupported()
+    {
+        var p = document.createElement('p');
+        var flag = false;
 
-		if(p.addEventListener)
-		{
-			p.addEventListener('DOMAttrModified', function()
-			{
-				flag = true
-			}, false);
-		}
-		else if(p.attachEvent)
-		{
-			p.attachEvent('onDOMAttrModified', function()
-			{
-				flag = true
-			});
-		}
-		else
-		{
-			return false;
-		}
+        if(p.addEventListener)
+        {
+            p.addEventListener('DOMAttrModified', function()
+            {
+                flag = true
+            }, false);
+        }
+        else if(p.attachEvent)
+        {
+            p.attachEvent('onDOMAttrModified', function()
+            {
+                flag = true
+            });
+        }
+        else
+        {
+            return false;
+        }
 
-		p.setAttribute('id', 'target');
+        p.setAttribute('id', 'target');
 
-		return flag;
-	}
+        return flag;
+    }
 
-	function checkAttributes(chkAttr, e)
-	{
-		if(chkAttr)
-		{
-			var attributes = this.data('attr-old-value');
+    function checkAttributes(chkAttr, e)
+    {
+        if(chkAttr)
+        {
+            var attributes = this.data('attr-old-value');
 
-			if(e.attributeName.indexOf('style') >= 0)
-			{
-				if(!attributes['style'])
-				{
-					attributes['style'] = {};
-				} //initialize
-				var keys = e.attributeName.split('.');
-				e.attributeName = keys[0];
-				e.oldValue = attributes['style'][keys[1]]; //old value
-				e.newValue = keys[1] + ':' + this.prop("style")[$.camelCase(keys[1])]; //new value
-				attributes['style'][keys[1]] = e.newValue;
-			}
-			else
-			{
-				e.oldValue = attributes[e.attributeName];
-				e.newValue = this.attr(e.attributeName);
-				attributes[e.attributeName] = e.newValue;
-			}
+            if(e.attributeName.indexOf('style') >= 0)
+            {
+                if(!attributes['style'])
+                {
+                    attributes['style'] = {};
+                } //initialize
+                var keys = e.attributeName.split('.');
+                e.attributeName = keys[0];
+                e.oldValue = attributes['style'][keys[1]]; //old value
+                e.newValue = keys[1] + ':' + this.prop("style")[$.camelCase(keys[1])]; //new value
+                attributes['style'][keys[1]] = e.newValue;
+            }
+            else
+            {
+                e.oldValue = attributes[e.attributeName];
+                e.newValue = this.attr(e.attributeName);
+                attributes[e.attributeName] = e.newValue;
+            }
 
-			this.data('attr-old-value', attributes); //update the old value object
-		}
-	}
+            this.data('attr-old-value', attributes); //update the old value object
+        }
+    }
 
-	//initialize Mutation Observer
-	var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+    //initialize Mutation Observer
+    var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
-	$.fn.attrchange = function(o)
-	{
+    $.fn.attrchange = function(o)
+    {
 
-		var cfg = {
-			trackValues: false,
-			callback   : $.noop
-		};
+        var cfg = {
+            trackValues: false,
+            callback   : $.noop
+        };
 
-		//for backward compatibility
-		if(typeof o === "function")
-		{
-			cfg.callback = o;
-		}
-		else
-		{
-			$.extend(cfg, o);
-		}
+        //for backward compatibility
+        if(typeof o === "function")
+        {
+            cfg.callback = o;
+        }
+        else
+        {
+            $.extend(cfg, o);
+        }
 
-		if(cfg.trackValues)
-		{ //get attributes old value
-			$(this).each(function(i, el)
-			{
-				var attributes = {};
-				for(var attr, i = 0, attrs = el.attributes, l = attrs.length; i < l; i++)
-				{
-					attr = attrs.item(i);
-					attributes[attr.nodeName] = attr.value;
-				}
+        if(cfg.trackValues)
+        { //get attributes old value
+            $(this).each(function(i, el)
+            {
+                var attributes = {};
+                for(var attr, i = 0, attrs = el.attributes, l = attrs.length; i < l; i++)
+                {
+                    attr = attrs.item(i);
+                    attributes[attr.nodeName] = attr.value;
+                }
 
-				$(this).data('attr-old-value', attributes);
-			});
-		}
+                $(this).data('attr-old-value', attributes);
+            });
+        }
 
-		if(MutationObserver)
-		{ //Modern Browsers supporting MutationObserver
-			/*
-			 Mutation Observer is still new and not supported by all browsers.
-			 http://lists.w3.org/Archives/Public/public-webapps/2011JulSep/1622.html
-			 */
-			var mOptions = {
-				subtree          : false,
-				attributes       : true,
-				attributeOldValue: cfg.trackValues
-			};
+        if(MutationObserver)
+        { //Modern Browsers supporting MutationObserver
+            /*
+             Mutation Observer is still new and not supported by all browsers.
+             http://lists.w3.org/Archives/Public/public-webapps/2011JulSep/1622.html
+             */
+            var mOptions = {
+                subtree          : false,
+                attributes       : true,
+                attributeOldValue: cfg.trackValues
+            };
 
-			var observer = new MutationObserver(function(mutations)
-			{
-				mutations.forEach(function(e)
-				{
-					var _this = e.target;
+            var observer = new MutationObserver(function(mutations)
+            {
+                mutations.forEach(function(e)
+                {
+                    var _this = e.target;
 
-					//get new value if trackValues is true
-					if(cfg.trackValues)
-					{
-						/**
-						 * @KNOWN_ISSUE: The new value is buggy for STYLE attribute as we don't have
-						 * any additional information on which style is getting updated.
-						 * */
-						e.newValue = $(_this).attr(e.attributeName);
-					}
+                    //get new value if trackValues is true
+                    if(cfg.trackValues)
+                    {
+                        /**
+                         * @KNOWN_ISSUE: The new value is buggy for STYLE attribute as we don't have
+                         * any additional information on which style is getting updated.
+                         * */
+                        e.newValue = $(_this).attr(e.attributeName);
+                    }
 
-					cfg.callback.call(_this, e);
-				});
-			});
+                    cfg.callback.call(_this, e);
+                });
+            });
 
-			return this.each(function()
-			{
-				observer.observe(this, mOptions);
-			});
-		}
-		else if(isDOMAttrModifiedSupported())
-		{ //Opera
-			//Good old Mutation Events but the performance is no good
-			//http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
-			return this.on('DOMAttrModified', function(event)
-			{
-				if(event.originalEvent)
-				{
-					event = event.originalEvent;
-				} //jQuery normalization is not required for us
-				event.attributeName = event.attrName; //property names to be consistent with MutationObserver
-				event.oldValue = event.prevValue; //property names to be consistent with MutationObserver
-				cfg.callback.call(this, event);
-			});
-		}
-		else if('onpropertychange' in document.body)
-		{ //works only in IE
-			return this.on('propertychange', function(e)
-			{
-				e.attributeName = window.event.propertyName;
-				//to set the attr old value
-				checkAttributes.call($(this), cfg.trackValues, e);
-				cfg.callback.call(this, e);
-			});
-		}
+            return this.each(function()
+            {
+                observer.observe(this, mOptions);
+            });
+        }
+        else if(isDOMAttrModifiedSupported())
+        { //Opera
+            //Good old Mutation Events but the performance is no good
+            //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
+            return this.on('DOMAttrModified', function(event)
+            {
+                if(event.originalEvent)
+                {
+                    event = event.originalEvent;
+                } //jQuery normalization is not required for us
+                event.attributeName = event.attrName; //property names to be consistent with MutationObserver
+                event.oldValue = event.prevValue; //property names to be consistent with MutationObserver
+                cfg.callback.call(this, event);
+            });
+        }
+        else if('onpropertychange' in document.body)
+        { //works only in IE
+            return this.on('propertychange', function(e)
+            {
+                e.attributeName = window.event.propertyName;
+                //to set the attr old value
+                checkAttributes.call($(this), cfg.trackValues, e);
+                cfg.callback.call(this, e);
+            });
+        }
 
-		return this;
-	}
+        return this;
+    }
 })(jQuery);
 
 (function(jQuery) {
 
-	jQuery.eventEmitter = {
-		_JQInit: function() {
-			this._JQ = jQuery(this);
-		},
-		emit: function(evt, data) {
-			!this._JQ && this._JQInit();
-			this._JQ.trigger(evt, data);
-		},
-		once: function(evt, handler) {
-			!this._JQ && this._JQInit();
-			this._JQ.one(evt, handler);
-		},
-		on: function(evt, handler) {
-			!this._JQ && this._JQInit();
-			this._JQ.bind(evt, handler);
-		},
-		off: function(evt, handler) {
-			!this._JQ && this._JQInit();
-			this._JQ.unbind(evt, handler);
-		}
-	};
+    jQuery.eventEmitter = {
+        _JQInit: function() {
+            this._JQ = jQuery(this);
+        },
+        emit: function(evt, data) {
+            !this._JQ && this._JQInit();
+            this._JQ.trigger(evt, data);
+        },
+        once: function(evt, handler) {
+            !this._JQ && this._JQInit();
+            this._JQ.one(evt, handler);
+        },
+        on: function(evt, handler) {
+            !this._JQ && this._JQInit();
+            this._JQ.bind(evt, handler);
+        },
+        off: function(evt, handler) {
+            !this._JQ && this._JQInit();
+            this._JQ.unbind(evt, handler);
+        }
+    };
 
 }(jQuery));
 
 var freeboard = (function()
 {
-	var browsername;
-	var datasourcePlugins = {};
-	var widgetPlugins = {};
+    var browsername;
+    var datasourcePlugins = {};
+    var widgetPlugins = {};
 
-	var freeboardUI = new FreeboardUI();
-	var theFreeboardModel = new FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI);
+    var freeboardUI = new FreeboardUI();
+    var theFreeboardModel = new FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI);
 
-	var jsEditor = new JSEditor();
-	var valueEditor = new ValueEditor(theFreeboardModel);
-	var pluginEditor = new PluginEditor(jsEditor, valueEditor);
+    var jsEditor = new JSEditor();
+    var valueEditor = new ValueEditor(theFreeboardModel);
+    var pluginEditor = new PluginEditor(jsEditor, valueEditor);
 
-	var developerConsole = new DeveloperConsole(theFreeboardModel);
+    var developerConsole = new DeveloperConsole(theFreeboardModel);
 
-	var currentStyle = {
-		values: {
-			"font-family-light": '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", "Open Sans", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, Arial, sans-serif',
-			"font-family": '"Helvetica Neue", Helvetica, "Open Sans", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, Arial, sans-serif',
-			"color"      : "#d3d4d4",
-			"font-weight": 100
-		}
-	};
+    var currentStyle = {
+        values: {
+            "font-family-light": '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", "Open Sans", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, Arial, sans-serif',
+            "font-family": '"Helvetica Neue", Helvetica, "Open Sans", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, Arial, sans-serif',
+            "color"      : "#d3d4d4",
+            "font-weight": 100
+        }
+    };
 
-	ko.bindingHandlers.pluginEditor = {
-		init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-		{
-			var options = ko.unwrap(valueAccessor());
+    ko.bindingHandlers.pluginEditor = {
+        init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
+        {
+            var options = ko.unwrap(valueAccessor());
 
-			var types = {};
-			var settings = undefined;
-			var title = "";
+            var types = {};
+            var settings = undefined;
+            var title = "";
 
-			if(options.type == 'datasource')
-			{
-				types = datasourcePlugins;
-				title = "データソース";
-			}
-			else if(options.type == 'widget')
-			{
-				types = widgetPlugins;
-				title = "ウィジェット";
-			}
-			else if(options.type == 'pane')
-			{
-				title = "ペイン";
-			}
+            if(options.type == 'datasource')
+            {
+                types = datasourcePlugins;
+                title = $.i18n.t('dataSource.title');
+            }
+            else if(options.type == 'widget')
+            {
+                types = widgetPlugins;
+                title = "ウィジェット";
+            }
+            else if(options.type == 'pane')
+            {
+                title = $.i18n.t('panel.title');
+            }
 
-			$(element).click(function(event)
-			{
-				if(options.operation == 'delete')
-				{
-					var phraseElement = $('<p>' + title + ' を削除してもよろしいですか？</p>');
-					new DialogBox(phraseElement, "削除確認", "はい", "いいえ", function(okcancel)
-					{
-						if (okcancel == 'ok') {
-							if(options.type == 'datasource')
-							{
-								theFreeboardModel.deleteDatasource(viewModel);
-							}
-							else if(options.type == 'widget')
-							{
-								theFreeboardModel.deleteWidget(viewModel);
-							}
-							else if(options.type == 'pane')
-							{
-								theFreeboardModel.deletePane(viewModel);
-							}
-						}
-					});
-				}
-				else
-				{
-					var instanceType = undefined;
+            $(element).click(function(event)
+            {
+                if(options.operation == 'delete')
+                {
+                    var phraseElement = $('<p>' + title + ' を削除してもよろしいですか？</p>');
+                    new DialogBox(phraseElement, "削除確認", "はい", "いいえ", function(okcancel)
+                    {
+                        if (okcancel == 'ok') {
+                            if(options.type == 'datasource')
+                            {
+                                theFreeboardModel.deleteDatasource(viewModel);
+                            }
+                            else if(options.type == 'widget')
+                            {
+                                theFreeboardModel.deleteWidget(viewModel);
+                            }
+                            else if(options.type == 'pane')
+                            {
+                                theFreeboardModel.deletePane(viewModel);
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    var instanceType = undefined;
 
-					if(options.type == 'datasource')
-					{
-						if(options.operation == 'add')
-						{
-							settings = {};
-						}
-						else
-						{
-							instanceType = viewModel.type();
-							settings = viewModel.settings();
-							settings.name = viewModel.name();
-							viewModel.isEditing(true);
-						}
-					}
-					else if(options.type == 'widget')
-					{
-						if(options.operation == 'add')
-						{
-							settings = {};
-						}
-						else
-						{
-							instanceType = viewModel.type();
-							settings = viewModel.settings();
-							viewModel.isEditing(true);
-						}
-					}
-					else if(options.type == 'pane')
-					{
-						settings = {};
+                    if(options.type == 'datasource')
+                    {
+                        if(options.operation == 'add')
+                        {
+                            settings = {};
+                        }
+                        else
+                        {
+                            instanceType = viewModel.type();
+                            settings = viewModel.settings();
+                            settings.name = viewModel.name();
+                            viewModel.isEditing(true);
+                        }
+                    }
+                    else if(options.type == 'widget')
+                    {
+                        if(options.operation == 'add')
+                        {
+                            settings = {};
+                        }
+                        else
+                        {
+                            instanceType = viewModel.type();
+                            settings = viewModel.settings();
+                            viewModel.isEditing(true);
+                        }
+                    }
+                    else if(options.type == 'pane')
+                    {
+                        settings = {};
 
-						if(options.operation == 'edit')
-						{
-							settings.title = viewModel.title();
-							settings.col_width = viewModel.col_width();
-						}
+                        if(options.operation == 'edit')
+                        {
+                            settings.title = viewModel.title();
+                            settings.col_width = viewModel.col_width();
+                        }
 
-						types = {
-							settings: {
-								settings: [
-									{
-										name: "title",
-										display_name: "タイトル",
-										validate: "optional,maxSize[100]",
-										type: "text",
-										description: "最大100文字"
-									},
-									{
-										name : "col_width",
-										display_name : "カラム幅",
-										validate: "required,custom[integer],min[1],max[10]",
-										style: "width:100px",
-										type: "number",
-										default_value : 1,
-										description: "最大10ブロック"
-									}
-								]
-							}
-						}
-					}
+                        types = {
+                            settings: {
+                                settings: [
+                                    {
+                                        name: "title",
+                                        display_name: "タイトル",
+                                        validate: "optional,maxSize[100]",
+                                        type: "text",
+                                        description: "最大100文字"
+                                    },
+                                    {
+                                        name : "col_width",
+                                        display_name : "カラム幅",
+                                        validate: "required,custom[integer],min[1],max[10]",
+                                        style: "width:100px",
+                                        type: "number",
+                                        default_value : 1,
+                                        description: "最大10ブロック"
+                                    }
+                                ]
+                            }
+                        }
+                    }
 
-					pluginEditor.createPluginEditor(title, types, instanceType, settings, function(newSettings)
-					{
-						if(options.operation == 'add')
-						{
-							if(options.type == 'datasource')
-							{
-								var newViewModel = new DatasourceModel(theFreeboardModel, datasourcePlugins);
-								theFreeboardModel.addDatasource(newViewModel);
+                    pluginEditor.createPluginEditor(title, types, instanceType, settings, function(newSettings)
+                    {
+                        if(options.operation == 'add')
+                        {
+                            if(options.type == 'datasource')
+                            {
+                                var newViewModel = new DatasourceModel(theFreeboardModel, datasourcePlugins);
+                                theFreeboardModel.addDatasource(newViewModel);
 
-								newViewModel.name(newSettings.settings.name);
-								delete newSettings.settings.name;
+                                newViewModel.name(newSettings.settings.name);
+                                delete newSettings.settings.name;
 
-								newViewModel.settings(newSettings.settings);
-								newViewModel.type(newSettings.type);
-							}
-							else if(options.type == 'widget')
-							{
-								var newViewModel = new WidgetModel(theFreeboardModel, widgetPlugins);
-								newViewModel.settings(newSettings.settings);
-								newViewModel.type(newSettings.type);
+                                newViewModel.settings(newSettings.settings);
+                                newViewModel.type(newSettings.type);
+                            }
+                            else if(options.type == 'widget')
+                            {
+                                var newViewModel = new WidgetModel(theFreeboardModel, widgetPlugins);
+                                newViewModel.settings(newSettings.settings);
+                                newViewModel.type(newSettings.type);
 
-								viewModel.widgets.push(newViewModel);
+                                viewModel.widgets.push(newViewModel);
 
-								freeboardUI.attachWidgetEditIcons(element);
-							}
-						}
-						else if(options.operation == 'edit')
-						{
-							if(options.type == 'pane')
-							{
-								viewModel.title(newSettings.settings.title);
-								viewModel.col_width(newSettings.settings.col_width);
-								freeboardUI.processResize(false);
-							}
-							else
-							{
-								if(options.type == 'datasource')
-								{
-									if (viewModel.name() != newSettings.settings.name) {
-										theFreeboardModel.updateDatasourceNameRef(newSettings.settings.name, viewModel.name());
-									}
-									viewModel.name(newSettings.settings.name);
-									delete newSettings.settings.name;
-								}
-								viewModel.isEditing(false);
-								viewModel.type(newSettings.type);
-								viewModel.settings(newSettings.settings);
-							}
-						}
-					});
-				}
-			});
-		}
-	}
+                                freeboardUI.attachWidgetEditIcons(element);
+                            }
+                        }
+                        else if(options.operation == 'edit')
+                        {
+                            if(options.type == 'pane')
+                            {
+                                viewModel.title(newSettings.settings.title);
+                                viewModel.col_width(newSettings.settings.col_width);
+                                freeboardUI.processResize(false);
+                            }
+                            else
+                            {
+                                if(options.type == 'datasource')
+                                {
+                                    if (viewModel.name() != newSettings.settings.name) {
+                                        theFreeboardModel.updateDatasourceNameRef(newSettings.settings.name, viewModel.name());
+                                    }
+                                    viewModel.name(newSettings.settings.name);
+                                    delete newSettings.settings.name;
+                                }
+                                viewModel.isEditing(false);
+                                viewModel.type(newSettings.type);
+                                viewModel.settings(newSettings.settings);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
 
-	ko.virtualElements.allowedBindings.datasourceTypeSettings = true;
-	ko.bindingHandlers.datasourceTypeSettings = {
-		update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-		{
-			processPluginSettings(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext);
-		}
-	}
+    ko.virtualElements.allowedBindings.datasourceTypeSettings = true;
+    ko.bindingHandlers.datasourceTypeSettings = {
+        update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
+        {
+            processPluginSettings(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext);
+        }
+    }
 
-	ko.bindingHandlers.pane = {
-		init  : function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-		{
-			if(theFreeboardModel.isEditing())
-			{
-				$(element).css({cursor: "pointer"});
-			}
+    ko.bindingHandlers.pane = {
+        init  : function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
+        {
+            if(theFreeboardModel.isEditing())
+            {
+                $(element).css({cursor: "pointer"});
+            }
 
-			freeboardUI.addPane(element, viewModel, bindingContext.$root.isEditing());
-		},
-		update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-		{
-			// If pane has been removed
-			if(theFreeboardModel.panes.indexOf(viewModel) == -1)
-			{
-				freeboardUI.removePane(element);
-			}
-			freeboardUI.updatePane(element, viewModel);
-		}
-	}
+            freeboardUI.addPane(element, viewModel, bindingContext.$root.isEditing());
+        },
+        update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
+        {
+            // If pane has been removed
+            if(theFreeboardModel.panes.indexOf(viewModel) == -1)
+            {
+                freeboardUI.removePane(element);
+            }
+            freeboardUI.updatePane(element, viewModel);
+        }
+    }
 
-	ko.bindingHandlers.widget = {
-		init  : function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-		{
-			if(theFreeboardModel.isEditing())
-			{
-				freeboardUI.attachWidgetEditIcons($(element).parent());
-			}
-		},
-		update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-		{
-			if(viewModel.shouldRender())
-			{
-				$(element).empty();
-				viewModel.render(element);
-			}
-		}
-	}
+    ko.bindingHandlers.widget = {
+        init  : function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
+        {
+            if(theFreeboardModel.isEditing())
+            {
+                freeboardUI.attachWidgetEditIcons($(element).parent());
+            }
+        },
+        update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
+        {
+            if(viewModel.shouldRender())
+            {
+                $(element).empty();
+                viewModel.render(element);
+            }
+        }
+    }
 
-	/**
-	 *  Get the Browser name
-	 *
-	 *  @return     browsername(ie6、ie7、ie8、ie9、ie10、ie11、chrome、safari、opera、firefox、unknown)
-	 *
-	 */
-	var getBrowser = function(){
-		var ua = window.navigator.userAgent.toLowerCase();
-		var ver = window.navigator.appVersion.toLowerCase();
-		var name = 'unknown';
+    /**
+     *  Get the Browser name
+     *
+     *  @return     browsername(ie6、ie7、ie8、ie9、ie10、ie11、chrome、safari、opera、firefox、unknown)
+     *
+     */
+    var getBrowser = function(){
+        var ua = window.navigator.userAgent.toLowerCase();
+        var ver = window.navigator.appVersion.toLowerCase();
+        var name = 'unknown';
 
-		if (ua.indexOf("msie") != -1){
-			if (ver.indexOf("msie 6.") != -1){
-				name = 'ie6';
-			}else if (ver.indexOf("msie 7.") != -1){
-				name = 'ie7';
-			}else if (ver.indexOf("msie 8.") != -1){
-				name = 'ie8';
-			}else if (ver.indexOf("msie 9.") != -1){
-				name = 'ie9';
-			}else if (ver.indexOf("msie 10.") != -1){
-				name = 'ie10';
-			}else{
-				name = 'ie';
-			}
-		}else if(ua.indexOf('trident/7') != -1){
-			name = 'ie11';
-		}else if (ua.indexOf('chrome') != -1){
-			name = 'chrome';
-		}else if (ua.indexOf('safari') != -1){
-			name = 'safari';
-		}else if (ua.indexOf('opera') != -1){
-			name = 'opera';
-		}else if (ua.indexOf('firefox') != -1){
-			name = 'firefox';
-		}
-		return name;
-	};
+        if (ua.indexOf("msie") != -1){
+            if (ver.indexOf("msie 6.") != -1){
+                name = 'ie6';
+            }else if (ver.indexOf("msie 7.") != -1){
+                name = 'ie7';
+            }else if (ver.indexOf("msie 8.") != -1){
+                name = 'ie8';
+            }else if (ver.indexOf("msie 9.") != -1){
+                name = 'ie9';
+            }else if (ver.indexOf("msie 10.") != -1){
+                name = 'ie10';
+            }else{
+                name = 'ie';
+            }
+        }else if(ua.indexOf('trident/7') != -1){
+            name = 'ie11';
+        }else if (ua.indexOf('chrome') != -1){
+            name = 'chrome';
+        }else if (ua.indexOf('safari') != -1){
+            name = 'safari';
+        }else if (ua.indexOf('opera') != -1){
+            name = 'opera';
+        }else if (ua.indexOf('firefox') != -1){
+            name = 'firefox';
+        }
+        return name;
+    };
 
-	/**
-	 *  Determining whether the corresponding browser
-	 *
-	 *  @param  browsers    supported browser name in the array(ie6、ie7、ie8、ie9、ie10、ie11、chrome、safari、opera、firefox)
-	 *  @return             returns whether support is in true / false
-	 *
-	 */
-	var isSupported = function(browsers){
-		var thusBrowser = getBrowser();
-		for(var i=0; i<browsers.length; i++){
-			if(browsers[i] == thusBrowser){
-				return true;
-				exit;
-			}
-		}
-		return false;
-	};
+    /**
+     *  Determining whether the corresponding browser
+     *
+     *  @param  browsers    supported browser name in the array(ie6、ie7、ie8、ie9、ie10、ie11、chrome、safari、opera、firefox)
+     *  @return             returns whether support is in true / false
+     *
+     */
+    var isSupported = function(browsers){
+        var thusBrowser = getBrowser();
+        for(var i=0; i<browsers.length; i++){
+            if(browsers[i] == thusBrowser){
+                return true;
+                exit;
+            }
+        }
+        return false;
+    };
 
-	function getParameterByName(name)
-	{
-		name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-		var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
-		return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-	}
+    function getParameterByName(name)
+    {
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
 
-	$(function()
-	{ //DOM Ready
-		// Show the loading indicator when we first load
-		freeboardUI.showLoadingIndicator(true);
+    $(function()
+    { //DOM Ready
+        // Show the loading indicator when we first load
+        freeboardUI.showLoadingIndicator(true);
 
-		$(window).resize(_.debounce(function() {
-			freeboardUI.processResize(true);
-		}, 500));
-	});
+        $(window).resize(_.debounce(function() {
+            freeboardUI.processResize(true);
+        }, 500));
+    });
 
-	// PUBLIC FUNCTIONS
-	return {
-		initialize          : function(allowEdit, finishedCallback)
-		{
-			freeboard.browsername = getBrowser();
+    // PUBLIC FUNCTIONS
+    return {
+        initialize          : function(allowEdit, finishedCallback)
+        {
+            freeboard.browsername = getBrowser();
 
-			// Check to see if we have a query param called load. If so, we should load that dashboard initially
-			var freeboardLocation = getParameterByName("load");
+            // Check to see if we have a query param called load. If so, we should load that dashboard initially
+            var freeboardLocation = getParameterByName("load");
 
-			if(freeboardLocation != "")
-			{
-				ko.applyBindings(theFreeboardModel);
+            if(freeboardLocation != "")
+            {
+                ko.applyBindings(theFreeboardModel);
 
-				$.ajax({
-					url    : freeboardLocation,
-					success: function(data)
-					{
-						theFreeboardModel.loadDashboard(data);
+                $.ajax({
+                    url    : freeboardLocation,
+                    success: function(data)
+                    {
+                        theFreeboardModel.loadDashboard(data);
 
-						if(_.isFunction(finishedCallback))
-						{
-							finishedCallback();
-						}
-					}
-				});
-			}
-			else
-			{
-				theFreeboardModel.allow_edit(allowEdit);
+                        if(_.isFunction(finishedCallback))
+                        {
+                            finishedCallback();
+                        }
+                    }
+                });
+            }
+            else
+            {
+                theFreeboardModel.allow_edit(allowEdit);
 
-				ko.applyBindings(theFreeboardModel);
+                ko.applyBindings(theFreeboardModel);
 
-				theFreeboardModel.setEditing(allowEdit);
+                theFreeboardModel.setEditing(allowEdit);
 
-				freeboardUI.showLoadingIndicator(false);
-				if(_.isFunction(finishedCallback))
-				{
-					finishedCallback();
-				}
+                freeboardUI.showLoadingIndicator(false);
+                if(_.isFunction(finishedCallback))
+                {
+                    finishedCallback();
+                }
 
-				freeboard.emit("initialized");
-			}
-		},
-		newDashboard        : function()
-		{
-			theFreeboardModel.loadDashboard({allow_edit: true});
-		},
-		loadDashboard       : function(configuration, callback)
-		{
-			theFreeboardModel.loadDashboard(configuration, callback);
-		},
-		serialize           : function()
-		{
-			return theFreeboardModel.serialize();
-		},
-		setEditing          : function(editing, animate)
-		{
-			theFreeboardModel.setEditing(editing, animate);
-		},
-		isEditing           : function()
-		{
-			return theFreeboardModel.isEditing();
-		},
-		loadDatasourcePlugin: function(plugin)
-		{
-			if(_.isUndefined(plugin.display_name))
-			{
-				plugin.display_name = plugin.type_name;
-			}
+                freeboard.emit("initialized");
+            }
+        },
+        newDashboard        : function()
+        {
+            theFreeboardModel.loadDashboard({allow_edit: true});
+        },
+        loadDashboard       : function(configuration, callback)
+        {
+            theFreeboardModel.loadDashboard(configuration, callback);
+        },
+        serialize           : function()
+        {
+            return theFreeboardModel.serialize();
+        },
+        setEditing          : function(editing, animate)
+        {
+            theFreeboardModel.setEditing(editing, animate);
+        },
+        isEditing           : function()
+        {
+            return theFreeboardModel.isEditing();
+        },
+        loadDatasourcePlugin: function(plugin)
+        {
+            if(_.isUndefined(plugin.display_name))
+            {
+                plugin.display_name = plugin.type_name;
+            }
 
-			// Datasource name must be unique
-			window.freeboard.isUniqueDatasourceName = function(field, rules, i, options) {
-				var res = _.find(theFreeboardModel.datasources(), function(datasource) {
-					// except itself
-					if (datasource.isEditing() == false)
-						return datasource.name() == field.val();
-				});
-				if (!_.isUndefined(res))
-					return options.allrules.alreadyusedname.alertText;
-			}
+            // Datasource name must be unique
+            window.freeboard.isUniqueDatasourceName = function(field, rules, i, options) {
+                var res = _.find(theFreeboardModel.datasources(), function(datasource) {
+                    // except itself
+                    if (datasource.isEditing() == false)
+                        return datasource.name() == field.val();
+                });
+                if (!_.isUndefined(res))
+                    return options.allrules.alreadyusedname.alertText;
+            }
 
-			// Add a required setting called name to the beginning
-			plugin.settings.unshift({
-				name : "name",
-				display_name : "名前",
-				validate: "funcCall[freeboard.isUniqueDatasourceName],required,maxSize[100]",
-				type: "text",
-				description: "最大100文字まで"
-			});
+            // Add a required setting called name to the beginning
+            plugin.settings.unshift({
+                name : "name",
+                display_name : "名前",
+                validate: "funcCall[freeboard.isUniqueDatasourceName],required,maxSize[100]",
+                type: "text",
+                description: "最大100文字まで"
+            });
 
-			theFreeboardModel.addPluginSource(plugin.source);
-			datasourcePlugins[plugin.type_name] = plugin;
-			theFreeboardModel._datasourceTypes.valueHasMutated();
-		},
-		resize : function()
-		{
-			freeboardUI.processResize(true);
-		},
-		loadWidgetPlugin    : function(plugin)
-		{
-			if(_.isUndefined(plugin.display_name))
-			{
-				plugin.display_name = plugin.type_name;
-			}
+            theFreeboardModel.addPluginSource(plugin.source);
+            datasourcePlugins[plugin.type_name] = plugin;
+            theFreeboardModel._datasourceTypes.valueHasMutated();
+        },
+        resize : function()
+        {
+            freeboardUI.processResize(true);
+        },
+        loadWidgetPlugin    : function(plugin)
+        {
+            if(_.isUndefined(plugin.display_name))
+            {
+                plugin.display_name = plugin.type_name;
+            }
 
-			theFreeboardModel.addPluginSource(plugin.source);
-			widgetPlugins[plugin.type_name] = plugin;
-			theFreeboardModel._widgetTypes.valueHasMutated();
-		},
-		// To be used if freeboard is going to load dynamic assets from a different root URL
-		setAssetRoot        : function(assetRoot)
-		{
-			jsEditor.setAssetRoot(assetRoot);
-		},
-		addStyle            : function(selector, rules)
-		{
-			var styleString = selector + "{" + rules + "}";
+            theFreeboardModel.addPluginSource(plugin.source);
+            widgetPlugins[plugin.type_name] = plugin;
+            theFreeboardModel._widgetTypes.valueHasMutated();
+        },
+        // To be used if freeboard is going to load dynamic assets from a different root URL
+        setAssetRoot        : function(assetRoot)
+        {
+            jsEditor.setAssetRoot(assetRoot);
+        },
+        addStyle            : function(selector, rules)
+        {
+            var styleString = selector + "{" + rules + "}";
 
-			var styleElement = $("style#fb-styles");
+            var styleElement = $("style#fb-styles");
 
-			if(styleElement.length == 0)
-			{
-				styleElement = $('<style id="fb-styles" type="text/css"></style>');
-				$("head").append(styleElement);
-			}
+            if(styleElement.length == 0)
+            {
+                styleElement = $('<style id="fb-styles" type="text/css"></style>');
+                $("head").append(styleElement);
+            }
 
-			if(styleElement[0].styleSheet)
-			{
-				styleElement[0].styleSheet.cssText += styleString;
-			}
-			else
-			{
-				styleElement.text(styleElement.text() + styleString);
-			}
-		},
-		showLoadingIndicator: function(show)
-		{
-			freeboardUI.showLoadingIndicator(show);
-		},
-		showDialog          : function(contentElement, title, okTitle, cancelTitle, okCallback)
-		{
-			new DialogBox(contentElement, title, okTitle, cancelTitle, okCallback);
-		},
-		getDatasourceSettings : function(datasourceName)
-		{
-			var datasources = theFreeboardModel.datasources();
+            if(styleElement[0].styleSheet)
+            {
+                styleElement[0].styleSheet.cssText += styleString;
+            }
+            else
+            {
+                styleElement.text(styleElement.text() + styleString);
+            }
+        },
+        showLoadingIndicator: function(show)
+        {
+            freeboardUI.showLoadingIndicator(show);
+        },
+        showDialog          : function(contentElement, title, okTitle, cancelTitle, okCallback)
+        {
+            new DialogBox(contentElement, title, okTitle, cancelTitle, okCallback);
+        },
+        getDatasourceSettings : function(datasourceName)
+        {
+            var datasources = theFreeboardModel.datasources();
 
-			// Find the datasource with the name specified
-			var datasource = _.find(datasources, function(datasourceModel){
-				return (datasourceModel.name() === datasourceName);
-			});
+            // Find the datasource with the name specified
+            var datasource = _.find(datasources, function(datasourceModel){
+                return (datasourceModel.name() === datasourceName);
+            });
 
-			if(datasource)
-			{
-				return datasource.settings();
-			}
-			else
-			{
-				return null;
-			}
-		},
-		setDatasourceSettings : function(datasourceName, settings)
-		{
-			var datasources = theFreeboardModel.datasources();
+            if(datasource)
+            {
+                return datasource.settings();
+            }
+            else
+            {
+                return null;
+            }
+        },
+        setDatasourceSettings : function(datasourceName, settings)
+        {
+            var datasources = theFreeboardModel.datasources();
 
-			// Find the datasource with the name specified
-			var datasource = _.find(datasources, function(datasourceModel){
-				return (datasourceModel.name() === datasourceName);
-			});
+            // Find the datasource with the name specified
+            var datasource = _.find(datasources, function(datasourceModel){
+                return (datasourceModel.name() === datasourceName);
+            });
 
-			if(!datasource)
-			{
-				console.log("Datasource not found");
-				return;
-			}
+            if(!datasource)
+            {
+                console.log("Datasource not found");
+                return;
+            }
 
-			var combinedSettings = _.defaults(settings, datasource.settings());
-			datasource.settings(combinedSettings);
-		},
-		getStyleString      : function(name)
-		{
-			var returnString = "";
+            var combinedSettings = _.defaults(settings, datasource.settings());
+            datasource.settings(combinedSettings);
+        },
+        getStyleString      : function(name)
+        {
+            var returnString = "";
 
-			_.each(currentStyle[name], function(value, name)
-			{
-				returnString = returnString + name + ":" + value + ";";
-			});
+            _.each(currentStyle[name], function(value, name)
+            {
+                returnString = returnString + name + ":" + value + ";";
+            });
 
-			return returnString;
-		},
-		getStyleObject      : function(name)
-		{
-			return currentStyle[name];
-		},
-		showDeveloperConsole : function()
-		{
-			developerConsole.showDeveloperConsole();
-		}
-	};
+            return returnString;
+        },
+        getStyleObject      : function(name)
+        {
+            return currentStyle[name];
+        },
+        showDeveloperConsole : function()
+        {
+            developerConsole.showDeveloperConsole();
+        }
+    };
 }());
 
 $.extend(freeboard, jQuery.eventEmitter);
