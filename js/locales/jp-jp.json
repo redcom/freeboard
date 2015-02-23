@@ -1,4 +1,3 @@
-
 {
     "menu": {
         "menu": "menu",
@@ -7,19 +6,59 @@
         "addPanel": "ペイン追加",
         "dataSource": "データソース"
     },
+    "global": {
+        "yes": "はい",
+        "no": "いいえ"
+    },
     "dataSource": {
         "title": "データソース",
         "givenName": "名前",
         "lastUpdated": "最終更新日",
-        "addTo": "追加"
+        "addTo": "追加",
+        "limit100": "A maximum of 100 characters"
     },
     "panel": {
-        "title": "ペイン"
+        "title": "ペイン",
+        "delete": {
+            "title": "削除確認",
+            "text": " を削除してもよろしいですか"
+        },
+        "edit": {
+            "title": "タイトル",
+            "description": "最大100文字,"
+            "colWidth": "カラム幅",
+            "colWidthDescription": "最大10ブロック"
+        }
     },
     "plugins": {
         "clock": {
             "title": "時計"
         }
+    },
+    "widgets": {
+        "title": "ウィジェット"
+    },
+    "JSEditor": {
+        "javascript": {
+            "exampleText": "// 例: 摂氏から華氏へ変換、小数点2桁以下切り捨て。",
+            "codeWindowHeader": "このJavaScriptは、参照データソースが更新されるたびに再評価されます。そして<span class='cm-keyword'>戻り値</span>はウィジェットに表示されます。あなたは関数<code><span class='cm-keyword'>function</span>(<span class='cm-def'>datasources</span>)</code>の中身をJavaScriptで記述することができます。引数datasourcesは追加したデータソースの配列です。"
+
+        },
+        "json": {
+            "exampleText": "// 例: {\n//    \"title\": \"タイトル\"\\n\/\/    \"value\": 10\n}",
+            "codeWindowHeader": "<span class='cm-keyword'>'(ダブルクォーテーション)</span>で括った文字列の中では適切なエスケープシーケンスを使用して下さい。<br>例: 'function(label, series){return (\\\'ID:\\\'+label);}' "
+        },
+        "cancel": "閉じる"
+    },
+    "PluginEditor": {
+        "datasourceTool": "データソース",
+        "tableOperation": "追加",
+        "dialog": {
+            "yes": "保存",
+            "no": "キャンセル"
+        },
+        "type": "タイプ",
+        "firstOption": "追加するタイプを選択してください。"
     }
 
 }
