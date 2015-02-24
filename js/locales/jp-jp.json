@@ -1,0 +1,25 @@
+
+{
+    "menu": {
+        "menu": "menu",
+        "load": "ロー",
+        "save": "保存",
+        "addPanel": "ペイン追加",
+        "dataSource": "データソース"
+    },
+    "dataSource": {
+        "title": "データソース",
+        "givenName": "名前",
+        "lastUpdated": "最終更新日",
+        "addTo": "追加"
+    },
+    "panel": {
+        "title": "ペイン"
+    },
+    "plugins": {
+        "clock": {
+            "title": "時計"
+        }
+    }
+
+}

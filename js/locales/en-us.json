@@ -1,0 +1,25 @@
+
+{
+    "menu": {
+        "menu": "menu",
+        "load": "LOAD",
+        "save": "SAVE",
+        "addPanel": "Add Panel",
+        "dataSource": "Data source"
+    },
+    "dataSource": {
+        "title": "Data source",
+        "givenName": "Given Name",
+        "lastUpdated": "Last updated",
+        "addTo": "Add to"
+    },
+    "panel": {
+        "title": "Pane"
+    },
+    "plugins": {
+        "clock": {
+            "title": "Clock"
+        }
+    }
+
+}

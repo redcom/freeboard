@@ -36,17 +36,18 @@
                 "lib/js/thirdparty/codemirror-csslint.js",
                 "lib/js/thirdparty/colpick.js",
                 "lib/js/thirdparty/webfont.js",
+                "lib/js/thirdparty/i18next-1.7.7.min.js",
 
-                "lib/js/freeboard/freeboardModel.js",
-                "lib/js/freeboard/datasourceModel.js",
-                "lib/js/freeboard/paneModel.js",
-                "lib/js/freeboard/widgetModel.js",
-                "lib/js/freeboard/freeboardUI.js",
-                "lib/js/freeboard/dialogBox.js",
-                "lib/js/freeboard/pluginEditor.js",
-                "lib/js/freeboard/valueEditor.js",
-                "lib/js/freeboard/jsEditor.js",
-                "lib/js/freeboard/developerConsole.js",
+                "lib/js/freeboard/FreeboardModel.js",
+                "lib/js/freeboard/DatasourceModel.js",
+                "lib/js/freeboard/PaneModel.js",
+                "lib/js/freeboard/WidgetModel.js",
+                "lib/js/freeboard/FreeboardUI.js",
+                "lib/js/freeboard/DialogBox.js",
+                "lib/js/freeboard/PluginEditor.js",
+                "lib/js/freeboard/ValueEditor.js",
+                "lib/js/freeboard/JSEditor.js",
+                "lib/js/freeboard/DeveloperConsole.js",
                 "lib/js/freeboard/freeboard.js",
 
                 "plugins/freeboard/freeboard.datasources.js",
@@ -54,12 +55,15 @@
                 "plugins/freeboard/plugin.c3js.js",
                 "examples/wsDataSourcePlugin.js",
 
+                "js/locales/init.js",
+
                 // *** Load more plugins here ***
                 function(){
                     $(function()
                     { //DOM Ready
                         freeboard.setAssetRoot("/freeboard-ui/");
                         freeboard.initialize(true);
+                        freeboard.i18n = "aaa";
 
                         var hashpattern = window.location.hash.match(/(&|#)source=([^&]+)/);
                         if (hashpattern !== null) {
@@ -83,18 +87,18 @@
             </div>
             <div id="board-tools">
                 <div id="board-actions">
-                    <h2 id="menutitle" class="title menu">Menu</h2>
+                    <h2 id="menutitle" class="title menu" data-i18n="menu.menu">Menu</h2>
                     <ul class="board-toolbar collapse">
-                        <li data-bind="click: loadDashboardFromLocalFile"><i id="full-screen-icon" class="icon-folder-open icon-white"></i><label id="full-screen">ロード</label></li>
-                        <li data-bind="click: saveDashboard"><i class="icon-download-alt icon-white"></i><label>保存</label></li>
-                        <li id="add-pane" data-bind="click: createPane"><i class="icon-plus icon-white"></i><label>ペイン追加</label></li>
+                        <li data-bind="click: loadDashboardFromLocalFile"><i id="full-screen-icon" class="icon-folder-open icon-white"></i><label id="full-screen" data-i18n="menu.load">Load</label></li>
+                        <li data-bind="click: saveDashboard"><i class="icon-download-alt icon-white"></i><label data-i18n="menu.save">Save</label></li>
+                        <li id="add-pane" data-bind="click: createPane"><i class="icon-plus icon-white"></i><label data-i18n="menu.addPanel">Add PaneL</label></li>
                     </ul>
                 </div>
             </div>
             <div id="board-configs">
                 <div id="board-actions-right">
                     <ul class="board-toolbar collapse">
-                        <li id="toggle-datasources" data-bind="click: toggleDatasources"><i class="icon-globe icon-white"></i><label>データソース</label></li>
+                        <li id="toggle-datasources" data-bind="click: toggleDatasources"><i class="icon-globe icon-white"></i><label data-i18n="menu.dataSource">Data source</label></li>
                     </ul>
                 </div>
             </div>
@@ -126,7 +130,7 @@
 <div id="datasources" data-bind="if:allow_edit">
     <div class="datasource-container">
         <div class="datasource-container-header">
-            <h2 class="datasource-container-header title">データソース</h2>
+            <h2 class="datasource-container-header title" data-i18n="dataSource.title">Data source</h2>
             <div>
                 <ul class="board-toolbar collapse">
                     <li data-bind="click: toggleDatasources"><i class="icon-remove icon-white"></i></li>
@@ -137,8 +141,8 @@
             <table class="table table-condensed sub-table" id="datasources-list" data-bind="if: datasources().length">
                 <thead>
                 <tr>
-                    <th>名前</th>
-                    <th>最終更新日</th>
+                    <th data-i18n="dataSource.givenName">Given Name</th>
+                    <th data-i18n="dataSource.lastUpdated">Last updated</th>
                     <th>&nbsp;</th>
                 </tr>
                 </thead>
@@ -161,7 +165,7 @@
         </div>
         <div class="datasource-toolbar">
             <ul class="board-toolbar collapse">
-                <li data-bind="pluginEditor: {operation: 'add', type: 'datasource'}"><i class="icon-plus icon-white"></i><label>追加</label></li>
+                <li data-bind="pluginEditor: {operation: 'add', type: 'datasource'}"><i class="icon-plus icon-white"></i><label data-i18n="dataSource.addTo">Add to</label></li>
             </ul>
         </div>
     </div>
