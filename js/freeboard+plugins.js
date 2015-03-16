@@ -9,112 +9,93 @@
 // └────────────────────────────────────────────────────────────────────┘ \\
 
 DatasourceModel = function(theFreeboardModel, datasourcePlugins) {
-	var self = this;
+    var self = this;
 
-	function disposeDatasourceInstance()
-	{
-		if(!_.isUndefined(self.datasourceInstance))
-		{
-			if(_.isFunction(self.datasourceInstance.onDispose))
-			{
-				self.datasourceInstance.onDispose();
-			}
+    function disposeDatasourceInstance() {
+        if (!_.isUndefined(self.datasourceInstance)) {
+            if (_.isFunction(self.datasourceInstance.onDispose)) {
+                self.datasourceInstance.onDispose();
+            }
 
-			self.datasourceInstance = undefined;
-		}
-	}
+            self.datasourceInstance = undefined;
+        }
+    }
 
-	this.isEditing = ko.observable(false); // editing by PluginEditor
-	this.name = ko.observable();
-	this.latestData = ko.observable();
-	this.settings = ko.observable({});
-	this.settings.subscribe(function(newValue)
-	{
-		if(!_.isUndefined(self.datasourceInstance) && _.isFunction(self.datasourceInstance.onSettingsChanged))
-		{
-			self.datasourceInstance.onSettingsChanged(newValue);
-		}
-	});
+    this.isEditing = ko.observable(false); // editing by PluginEditor
+    this.name = ko.observable();
+    this.latestData = ko.observable();
+    this.settings = ko.observable({});
+    this.settings.subscribe(function(newValue) {
+        if (!_.isUndefined(self.datasourceInstance) && _.isFunction(self.datasourceInstance.onSettingsChanged)) {
+            self.datasourceInstance.onSettingsChanged(newValue);
+        }
+    });
 
-	this.updateCallback = function(newData)
-	{
-		theFreeboardModel.processDatasourceUpdate(self, newData);
+    this.updateCallback = function(newData) {
+        theFreeboardModel.processDatasourceUpdate(self, newData);
 
-		self.latestData(newData);
+        self.latestData(newData);
 
-		var now = new Date();
-		self.last_updated(now.toLocaleTimeString());
-	}
+        var now = new Date();
+        self.last_updated(now.toLocaleTimeString());
+    }
 
-	this.type = ko.observable();
-	this.type.subscribe(function(newValue)
-	{
-		disposeDatasourceInstance();
+    this.type = ko.observable();
+    this.type.subscribe(function(newValue) {
+        disposeDatasourceInstance();
 
-		if((newValue in datasourcePlugins) && _.isFunction(datasourcePlugins[newValue].newInstance))
-		{
-			var datasourceType = datasourcePlugins[newValue];
+        if ((newValue in datasourcePlugins) && _.isFunction(datasourcePlugins[newValue].newInstance)) {
+            var datasourceType = datasourcePlugins[newValue];
 
-			function finishLoad()
-			{
-				datasourceType.newInstance(self.settings(), function(datasourceInstance)
-				{
+            function finishLoad() {
+                datasourceType.newInstance(self.settings(), function(datasourceInstance) {
 
-					self.datasourceInstance = datasourceInstance;
-					datasourceInstance.updateNow();
+                    self.datasourceInstance = datasourceInstance;
+                    datasourceInstance.updateNow();
 
-				}, self.updateCallback);
-			}
+                }, self.updateCallback);
+            }
 
-			// Do we need to load any external scripts?
-			if(datasourceType.external_scripts)
-			{
-				head.js(datasourceType.external_scripts.slice(0), finishLoad); // Need to clone the array because head.js adds some weird functions to it
-			}
-			else
-			{
-				finishLoad();
-			}
-		}
-	});
+            // Do we need to load any external scripts?
+            if (datasourceType.external_scripts) {
+                head.js(datasourceType.external_scripts.slice(0), finishLoad); // Need to clone the array because head.js adds some weird functions to it
+            } else {
+                finishLoad();
+            }
+        }
+    });
 
-	this.last_updated = ko.observable("never");
-	this.last_error = ko.observable();
+    this.last_updated = ko.observable("never");
+    this.last_error = ko.observable();
 
-	this.serialize = function()
-	{
-		return {
-			name    : self.name(),
-			type    : self.type(),
-			settings: self.settings()
-		};
-	}
+    this.serialize = function() {
+        return {
+            name: self.name(),
+            type: self.type(),
+            settings: self.settings()
+        };
+    }
 
-	this.deserialize = function(object)
-	{
-		self.settings(object.settings);
-		self.name(object.name);
-		self.type(object.type);
-	}
+    this.deserialize = function(object) {
+        self.settings(object.settings);
+        self.name(object.name);
+        self.type(object.type);
+    }
 
-	this.getDataRepresentation = function(dataPath)
-	{
-		var valueFunction = new Function("data", "return " + dataPath + ";");
-		return valueFunction.call(undefined, self.latestData());
-	}
+    this.getDataRepresentation = function(dataPath) {
+        var valueFunction = new Function("data", "return " + dataPath + ";");
+        return valueFunction.call(undefined, self.latestData());
+    }
 
-	this.updateNow = function()
-	{
-		if(!_.isUndefined(self.datasourceInstance) && _.isFunction(self.datasourceInstance.updateNow))
-		{
-			self.datasourceInstance.updateNow();
-		}
-	}
+    this.updateNow = function() {
+        if (!_.isUndefined(self.datasourceInstance) && _.isFunction(self.datasourceInstance.updateNow)) {
+            self.datasourceInstance.updateNow();
+        }
+    }
 
-	this.dispose = function()
-	{
-		disposeDatasourceInstance();
-	}
+    this.dispose = function() {
+        disposeDatasourceInstance();
+    }
 }
 
 // ┌────────────────────────────────────────────────────────────────────┐ \\
@@ -127,100 +108,92 @@ DatasourceModel = function(theFreeboardModel, datasourcePlugins) {
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
 
-DeveloperConsole = function(theFreeboardModel)
-{
-	function showDeveloperConsole()
-	{
-		var pluginScriptsInputs = [];
-		var container = $('<div></div>');
-		var addScript = $('<div class="table-operation text-button">ADD</div>');
-		var table = $('<table class="table table-condensed sub-table"></table>');
+DeveloperConsole = function(theFreeboardModel) {
+    function showDeveloperConsole() {
+        var pluginScriptsInputs = [];
+        var container = $('<div></div>');
+        var addScript = $('<div class="table-operation text-button">ADD</div>');
+        var table = $('<table class="table table-condensed sub-table"></table>');
 
-		table.append($('<thead style=""><tr><th>Plugin Script URL</th></tr></thead>'));
+        table.append($('<thead style=""><tr><th>Plugin Script URL</th></tr></thead>'));
 
-		var tableBody = $("<tbody></tbody>");
+        var tableBody = $("<tbody></tbody>");
 
-		table.append(tableBody);
+        table.append(tableBody);
 
-		container.append($("<p>Here you can add references to other scripts to load datasource or widget plugins.</p>"))
-			.append(table)
-			.append(addScript)
-			.append('<p>To learn how to build plugins for freeboard, please visit <a target="_blank" href="http://freeboard.github.io/freeboard/docs/plugin_example.html">http://freeboard.github.io/freeboard/docs/plugin_example.html</a></p>');
+        container.append($("<p>Here you can add references to other scripts to load datasource or widget plugins.</p>"))
+            .append(table)
+            .append(addScript)
+            .append('<p>To learn how to build plugins for freeboard, please visit <a target="_blank" href="http://freeboard.github.io/freeboard/docs/plugin_example.html">http://freeboard.github.io/freeboard/docs/plugin_example.html</a></p>');
 
-		function refreshScript(scriptURL)
-		{
-			$('script[src="' + scriptURL + '"]').remove();
-		}
+        function refreshScript(scriptURL) {
+            $('script[src="' + scriptURL + '"]').remove();
+        }
 
-		function addNewScriptRow(scriptURL)
-		{
-			var tableRow = $('<tr></tr>');
-			var tableOperations = $('<ul class="board-toolbar"></ul>');
-			var scriptInput = $('<input class="table-row-value" style="width:100%;" type="text">');
-			var deleteOperation = $('<li><i class="icon-trash icon-white"></i></li>').click(function(e){
-				pluginScriptsInputs = _.without(pluginScriptsInputs, scriptInput);
-				tableRow.remove();
-			});
+        function addNewScriptRow(scriptURL) {
+            var tableRow = $('<tr></tr>');
+            var tableOperations = $('<ul class="board-toolbar"></ul>');
+            var scriptInput = $('<input class="table-row-value" style="width:100%;" type="text">');
+            var deleteOperation = $('<li><i class="icon-trash icon-white"></i></li>').click(function(e) {
+                pluginScriptsInputs = _.without(pluginScriptsInputs, scriptInput);
+                tableRow.remove();
+            });
 
-			pluginScriptsInputs.push(scriptInput);
+            pluginScriptsInputs.push(scriptInput);
 
-			if(scriptURL)
-			{
-				scriptInput.val(scriptURL);
-			}
+            if (scriptURL) {
+                scriptInput.val(scriptURL);
+            }
 
-			tableOperations.append(deleteOperation);
-			tableBody
-				.append(tableRow
-				.append($('<td></td>').append(scriptInput))
-					.append($('<td class="table-row-operation">').append(tableOperations)));
-		}
+            tableOperations.append(deleteOperation);
+            tableBody
+                .append(tableRow
+                    .append($('<td></td>').append(scriptInput))
+                    .append($('<td class="table-row-operation">').append(tableOperations)));
+        }
 
-		_.each(theFreeboardModel.plugins(), function(pluginSource){
+        _.each(theFreeboardModel.plugins(), function(pluginSource) {
 
-			addNewScriptRow(pluginSource);
+            addNewScriptRow(pluginSource);
 
-		});
+        });
 
-		addScript.click(function(e)
-		{
-			addNewScriptRow();
-		});
+        addScript.click(function(e) {
+            addNewScriptRow();
+        });
 
-		new DialogBox(container, "Developer Console", "OK", null, function(okcancel){
-			if (okcancel == 'ok') {
-				// Unload our previous scripts
-				_.each(theFreeboardModel.plugins(), function(pluginSource){
+        new DialogBox(container, "Developer Console", "OK", null, function(okcancel) {
+            if (okcancel == 'ok') {
+                // Unload our previous scripts
+                _.each(theFreeboardModel.plugins(), function(pluginSource) {
 
-					$('script[src^="' + pluginSource + '"]').remove();
+                    $('script[src^="' + pluginSource + '"]').remove();
 
-				});
+                });
 
-				theFreeboardModel.plugins.removeAll();
+                theFreeboardModel.plugins.removeAll();
 
-				_.each(pluginScriptsInputs, function(scriptInput){
+                _.each(pluginScriptsInputs, function(scriptInput) {
 
-					var scriptURL = scriptInput.val();
+                    var scriptURL = scriptInput.val();
 
-					if(scriptURL && scriptURL.length > 0)
-					{
-						theFreeboardModel.addPluginSource(scriptURL);
+                    if (scriptURL && scriptURL.length > 0) {
+                        theFreeboardModel.addPluginSource(scriptURL);
 
-						// Load the script with a cache buster
-						head.js(scriptURL + "?" + Date.now());
-					}
-				});
-			}
-		});
-	}
+                        // Load the script with a cache buster
+                        head.js(scriptURL + "?" + Date.now());
+                    }
+                });
+            }
+        });
+    }
 
-	// Public API
-	return {
-		showDeveloperConsole : function()
-		{
-			showDeveloperConsole();
-		}
-	}
+    // Public API
+    return {
+        showDeveloperConsole: function() {
+            showDeveloperConsole();
+        }
+    }
 }
 
 // ┌────────────────────────────────────────────────────────────────────┐ \\
@@ -233,66 +206,59 @@ DeveloperConsole = function(theFreeboardModel)
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
 
-function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
-{
-	var modal_width = 900;
+function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback) {
+    var modal_width = 900;
 
-	// Initialize our modal overlay
-	var overlay = $('<div id="modal_overlay" style="display:none;"></div>');
+    // Initialize our modal overlay
+    var overlay = $('<div id="modal_overlay" style="display:none;"></div>');
 
-	var modalDialog = $('<div class="modal"></div>');
+    var modalDialog = $('<div class="modal"></div>');
 
-	function closeModal()
-	{
-		overlay.fadeOut(200, function()
-		{
-			$(this).remove();
-		});
-	}
+    function closeModal() {
+        overlay.fadeOut(200, function() {
+            $(this).remove();
+        });
+    }
 
-	// Create our header
-	modalDialog.append('<header><h2 class="title">' + title + "</h2></header>");
+    // Create our header
+    modalDialog.append('<header><h2 class="title">' + title + "</h2></header>");
 
-	$('<section></section>').appendTo(modalDialog).append(contentElement);
+    $('<section></section>').appendTo(modalDialog).append(contentElement);
 
-	// Create our footer
-	var footer = $('<footer></footer>').appendTo(modalDialog);
+    // Create our footer
+    var footer = $('<footer></footer>').appendTo(modalDialog);
 
-	if(okTitle)
-	{
-		$('<span id="dialog-ok" class="text-button">' + okTitle + '</span>').appendTo(footer).click(function()
-		{
-			var hold = false;
+    if (okTitle) {
+        $('<span id="dialog-ok" class="text-button">' + okTitle + '</span>').appendTo(footer).click(function() {
+            var hold = false;
 
-			if (!$("#plugin-editor").validationEngine('validate'))
-				return false;
+            if (!$("#plugin-editor").validationEngine('validate'))
+                return false;
 
-			if(_.isFunction(closeCallback))
-				hold = closeCallback("ok");
+            if (_.isFunction(closeCallback))
+                hold = closeCallback("ok");
 
-			if(!hold)
-				closeModal();
-		});
-	}
+            if (!hold)
+                closeModal();
+        });
+    }
 
-	if(cancelTitle)
-	{
-		$('<span id="dialog-cancel" class="text-button">' + cancelTitle + '</span>').appendTo(footer).click(function()
-		{
-			closeCallback("cancel");
-			closeModal();
-		});
-	}
+    if (cancelTitle) {
+        $('<span id="dialog-cancel" class="text-button">' + cancelTitle + '</span>').appendTo(footer).click(function() {
+            closeCallback("cancel");
+            closeModal();
+        });
+    }
 
-	overlay.append(modalDialog);
-	$("body").append(overlay);
-	overlay.fadeIn(200);
+    overlay.append(modalDialog);
+    $("body").append(overlay);
+    overlay.fadeIn(200);
 
-	// ValidationEngine initialize
-	$.validationEngine.defaults.autoPositionUpdate = true;
-	// media query max-width : 960px
-	$.validationEngine.defaults.promptPosition = ($("#hamburger").css("display") == "none") ? "topRight" : "topLeft";
-	$("#plugin-editor").validationEngine();
+    // ValidationEngine initialize
+    $.validationEngine.defaults.autoPositionUpdate = true;
+    // media query max-width : 960px
+    $.validationEngine.defaults.promptPosition = ($("#hamburger").css("display") == "none") ? "topRight" : "topLeft";
+    $("#plugin-editor").validationEngine();
 }
 
 // ┌────────────────────────────────────────────────────────────────────┐ \\
@@ -305,545 +271,496 @@ function DialogBox(contentElement, title, okTitle, cancelTitle, closeCallback)
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
 
-function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
-{
-	var self = this;
-
-	var SERIALIZATION_VERSION = 1;
-
-	this.version = 0;
-	this.isEditing = ko.observable(false);
-	this.allow_edit = ko.observable(false);
-	this.allow_edit.subscribe(function(newValue)
-	{
-		if(newValue)
-		{
-			$("#main-header").show();
-		}
-		else
-		{
-			$("#main-header").hide();
-			$("#datasources").hide();
-		}
-	});
-
-	this.isVisibleDatasources = ko.observable(false);
-	this.isVisibleBoardTools = ko.observable(false);
-
-	this.header_image = ko.observable();
-	this.plugins = ko.observableArray();
-	this.datasources = ko.observableArray();
-	this.panes = ko.observableArray();
-	this.datasourceData = {};
-	this.processDatasourceUpdate = function(datasourceModel, newData)
-	{
-		var datasourceName = datasourceModel.name();
-
-		self.datasourceData[datasourceName] = newData;
-
-		_.each(self.panes(), function(pane)
-		{
-			_.each(pane.widgets(), function(widget)
-			{
-				widget.processDatasourceUpdate(datasourceName);
-			});
-		});
-	}
-
-	this._datasourceTypes = ko.observable();
-	this.datasourceTypes = ko.computed({
-		read: function()
-		{
-			self._datasourceTypes();
-
-			var returnTypes = [];
-
-			_.each(datasourcePlugins, function(datasourcePluginType)
-			{
-				var typeName = datasourcePluginType.type_name;
-				var displayName = typeName;
-
-				if(!_.isUndefined(datasourcePluginType.display_name))
-				{
-					displayName = datasourcePluginType.display_name;
-				}
-
-				returnTypes.push({
-					name        : typeName,
-					display_name: displayName
-				});
-			});
-
-			return returnTypes;
-		}
-	});
-
-	this._widgetTypes = ko.observable();
-	this.widgetTypes = ko.computed({
-		read: function()
-		{
-			self._widgetTypes();
-
-			var returnTypes = [];
-
-			_.each(widgetPlugins, function(widgetPluginType)
-			{
-				var typeName = widgetPluginType.type_name;
-				var displayName = typeName;
-
-				if(!_.isUndefined(widgetPluginType.display_name))
-				{
-					displayName = widgetPluginType.display_name;
-				}
-
-				returnTypes.push({
-					name        : typeName,
-					display_name: displayName
-				});
-			});
-
-			return returnTypes;
-		}
-	});
-
-	this.addPluginSource = function(pluginSource)
-	{
-		if(pluginSource && self.plugins.indexOf(pluginSource) == -1)
-		{
-			self.plugins.push(pluginSource);
-		}
-	}
-
-	this.serialize = function()
-	{
-		var panes = [];
-
-		_.each(self.panes(), function(pane)
-		{
-			panes.push(pane.serialize());
-		});
-
-		var datasources = [];
-
-		_.each(self.datasources(), function(datasource)
-		{
-			datasources.push(datasource.serialize());
-		});
-
-		return {
-			version     : SERIALIZATION_VERSION,
-			header_image: self.header_image(),
-			allow_edit  : self.allow_edit(),
-			plugins     : self.plugins(),
-			panes       : panes,
-			datasources : datasources,
-			columns     : freeboardUI.getUserColumns()
-		};
-	}
-
-	this.deserialize = function(object, finishedCallback)
-	{
-		self.clearDashboard();
-
-		function finishLoad()
-		{
-			freeboardUI.setUserColumns(object.columns);
-
-			if(!_.isUndefined(object.allow_edit))
-			{
-				self.allow_edit(object.allow_edit);
-			}
-			else
-			{
-				self.allow_edit(true);
-			}
-			self.version = object.version || 0;
-			self.header_image(object.header_image);
-
-			_.each(object.datasources, function(datasourceConfig)
-			{
-				var datasource = new DatasourceModel(self, datasourcePlugins);
-				datasource.deserialize(datasourceConfig);
-				self.addDatasource(datasource);
-			});
-
-			var sortedPanes = _.sortBy(object.panes, function(pane){
-				return freeboardUI.getPositionForScreenSize(pane).row;
-			});
-
-			_.each(sortedPanes, function(paneConfig)
-			{
-				var pane = new PaneModel(self, widgetPlugins);
-				pane.deserialize(paneConfig);
-				self.panes.push(pane);
-			});
-
-			if(self.allow_edit() && self.panes().length == 0)
-			{
-				self.setEditing(true);
-			}
-
-			if(_.isFunction(finishedCallback))
-			{
-				finishedCallback();
-			}
-
-			freeboardUI.processResize(true);
-		}
-
-		// This could have been self.plugins(object.plugins), but for some weird reason head.js was causing a function to be added to the list of plugins.
-		_.each(object.plugins, function(plugin)
-		{
-			self.addPluginSource(plugin);
-		});
-
-		// Load any plugins referenced in this definition
-		if(_.isArray(object.plugins) && object.plugins.length > 0)
-		{
-			head.js(object.plugins, function()
-			{
-				finishLoad();
-			});
-		}
-		else
-		{
-			finishLoad();
-		}
-	}
-
-	this.clearDashboard = function()
-	{
-		freeboardUI.removeAllPanes();
-
-		_.each(self.datasources(), function(datasource)
-		{
-			datasource.dispose();
-		});
-
-		_.each(self.panes(), function(pane)
-		{
-			pane.dispose();
-		});
-
-		self.plugins.removeAll();
-		self.datasources.removeAll();
-		self.panes.removeAll();
-	}
-
-	this.loadDashboard = function(dashboardData, callback)
-	{
-		freeboardUI.showLoadingIndicator(true);
-		_.delay(function() {
-			self.deserialize(dashboardData, function()
-			{
-				if(_.isFunction(callback))
-				{
-					callback();
-				}
-
-				freeboardUI.showLoadingIndicator(false);
-
-				freeboard.emit("dashboard_loaded");
-			});
-		}, 50);
-	}
-
-	this.loadDashboardFromLocalFile = function()
-	{
-		// Check for the various File API support.
-		if(window.File && window.FileReader && window.FileList && window.Blob)
-		{
-			var input = document.createElement('input');
-			input.id = "myfile";
-			input.type = "file";
-			$(input).css({
-				'visibility':'hidden'
-			});
-			$(input).on("change", function(event)
-			{
-				var files = event.target.files;
-
-				if(files && files.length > 0)
-				{
-					var file = files[0];
-					var reader = new FileReader();
-
-					reader.addEventListener("load", function(fileReaderEvent)
-					{
-
-						var textFile = fileReaderEvent.target;
-						var jsonObject = JSON.parse(textFile.result);
-
-
-						self.loadDashboard(jsonObject);
-						self.setEditing(false);
-					});
-
-					reader.readAsText(file);
-				}
-				if (freeboard.browsername.indexOf('ie') != -1) {
-					$("#myfile").remove();
-				}
-			});
-			if (freeboard.browsername.indexOf('ie') != -1) {
-				document.body.appendChild(input);
-				var evt = document.createEvent('MouseEvents');
-				evt.initEvent('click',true,true,window,0,0,0,0,0,false,false,false,false,0,null);
-				input.dispatchEvent(evt);
-			} else {
-				$(input).trigger("click");
-			}
-		}
-		else
-		{
-			alert('Unable to load a file in this browser.');
-		}
-	}
-
-	this.saveDashboard = function()
-	{
-		var contentType = 'application/octet-stream';
-		var blob = new Blob([JSON.stringify(self.serialize())], {'type': contentType});
-		var file = "dashboard.json";
-
-		if (freeboard.browsername.indexOf('ie') != -1) {
-			window.navigator.msSaveBlob(blob, file);
-		} else {
-			var url = (window.URL || window.webkitURL);
-			var data = url.createObjectURL(blob);
-			var e = document.createEvent("MouseEvents");
-			e.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-			var a = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
-			a.href = data;
-			a.download = file;
-			a.dispatchEvent(e);
-		}
-	}
-
-	this.addDatasource = function(datasource)
-	{
-		self.datasources.push(datasource);
-	}
-
-	this.deleteDatasource = function(datasource)
-	{
-		delete self.datasourceData[datasource.name()];
-		datasource.dispose();
-		self.datasources.remove(datasource);
-	}
-
-	this.createPane = function()
-	{
-		var newPane = new PaneModel(self, widgetPlugins);
-		self.addPane(newPane);
-	}
-
-	this.addGridColumnLeft = function()
-	{
-		freeboardUI.addGridColumnLeft();
-	}
-
-	this.addGridColumnRight = function()
-	{
-		freeboardUI.addGridColumnRight();
-	}
-
-	this.subGridColumnLeft = function()
-	{
-		freeboardUI.subGridColumnLeft();
-	}
-
-	this.subGridColumnRight = function()
-	{
-		freeboardUI.subGridColumnRight();
-	}
-
-	this.addPane = function(pane)
-	{
-		self.panes.push(pane);
-	}
-
-	this.deletePane = function(pane)
-	{
-		pane.dispose();
-		self.panes.remove(pane);
-	}
-
-	this.deleteWidget = function(widget)
-	{
-		ko.utils.arrayForEach(self.panes(), function(pane)
-		{
-			pane.widgets.remove(widget);
-		});
-
-		widget.dispose();
-	}
-
-	this.updateDatasourceNameRef = function(newDatasourceName, oldDatasourceName) {
-		_.each(self.panes(), function(pane) {
-			_.each(pane.widgets(), function(widget) {
-				widget.updateDatasourceNameRef(newDatasourceName, oldDatasourceName);
-			});
-		});
-	}
-
-	$.fn.transform = function(axis){
-		var ret = 0;
-		var elem = this;
-		var matrix = elem.css('transform').replace(/[^0-9\-.,]/g, '').split(',');
-		if (axis == 'y')
-			ret = matrix[13] || matrix[5];
-		else if (axis == 'x')
-			ret = matrix[12] || matrix[4];
-		if (_.isUndefined(ret))
-			ret = 0;
-		return ret;
-	}
-
-	this.setEditing = function(editing, animate)
-	{
-		// Don't allow editing if it's not allowed
-		if(!self.allow_edit() && editing)
-			return;
-
-		self.isEditing(editing);
-
-		if (editing == false) {
-			if (self.isVisibleDatasources())
-				self.setVisibilityDatasources(false);
-			if (self.isVisibleBoardTools())
-				self.setVisibilityBoardTools(false);
-		}
-
-		var barHeight = $("#admin-bar").outerHeight();
-		var headerHeight = $("#main-header").outerHeight();
-
-		if(!editing)
-		{
-			freeboardUI.disableGrid();
-			$("#toggle-header-icon").addClass("icon-wrench").removeClass("icon-chevron-up");
-			$(".gridster .gs_w").css({cursor: "default"});
-
-			if (freeboard.browsername.indexOf("ie") == -1) {
-				$("#main-header").css("transform", "translateY(-" + barHeight + "px)");
-				$("#board-content").css("transform", "translateY(20px)");
-				_.delay(function() {
-					$("#admin-menu").css("display", "none");
-				}, 300);
-			} else {
-				$("#main-header").css("top", "-" + barHeight + "px");
-				$("#board-content").css("top", "20px");
-			}
-			$(".sub-section").unbind();
-		}
-		else
-		{
-			$("#admin-menu").css("display", "block");
-			$("#toggle-header-icon").addClass("icon-chevron-up").removeClass("icon-wrench");
-			$(".gridster .gs_w").css({cursor: "pointer"});
-
-			if (freeboard.browsername.indexOf("ie") == -1) {
-				$("#main-header").css("transform", "translateY(0px)");
-				$("#board-content").css("transform", "translateY(" + headerHeight + "px)");
-			} else {
-				$("#main-header").css("top", "0px");
-				$("#board-content").css("top", headerHeight + "px");
-			}
-			freeboardUI.attachWidgetEditIcons($(".sub-section"));
-			freeboardUI.enableGrid();
-		}
-
-		freeboardUI.showPaneEditIcons(editing, true);
-	}
-
-	this.setVisibilityDatasources = function(visibility, animate)
-	{
-		// Don't allow editing if it's not allowed
-		if(!self.allow_edit())
-			return;
-
-		self.isVisibleDatasources(visibility);
-
-		var ds = $("#datasources");
-		var width = ds.outerWidth();
-
-		if (visibility == true) {
-			ds.css("display", "block");
-			ds.css("transform", "translateX(-" + width + "px)");
-		} else {
-			ds.css("transform", "translateX(" + width + "px)");
-			_.delay(function() {
-				ds.css("display", "none");
-			}, 300);
-		}
-	}
-
-	this.setVisibilityBoardTools = function(visibility, animate)
-	{
-		// Don't allow editing if it's not allowed
-		if (!self.allow_edit())
-			return;
-
-		self.isVisibleBoardTools(visibility);
-
-		var mh = $("#main-header");
-		var bc = $("#board-content");
-		var bt = $("#board-tools");
-
-		var mhHeight = mh.outerHeight();
-		var width = bt.outerWidth();
-
-		var debounce = _.debounce(function() {
-			// media query max-width : 960px
-			if ($("#hamburger").css("display") == "none") {
-				self.setVisibilityBoardTools(false);
-				$(window).off("resize", debounce);
-			}
-		}, 500);
-
-		if (visibility == true) {
-			$("html").addClass("boardtools-opening");
-			$("#board-actions > ul").removeClass("collapse");
-
-			if (freeboard.browsername.indexOf("ie") == -1) {
-				mh.css("transform", "translate(" + width + "px, " + mh.transform('y') + "px)");
-				bc.css("transform", "translate(" + width + "px, " + bc.transform('y') + "px)");
-			} else {
-				mh.offset({ top: 0, left: width });
-				bc.offset({ top: mhHeight, left: width });
-			}
-
-			$(window).resize(debounce);
-		} else {
-			$("html").removeClass("boardtools-opening");
-			$("#board-actions > ul").addClass("collapse");
-
-			if (freeboard.browsername.indexOf("ie") == -1) {
-				mh.css("transform", "translate(0px, " + mh.transform('y') + "px)");
-				bc.css("transform", "translate(0px, " + bc.transform('y') + "px)");
-			} else {
-				mh.offset({ top: 0, left: 0 });
-				bc.offset({ top: mhHeight, left: 0 });
-			}
-
-			$(window).off("resize", debounce);
-		}
-	}
-
-	this.toggleEditing = function()
-	{
-		self.setEditing(!self.isEditing());
-	}
-
-	this.toggleDatasources = function()
-	{
-		self.setVisibilityDatasources(!self.isVisibleDatasources());
-	}
-
-	this.toggleBoardTools = function()
-	{
-		self.setVisibilityBoardTools(!self.isVisibleBoardTools());
-	}
+function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI) {
+    var self = this;
+
+    var SERIALIZATION_VERSION = 1;
+
+    this.version = 0;
+    this.isEditing = ko.observable(false);
+    this.allow_edit = ko.observable(false);
+    this.allow_edit.subscribe(function(newValue) {
+        if (newValue) {
+            $("#main-header").show();
+        } else {
+            $("#main-header").hide();
+            $("#datasources").hide();
+        }
+    });
+
+    this.isVisibleDatasources = ko.observable(false);
+    this.isVisibleBoardTools = ko.observable(false);
+
+    this.header_image = ko.observable();
+    this.plugins = ko.observableArray();
+    this.datasources = ko.observableArray();
+    this.panes = ko.observableArray();
+    this.datasourceData = {};
+    this.processDatasourceUpdate = function(datasourceModel, newData) {
+        var datasourceName = datasourceModel.name();
+
+        self.datasourceData[datasourceName] = newData;
+
+        _.each(self.panes(), function(pane) {
+            _.each(pane.widgets(), function(widget) {
+                widget.processDatasourceUpdate(datasourceName);
+            });
+        });
+    }
+
+    this._datasourceTypes = ko.observable();
+    this.datasourceTypes = ko.computed({
+        read: function() {
+            self._datasourceTypes();
+
+            var returnTypes = [];
+
+            _.each(datasourcePlugins, function(datasourcePluginType) {
+                var typeName = datasourcePluginType.type_name;
+                var displayName = typeName;
+
+                if (!_.isUndefined(datasourcePluginType.display_name)) {
+                    displayName = datasourcePluginType.display_name;
+                }
+
+                returnTypes.push({
+                    name: typeName,
+                    display_name: displayName
+                });
+            });
+
+            return returnTypes;
+        }
+    });
+
+    this._widgetTypes = ko.observable();
+    this.widgetTypes = ko.computed({
+        read: function() {
+            self._widgetTypes();
+
+            var returnTypes = [];
+
+            _.each(widgetPlugins, function(widgetPluginType) {
+                var typeName = widgetPluginType.type_name;
+                var displayName = typeName;
+
+                if (!_.isUndefined(widgetPluginType.display_name)) {
+                    displayName = widgetPluginType.display_name;
+                }
+
+                returnTypes.push({
+                    name: typeName,
+                    display_name: displayName
+                });
+            });
+
+            return returnTypes;
+        }
+    });
+
+    this.addPluginSource = function(pluginSource) {
+        if (pluginSource && self.plugins.indexOf(pluginSource) == -1) {
+            self.plugins.push(pluginSource);
+        }
+    }
+
+    this.serialize = function() {
+        var panes = [];
+
+        _.each(self.panes(), function(pane) {
+            panes.push(pane.serialize());
+        });
+
+        var datasources = [];
+
+        _.each(self.datasources(), function(datasource) {
+            datasources.push(datasource.serialize());
+        });
+
+        return {
+            version: SERIALIZATION_VERSION,
+            header_image: self.header_image(),
+            allow_edit: self.allow_edit(),
+            plugins: self.plugins(),
+            panes: panes,
+            datasources: datasources,
+            columns: freeboardUI.getUserColumns()
+        };
+    }
+
+    this.deserialize = function(object, finishedCallback) {
+        self.clearDashboard();
+
+        function finishLoad() {
+            freeboardUI.setUserColumns(object.columns);
+
+            if (!_.isUndefined(object.allow_edit)) {
+                self.allow_edit(object.allow_edit);
+            } else {
+                self.allow_edit(true);
+            }
+            self.version = object.version || 0;
+            self.header_image(object.header_image);
+
+            _.each(object.datasources, function(datasourceConfig) {
+                var datasource = new DatasourceModel(self, datasourcePlugins);
+                datasource.deserialize(datasourceConfig);
+                self.addDatasource(datasource);
+            });
+
+            var sortedPanes = _.sortBy(object.panes, function(pane) {
+                return freeboardUI.getPositionForScreenSize(pane).row;
+            });
+
+            _.each(sortedPanes, function(paneConfig) {
+                var pane = new PaneModel(self, widgetPlugins);
+                pane.deserialize(paneConfig);
+                self.panes.push(pane);
+            });
+
+            if (self.allow_edit() && self.panes().length == 0) {
+                self.setEditing(true);
+            }
+
+            if (_.isFunction(finishedCallback)) {
+                finishedCallback();
+            }
+
+            freeboardUI.processResize(true);
+        }
+
+        // This could have been self.plugins(object.plugins), but for some weird reason head.js was causing a function to be added to the list of plugins.
+        _.each(object.plugins, function(plugin) {
+            self.addPluginSource(plugin);
+        });
+
+        // Load any plugins referenced in this definition
+        if (_.isArray(object.plugins) && object.plugins.length > 0) {
+            head.js(object.plugins, function() {
+                finishLoad();
+            });
+        } else {
+            finishLoad();
+        }
+    }
+
+    this.clearDashboard = function() {
+        freeboardUI.removeAllPanes();
+
+        _.each(self.datasources(), function(datasource) {
+            datasource.dispose();
+        });
+
+        _.each(self.panes(), function(pane) {
+            pane.dispose();
+        });
+
+        self.plugins.removeAll();
+        self.datasources.removeAll();
+        self.panes.removeAll();
+    }
+
+    this.loadDashboard = function(dashboardData, callback) {
+        freeboardUI.showLoadingIndicator(true);
+        _.delay(function() {
+            self.deserialize(dashboardData, function() {
+                if (_.isFunction(callback)) {
+                    callback();
+                }
+
+                freeboardUI.showLoadingIndicator(false);
+
+                freeboard.emit("dashboard_loaded");
+            });
+        }, 50);
+    }
+
+    this.loadDashboardFromLocalFile = function() {
+        // Check for the various File API support.
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+            var input = document.createElement('input');
+            input.id = "myfile";
+            input.type = "file";
+            $(input).css({
+                'visibility': 'hidden'
+            });
+            $(input).on("change", function(event) {
+                var files = event.target.files;
+
+                if (files && files.length > 0) {
+                    var file = files[0];
+                    var reader = new FileReader();
+
+                    reader.addEventListener("load", function(fileReaderEvent) {
+
+                        var textFile = fileReaderEvent.target;
+                        var jsonObject = JSON.parse(textFile.result);
+
+
+                        self.loadDashboard(jsonObject);
+                        self.setEditing(false);
+                    });
+
+                    reader.readAsText(file);
+                }
+                if (freeboard.browsername.indexOf('ie') != -1) {
+                    $("#myfile").remove();
+                }
+            });
+            if (freeboard.browsername.indexOf('ie') != -1) {
+                document.body.appendChild(input);
+                var evt = document.createEvent('MouseEvents');
+                evt.initEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+                input.dispatchEvent(evt);
+            } else {
+                $(input).trigger("click");
+            }
+        } else {
+            alert('Unable to load a file in this browser.');
+        }
+    }
+
+    this.saveDashboard = function() {
+        var contentType = 'application/octet-stream';
+        var blob = new Blob([JSON.stringify(self.serialize())], {
+            'type': contentType
+        });
+        var file = "dashboard.json";
+
+        if (freeboard.browsername.indexOf('ie') != -1) {
+            window.navigator.msSaveBlob(blob, file);
+        } else {
+            var url = (window.URL || window.webkitURL);
+            var data = url.createObjectURL(blob);
+            var e = document.createEvent("MouseEvents");
+            e.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            var a = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
+            a.href = data;
+            a.download = file;
+            a.dispatchEvent(e);
+        }
+    }
+
+    this.addDatasource = function(datasource) {
+        self.datasources.push(datasource);
+    }
+
+    this.deleteDatasource = function(datasource) {
+        delete self.datasourceData[datasource.name()];
+        datasource.dispose();
+        self.datasources.remove(datasource);
+    }
+
+    this.createPane = function() {
+        var newPane = new PaneModel(self, widgetPlugins);
+        self.addPane(newPane);
+    }
+
+    this.addGridColumnLeft = function() {
+        freeboardUI.addGridColumnLeft();
+    }
+
+    this.addGridColumnRight = function() {
+        freeboardUI.addGridColumnRight();
+    }
+
+    this.subGridColumnLeft = function() {
+        freeboardUI.subGridColumnLeft();
+    }
+
+    this.subGridColumnRight = function() {
+        freeboardUI.subGridColumnRight();
+    }
+
+    this.addPane = function(pane) {
+        self.panes.push(pane);
+    }
+
+    this.deletePane = function(pane) {
+        pane.dispose();
+        self.panes.remove(pane);
+    }
+
+    this.deleteWidget = function(widget) {
+        ko.utils.arrayForEach(self.panes(), function(pane) {
+            pane.widgets.remove(widget);
+        });
+
+        widget.dispose();
+    }
+
+    this.updateDatasourceNameRef = function(newDatasourceName, oldDatasourceName) {
+        _.each(self.panes(), function(pane) {
+            _.each(pane.widgets(), function(widget) {
+                widget.updateDatasourceNameRef(newDatasourceName, oldDatasourceName);
+            });
+        });
+    }
+
+    $.fn.transform = function(axis) {
+        var ret = 0;
+        var elem = this;
+        var matrix = elem.css('transform').replace(/[^0-9\-.,]/g, '').split(',');
+        if (axis == 'y')
+            ret = matrix[13] || matrix[5];
+        else if (axis == 'x')
+            ret = matrix[12] || matrix[4];
+        if (_.isUndefined(ret))
+            ret = 0;
+        return ret;
+    }
+
+    this.setEditing = function(editing, animate) {
+        // Don't allow editing if it's not allowed
+        if (!self.allow_edit() && editing)
+            return;
+
+        self.isEditing(editing);
+
+        if (editing == false) {
+            if (self.isVisibleDatasources())
+                self.setVisibilityDatasources(false);
+            if (self.isVisibleBoardTools())
+                self.setVisibilityBoardTools(false);
+        }
+
+        var barHeight = $("#admin-bar").outerHeight();
+        var headerHeight = $("#main-header").outerHeight();
+
+        if (!editing) {
+            freeboardUI.disableGrid();
+            $("#toggle-header-icon").addClass("icon-wrench").removeClass("icon-chevron-up");
+            $(".gridster .gs_w").css({
+                cursor: "default"
+            });
+
+            if (freeboard.browsername.indexOf("ie") == -1) {
+                $("#main-header").css("transform", "translateY(-" + barHeight + "px)");
+                $("#board-content").css("transform", "translateY(20px)");
+                _.delay(function() {
+                    $("#admin-menu").css("display", "none");
+                }, 300);
+            } else {
+                $("#main-header").css("top", "-" + barHeight + "px");
+                $("#board-content").css("top", "20px");
+            }
+            $(".sub-section").unbind();
+        } else {
+            $("#admin-menu").css("display", "block");
+            $("#toggle-header-icon").addClass("icon-chevron-up").removeClass("icon-wrench");
+            $(".gridster .gs_w").css({
+                cursor: "pointer"
+            });
+
+            if (freeboard.browsername.indexOf("ie") == -1) {
+                $("#main-header").css("transform", "translateY(0px)");
+                $("#board-content").css("transform", "translateY(" + headerHeight + "px)");
+            } else {
+                $("#main-header").css("top", "0px");
+                $("#board-content").css("top", headerHeight + "px");
+            }
+            freeboardUI.attachWidgetEditIcons($(".sub-section"));
+            freeboardUI.enableGrid();
+        }
+
+        freeboardUI.showPaneEditIcons(editing, true);
+    }
+
+    this.setVisibilityDatasources = function(visibility, animate) {
+        // Don't allow editing if it's not allowed
+        if (!self.allow_edit())
+            return;
+
+        self.isVisibleDatasources(visibility);
+
+        var ds = $("#datasources");
+        var width = ds.outerWidth();
+
+        if (visibility == true) {
+            ds.css("display", "block");
+            ds.css("transform", "translateX(-" + width + "px)");
+        } else {
+            ds.css("transform", "translateX(" + width + "px)");
+            _.delay(function() {
+                ds.css("display", "none");
+            }, 300);
+        }
+    }
+
+    this.setVisibilityBoardTools = function(visibility, animate) {
+        // Don't allow editing if it's not allowed
+        if (!self.allow_edit())
+            return;
+
+        self.isVisibleBoardTools(visibility);
+
+        var mh = $("#main-header");
+        var bc = $("#board-content");
+        var bt = $("#board-tools");
+
+        var mhHeight = mh.outerHeight();
+        var width = bt.outerWidth();
+
+        var debounce = _.debounce(function() {
+            // media query max-width : 960px
+            if ($("#hamburger").css("display") == "none") {
+                self.setVisibilityBoardTools(false);
+                $(window).off("resize", debounce);
+            }
+        }, 500);
+
+        if (visibility == true) {
+            $("html").addClass("boardtools-opening");
+            $("#board-actions > ul").removeClass("collapse");
+
+            if (freeboard.browsername.indexOf("ie") == -1) {
+                mh.css("transform", "translate(" + width + "px, " + mh.transform('y') + "px)");
+                bc.css("transform", "translate(" + width + "px, " + bc.transform('y') + "px)");
+            } else {
+                mh.offset({
+                    top: 0,
+                    left: width
+                });
+                bc.offset({
+                    top: mhHeight,
+                    left: width
+                });
+            }
+
+            $(window).resize(debounce);
+        } else {
+            $("html").removeClass("boardtools-opening");
+            $("#board-actions > ul").addClass("collapse");
+
+            if (freeboard.browsername.indexOf("ie") == -1) {
+                mh.css("transform", "translate(0px, " + mh.transform('y') + "px)");
+                bc.css("transform", "translate(0px, " + bc.transform('y') + "px)");
+            } else {
+                mh.offset({
+                    top: 0,
+                    left: 0
+                });
+                bc.offset({
+                    top: mhHeight,
+                    left: 0
+                });
+            }
+
+            $(window).off("resize", debounce);
+        }
+    }
+
+    this.toggleEditing = function() {
+        self.setEditing(!self.isEditing());
+    }
+
+    this.toggleDatasources = function() {
+        self.setVisibilityDatasources(!self.isVisibleDatasources());
+    }
+
+    this.toggleBoardTools = function() {
+        self.setVisibilityBoardTools(!self.isVisibleBoardTools());
+    }
 }
 
 // ┌────────────────────────────────────────────────────────────────────┐ \\
@@ -856,447 +773,391 @@ function FreeboardModel(datasourcePlugins, widgetPlugins, freeboardUI)
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
 
-function FreeboardUI()
-{
-	var PANE_MARGIN = 10;
-	var PANE_WIDTH = 300;
-	var MIN_COLUMNS = 3;
-	var COLUMN_WIDTH = PANE_MARGIN + PANE_WIDTH + PANE_MARGIN;
+function FreeboardUI() {
+    var PANE_MARGIN = 10;
+    var PANE_WIDTH = 300;
+    var MIN_COLUMNS = 3;
+    var COLUMN_WIDTH = PANE_MARGIN + PANE_WIDTH + PANE_MARGIN;
 
-	var userColumns = MIN_COLUMNS;
+    var userColumns = MIN_COLUMNS;
 
-	var loadingIndicator = $('<div class="wrapperloading"><div class="loading up" ></div><div class="loading down"></div></div>');
-	var grid;
+    var loadingIndicator = $('<div class="wrapperloading"><div class="loading up" ></div><div class="loading down"></div></div>');
+    var grid;
 
-	function processResize(layoutWidgets)
-	{
-		var maxDisplayableColumns = getMaxDisplayableColumnCount();
-		var repositionFunction = function(){};
-		if(layoutWidgets)
-		{
-			repositionFunction = function(index)
-			{
-				var paneElement = this;
-				var paneModel = ko.dataFor(paneElement);
+    function processResize(layoutWidgets) {
+        var maxDisplayableColumns = getMaxDisplayableColumnCount();
+        var repositionFunction = function() {};
+        if (layoutWidgets) {
+            repositionFunction = function(index) {
+                var paneElement = this;
+                var paneModel = ko.dataFor(paneElement);
 
-				var newPosition = getPositionForScreenSize(paneModel);
-				$(paneElement).attr("data-sizex", Math.min(paneModel.col_width(),
-					maxDisplayableColumns, grid.cols))
-					.attr("data-row", newPosition.row)
-					.attr("data-col", newPosition.col);
+                var newPosition = getPositionForScreenSize(paneModel);
+                $(paneElement).attr("data-sizex", Math.min(paneModel.col_width(),
+                    maxDisplayableColumns, grid.cols))
+                    .attr("data-row", newPosition.row)
+                    .attr("data-col", newPosition.col);
 
-				paneModel.processSizeChange();
-			}
-		}
+                paneModel.processSizeChange();
+            }
+        }
 
-		updateGridWidth(Math.min(maxDisplayableColumns, userColumns));
+        updateGridWidth(Math.min(maxDisplayableColumns, userColumns));
 
-		repositionGrid(repositionFunction);
-		updateGridColumnControls();
-	}
+        repositionGrid(repositionFunction);
+        updateGridColumnControls();
+    }
 
-	function addGridColumn(shift)
-	{
-		var num_cols = grid.cols + 1;
-		if(updateGridWidth(num_cols))
-		{
-			repositionGrid(function() {
-				var paneElement = this;
-				var paneModel = ko.dataFor(paneElement);
+    function addGridColumn(shift) {
+        var num_cols = grid.cols + 1;
+        if (updateGridWidth(num_cols)) {
+            repositionGrid(function() {
+                var paneElement = this;
+                var paneModel = ko.dataFor(paneElement);
 
-				var prevColumnIndex = grid.cols > 1 ? grid.cols - 1 : 1;
-				var prevCol = paneModel.col[prevColumnIndex];
-				var prevRow = paneModel.row[prevColumnIndex];
-				var newPosition;
-				if(shift)
-				{
-					leftPreviewCol = true;
-					var newCol = prevCol < grid.cols ? prevCol + 1 : grid.cols;
-					newPosition = {row: prevRow, col: newCol};
-				}
-				else
-				{
-					rightPreviewCol = true;
-					newPosition = {row: prevRow, col: prevCol};
-				}
-				$(paneElement).attr("data-sizex", Math.min(paneModel.col_width(), grid.cols))
-					.attr("data-row", newPosition.row)
-					.attr("data-col", newPosition.col);
-			});
-		}
-		updateGridColumnControls();
-		userColumns = grid.cols;
-	}
+                var prevColumnIndex = grid.cols > 1 ? grid.cols - 1 : 1;
+                var prevCol = paneModel.col[prevColumnIndex];
+                var prevRow = paneModel.row[prevColumnIndex];
+                var newPosition;
+                if (shift) {
+                    leftPreviewCol = true;
+                    var newCol = prevCol < grid.cols ? prevCol + 1 : grid.cols;
+                    newPosition = {
+                        row: prevRow,
+                        col: newCol
+                    };
+                } else {
+                    rightPreviewCol = true;
+                    newPosition = {
+                        row: prevRow,
+                        col: prevCol
+                    };
+                }
+                $(paneElement).attr("data-sizex", Math.min(paneModel.col_width(), grid.cols))
+                    .attr("data-row", newPosition.row)
+                    .attr("data-col", newPosition.col);
+            });
+        }
+        updateGridColumnControls();
+        userColumns = grid.cols;
+    }
 
-	function subtractGridColumn(shift)
-	{
-		var num_cols = grid.cols - 1;
-		if(updateGridWidth(num_cols))
-		{
-			repositionGrid(function() {
-				var paneElement = this;
-				var paneModel = ko.dataFor(paneElement);
+    function subtractGridColumn(shift) {
+        var num_cols = grid.cols - 1;
+        if (updateGridWidth(num_cols)) {
+            repositionGrid(function() {
+                var paneElement = this;
+                var paneModel = ko.dataFor(paneElement);
 
-				var prevColumnIndex = grid.cols + 1;
-				var prevCol = paneModel.col[prevColumnIndex];
-				var prevRow = paneModel.row[prevColumnIndex];
-				var newPosition;
-				if(shift)
-				{
-					var newCol = prevCol > 1 ? prevCol - 1 : 1;
-					newPosition = {row: prevRow, col: newCol};
-				}
-				else
-				{
-					var newCol = prevCol <= grid.cols ? prevCol : grid.cols;
-					newPosition = {row: prevRow, col: newCol};
-				}
-				$(paneElement).attr("data-sizex", Math.min(paneModel.col_width(), grid.cols))
-					.attr("data-row", newPosition.row)
-					.attr("data-col", newPosition.col);
-			});
-		}
-		updateGridColumnControls();
-		userColumns = grid.cols;
-	}
+                var prevColumnIndex = grid.cols + 1;
+                var prevCol = paneModel.col[prevColumnIndex];
+                var prevRow = paneModel.row[prevColumnIndex];
+                var newPosition;
+                if (shift) {
+                    var newCol = prevCol > 1 ? prevCol - 1 : 1;
+                    newPosition = {
+                        row: prevRow,
+                        col: newCol
+                    };
+                } else {
+                    var newCol = prevCol <= grid.cols ? prevCol : grid.cols;
+                    newPosition = {
+                        row: prevRow,
+                        col: newCol
+                    };
+                }
+                $(paneElement).attr("data-sizex", Math.min(paneModel.col_width(), grid.cols))
+                    .attr("data-row", newPosition.row)
+                    .attr("data-col", newPosition.col);
+            });
+        }
+        updateGridColumnControls();
+        userColumns = grid.cols;
+    }
 
-	function updateGridColumnControls()
-	{
-		var col_controls = $(".column-tool");
-		var available_width = $("#board-content").width();
-		var max_columns = Math.floor(available_width / COLUMN_WIDTH);
+    function updateGridColumnControls() {
+        var col_controls = $(".column-tool");
+        var available_width = $("#board-content").width();
+        var max_columns = Math.floor(available_width / COLUMN_WIDTH);
 
-		if(grid.cols <= MIN_COLUMNS)
-		{
-			col_controls.addClass("min");
-		}
-		else
-		{
-			col_controls.removeClass("min");
-		}
+        if (grid.cols <= MIN_COLUMNS) {
+            col_controls.addClass("min");
+        } else {
+            col_controls.removeClass("min");
+        }
 
-		if(grid.cols >= max_columns)
-		{
-			col_controls.addClass("max");
-		}
-		else
-		{
-			col_controls.removeClass("max");
-		}
-	}
+        if (grid.cols >= max_columns) {
+            col_controls.addClass("max");
+        } else {
+            col_controls.removeClass("max");
+        }
+    }
 
-	function getMaxDisplayableColumnCount()
-	{
-		var available_width = $("#board-content").width();
-		return Math.floor(available_width / COLUMN_WIDTH);
-	}
+    function getMaxDisplayableColumnCount() {
+        var available_width = $("#board-content").width();
+        return Math.floor(available_width / COLUMN_WIDTH);
+    }
 
-	function updateGridWidth(newCols)
-	{
-		if(newCols === undefined || newCols < MIN_COLUMNS)
-		{
-			newCols = MIN_COLUMNS;
-		}
+    function updateGridWidth(newCols) {
+        if (newCols === undefined || newCols < MIN_COLUMNS) {
+            newCols = MIN_COLUMNS;
+        }
 
-		var max_columns = getMaxDisplayableColumnCount();
-		if(newCols > max_columns)
-		{
-			newCols = max_columns;
-		}
+        var max_columns = getMaxDisplayableColumnCount();
+        if (newCols > max_columns) {
+            newCols = max_columns;
+        }
 
-		// +newCols to account for scaling on zoomed browsers
-		var new_width = (COLUMN_WIDTH * newCols) + newCols;
-		$(".responsive-column-width").css("max-width", new_width);
+        // +newCols to account for scaling on zoomed browsers
+        var new_width = (COLUMN_WIDTH * newCols) + newCols;
+        $(".responsive-column-width").css("max-width", new_width);
 
-		if(newCols === grid.cols)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
+        if (newCols === grid.cols) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 
-	function repositionGrid(repositionFunction)
-	{
-		var rootElement = grid.$el;
+    function repositionGrid(repositionFunction) {
+        var rootElement = grid.$el;
 
-		rootElement.find("> li").unbind().removeData();
-		$(".responsive-column-width").css("width", "");
-		grid.generate_grid_and_stylesheet();
+        rootElement.find("> li").unbind().removeData();
+        $(".responsive-column-width").css("width", "");
+        grid.generate_grid_and_stylesheet();
 
-		rootElement.find("> li").each(repositionFunction);
+        rootElement.find("> li").each(repositionFunction);
 
-		grid.init();
-		$(".responsive-column-width").css("width", grid.cols * PANE_WIDTH + (grid.cols * PANE_MARGIN * 2));
-	}
+        grid.init();
+        $(".responsive-column-width").css("width", grid.cols * PANE_WIDTH + (grid.cols * PANE_MARGIN * 2));
+    }
 
-	function getUserColumns()
-	{
-		return userColumns;
-	}
+    function getUserColumns() {
+        return userColumns;
+    }
 
-	function setUserColumns(numCols)
-	{
-		userColumns = Math.max(MIN_COLUMNS, numCols);
-	}
+    function setUserColumns(numCols) {
+        userColumns = Math.max(MIN_COLUMNS, numCols);
+    }
 
-	ko.bindingHandlers.grid = {
-		init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-		{
-			// Initialize our grid
-			grid = $(element).gridster({
-				widget_margins        : [PANE_MARGIN, PANE_MARGIN],
-				widget_base_dimensions: [PANE_WIDTH, 10],
-				resize: {
-					enabled : false,
-					axes : "x"
-				}
-			}).data("gridster");
+    ko.bindingHandlers.grid = {
+        init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+            // Initialize our grid
+            grid = $(element).gridster({
+                widget_margins: [PANE_MARGIN, PANE_MARGIN],
+                widget_base_dimensions: [PANE_WIDTH, 10],
+                resize: {
+                    enabled: false,
+                    axes: "x"
+                }
+            }).data("gridster");
 
-			processResize(false)
+            processResize(false)
 
-			grid.disable();
-		}
-	}
+            grid.disable();
+        }
+    }
 
-	function addPane(element, viewModel, isEditing)
-	{
-		var position = getPositionForScreenSize(viewModel);
-		var col = position.col;
-		var row = position.row;
-		var width = Number(viewModel.width());
-		var height = Number(viewModel.getCalculatedHeight());
+    function addPane(element, viewModel, isEditing) {
+        var position = getPositionForScreenSize(viewModel);
+        var col = position.col;
+        var row = position.row;
+        var width = Number(viewModel.width());
+        var height = Number(viewModel.getCalculatedHeight());
 
-		grid.add_widget(element, width, height, col, row);
+        grid.add_widget(element, width, height, col, row);
 
-		if(isEditing)
-		{
-			showPaneEditIcons(true);
-		}
+        if (isEditing) {
+            showPaneEditIcons(true);
+        }
 
-		updatePositionForScreenSize(viewModel, row, col);
+        updatePositionForScreenSize(viewModel, row, col);
 
-		$(element).attrchange({
-			trackValues: true,
-			callback   : function(event)
-			{
-				if(event.attributeName == "data-row")
-				{
-					updatePositionForScreenSize(viewModel, Number(event.newValue), undefined);
-				}
-				else if(event.attributeName == "data-col")
-				{
-					updatePositionForScreenSize(viewModel, undefined, Number(event.newValue));
-				}
-			}
-		});
-	}
+        $(element).attrchange({
+            trackValues: true,
+            callback: function(event) {
+                if (event.attributeName == "data-row") {
+                    updatePositionForScreenSize(viewModel, Number(event.newValue), undefined);
+                } else if (event.attributeName == "data-col") {
+                    updatePositionForScreenSize(viewModel, undefined, Number(event.newValue));
+                }
+            }
+        });
+    }
 
-	function updatePane(element, viewModel)
-	{
-		// If widget has been added or removed
-		var calculatedHeight = viewModel.getCalculatedHeight();
+    function updatePane(element, viewModel) {
+        // If widget has been added or removed
+        var calculatedHeight = viewModel.getCalculatedHeight();
 
-		var elementHeight = Number($(element).attr("data-sizey"));
-		var elementWidth = Number($(element).attr("data-sizex"));
+        var elementHeight = Number($(element).attr("data-sizey"));
+        var elementWidth = Number($(element).attr("data-sizex"));
 
-		if(calculatedHeight != elementHeight || viewModel.col_width() !=  elementWidth)
-		{
-			grid.resize_widget($(element), viewModel.col_width(), calculatedHeight, function(){
-				grid.set_dom_grid_height();
-			});
-		}
-	}
+        if (calculatedHeight != elementHeight || viewModel.col_width() != elementWidth) {
+            grid.resize_widget($(element), viewModel.col_width(), calculatedHeight, function() {
+                grid.set_dom_grid_height();
+            });
+        }
+    }
 
-	function updatePositionForScreenSize(paneModel, row, col)
-	{
-		var displayCols = grid.cols;
+    function updatePositionForScreenSize(paneModel, row, col) {
+        var displayCols = grid.cols;
 
-		if(!_.isUndefined(row)) paneModel.row[displayCols] = row;
-		if(!_.isUndefined(col)) paneModel.col[displayCols] = col;
-	}
+        if (!_.isUndefined(row)) paneModel.row[displayCols] = row;
+        if (!_.isUndefined(col)) paneModel.col[displayCols] = col;
+    }
 
-	function showLoadingIndicator(show)
-	{
-		if (show === true)
-			loadingIndicator.removeClass('hide').appendTo("body").addClass('show');
-		else {
-			_.delay(function() {
-				loadingIndicator.removeClass('show').addClass('hide');
-				_.delay(function() {
-					loadingIndicator.remove()
-				}, 500);
-			}, 500);
-		}
-	}
+    function showLoadingIndicator(show) {
+        if (show === true)
+            loadingIndicator.removeClass('hide').appendTo("body").addClass('show');
+        else {
+            _.delay(function() {
+                loadingIndicator.removeClass('show').addClass('hide');
+                _.delay(function() {
+                    loadingIndicator.remove()
+                }, 500);
+            }, 500);
+        }
+    }
 
-	function showPaneEditIcons(show, animate)
-	{
-		if(_.isUndefined(animate))
-		{
-			animate = true;
-		}
+    function showPaneEditIcons(show, animate) {
+        if (_.isUndefined(animate)) {
+            animate = true;
+        }
 
-		var animateLength = (animate) ? 250 : 0;
+        var animateLength = (animate) ? 250 : 0;
 
-		if(show)
-		{
-			$(".pane-tools").fadeIn(animateLength);//.css("display", "block").animate({opacity: 1.0}, animateLength);
-			$("#column-tools").fadeIn(animateLength);
-		}
-		else
-		{
-			$(".pane-tools").fadeOut(animateLength);//.animate({opacity: 0.0}, animateLength).css("display", "none");//, function()
-			$("#column-tools").fadeOut(animateLength);
-		}
-	}
+        if (show) {
+            $(".pane-tools").fadeIn(animateLength); //.css("display", "block").animate({opacity: 1.0}, animateLength);
+            $("#column-tools").fadeIn(animateLength);
+        } else {
+            $(".pane-tools").fadeOut(animateLength); //.animate({opacity: 0.0}, animateLength).css("display", "none");//, function()
+            $("#column-tools").fadeOut(animateLength);
+        }
+    }
 
-	function attachWidgetEditIcons(element)
-	{
-		$(element).hover(function()
-		{
-			showWidgetEditIcons(this, true);
-		}, function()
-		{
-			showWidgetEditIcons(this, false);
-		});
-	}
+    function attachWidgetEditIcons(element) {
+        $(element).hover(function() {
+            showWidgetEditIcons(this, true);
+        }, function() {
+            showWidgetEditIcons(this, false);
+        });
+    }
 
-	function showWidgetEditIcons(element, show)
-	{
-		if(show)
-		{
-			$(element).find(".sub-section-tools").fadeIn(250);
-		}
-		else
-		{
-			$(element).find(".sub-section-tools").fadeOut(250);
-		}
-	}
+    function showWidgetEditIcons(element, show) {
+        if (show) {
+            $(element).find(".sub-section-tools").fadeIn(250);
+        } else {
+            $(element).find(".sub-section-tools").fadeOut(250);
+        }
+    }
 
-	function getPositionForScreenSize(paneModel)
-	{
-		var cols = grid.cols;
+    function getPositionForScreenSize(paneModel) {
+        var cols = grid.cols;
 
-		if(_.isNumber(paneModel.row) && _.isNumber(paneModel.col)) // Support for legacy format
-		{
-			var obj = {};
-			obj[cols] = paneModel.row;
-			paneModel.row = obj;
+        if (_.isNumber(paneModel.row) && _.isNumber(paneModel.col)) // Support for legacy format
+        {
+            var obj = {};
+            obj[cols] = paneModel.row;
+            paneModel.row = obj;
 
 
-			obj = {};
-			obj[cols] = paneModel.col;
-			paneModel.col = obj;
-		}
+            obj = {};
+            obj[cols] = paneModel.col;
+            paneModel.col = obj;
+        }
 
-		var newColumnIndex = 1;
-		var columnDiff = 1000;
+        var newColumnIndex = 1;
+        var columnDiff = 1000;
 
-		for(var columnIndex in paneModel.col)
-		{
-			if(columnIndex == cols)	 // If we already have a position defined for this number of columns, return that position
-			{
-				return {row: paneModel.row[columnIndex], col: paneModel.col[columnIndex]};
-			}
-			else if(paneModel.col[columnIndex] > cols) // If it's greater than our display columns, put it in the last column
-			{
-				newColumnIndex = cols;
-			}
-			else // If it's less than, pick whichever one is closest
-			{
-				var delta = cols - columnIndex;
+        for (var columnIndex in paneModel.col) {
+            if (columnIndex == cols) // If we already have a position defined for this number of columns, return that position
+            {
+                return {
+                    row: paneModel.row[columnIndex],
+                    col: paneModel.col[columnIndex]
+                };
+            } else if (paneModel.col[columnIndex] > cols) // If it's greater than our display columns, put it in the last column
+            {
+                newColumnIndex = cols;
+            } else // If it's less than, pick whichever one is closest
+            {
+                var delta = cols - columnIndex;
 
-				if(delta < columnDiff)
-				{
-					newColumnIndex = columnIndex;
-					columnDiff = delta;
-				}
-			}
-		}
+                if (delta < columnDiff) {
+                    newColumnIndex = columnIndex;
+                    columnDiff = delta;
+                }
+            }
+        }
 
-		if(newColumnIndex in paneModel.col && newColumnIndex in paneModel.row)
-		{
-			return {row: paneModel.row[newColumnIndex], col: paneModel.col[newColumnIndex]};
-		}
+        if (newColumnIndex in paneModel.col && newColumnIndex in paneModel.row) {
+            return {
+                row: paneModel.row[newColumnIndex],
+                col: paneModel.col[newColumnIndex]
+            };
+        }
 
-		return {row:1,col:newColumnIndex};
-	}
+        return {
+            row: 1,
+            col: newColumnIndex
+        };
+    }
 
 
-	// Public Functions
-	return {
-		showLoadingIndicator : function(show)
-		{
-			showLoadingIndicator(show);
-		},
-		showPaneEditIcons : function(show, animate)
-		{
-			showPaneEditIcons(show, animate);
-		},
-		attachWidgetEditIcons : function(element)
-		{
-			attachWidgetEditIcons(element);
-		},
-		getPositionForScreenSize : function(paneModel)
-		{
-			return getPositionForScreenSize(paneModel);
-		},
-		processResize : function(layoutWidgets)
-		{
-			processResize(layoutWidgets);
-		},
-		disableGrid : function()
-		{
-			grid.disable();
-		},
-		enableGrid : function()
-		{
-			grid.enable();
-		},
-		addPane : function(element, viewModel, isEditing)
-		{
-			addPane(element, viewModel, isEditing);
-		},
-		updatePane : function(element, viewModel)
-		{
-			updatePane(element, viewModel);
-		},
-		removePane : function(element)
-		{
-			grid.remove_widget(element);
-		},
-		removeAllPanes : function()
-		{
-			grid.remove_all_widgets();
-		},
-		addGridColumnLeft : function()
-		{
-			addGridColumn(true);
-		},
-		addGridColumnRight : function()
-		{
-			addGridColumn(false);
-		},
-		subGridColumnLeft : function()
-		{
-			subtractGridColumn(true);
-		},
-		subGridColumnRight : function()
-		{
-			subtractGridColumn(false);
-		},
-		getUserColumns : function()
-		{
-			return getUserColumns();
-		},
-		setUserColumns : function(numCols)
-		{
-			setUserColumns(numCols);
-		}
-	}
+    // Public Functions
+    return {
+        showLoadingIndicator: function(show) {
+            showLoadingIndicator(show);
+        },
+        showPaneEditIcons: function(show, animate) {
+            showPaneEditIcons(show, animate);
+        },
+        attachWidgetEditIcons: function(element) {
+            attachWidgetEditIcons(element);
+        },
+        getPositionForScreenSize: function(paneModel) {
+            return getPositionForScreenSize(paneModel);
+        },
+        processResize: function(layoutWidgets) {
+            processResize(layoutWidgets);
+        },
+        disableGrid: function() {
+            grid.disable();
+        },
+        enableGrid: function() {
+            grid.enable();
+        },
+        addPane: function(element, viewModel, isEditing) {
+            addPane(element, viewModel, isEditing);
+        },
+        updatePane: function(element, viewModel) {
+            updatePane(element, viewModel);
+        },
+        removePane: function(element) {
+            grid.remove_widget(element);
+        },
+        removeAllPanes: function() {
+            grid.remove_all_widgets();
+        },
+        addGridColumnLeft: function() {
+            addGridColumn(true);
+        },
+        addGridColumnRight: function() {
+            addGridColumn(false);
+        },
+        subGridColumnLeft: function() {
+            subtractGridColumn(true);
+        },
+        subGridColumnRight: function() {
+            subtractGridColumn(false);
+        },
+        getUserColumns: function() {
+            return getUserColumns();
+        },
+        setUserColumns: function(numCols) {
+            setUserColumns(numCols);
+        }
+    }
 }
 
 // ┌────────────────────────────────────────────────────────────────────┐ \\
@@ -1309,102 +1170,102 @@ function FreeboardUI()
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
 
-JSEditor = function () {
-	var assetRoot = ""
+JSEditor = function() {
+    var assetRoot = ""
 
-	function setAssetRoot(_assetRoot) {
-		assetRoot = _assetRoot;
-	}
+        function setAssetRoot(_assetRoot) {
+            assetRoot = _assetRoot;
+        }
 
-	function displayJSEditor(value, mode, callback) {
+        function displayJSEditor(value, mode, callback) {
 
-		var exampleText;
-		var codeWindow = $('<div class="code-window"></div>');
-		var codeMirrorWrapper = $('<div class="code-mirror-wrapper"></div>');
-		var codeWindowFooter = $('<div class="code-window-footer"></div>');
-		var codeWindowHeader = $('<div class="code-window-header cm-s-ambiance"></div>');
-		var config = {};
+            var exampleText;
+            var codeWindow = $('<div class="code-window"></div>');
+            var codeMirrorWrapper = $('<div class="code-mirror-wrapper"></div>');
+            var codeWindowFooter = $('<div class="code-window-footer"></div>');
+            var codeWindowHeader = $('<div class="code-window-header cm-s-ambiance"></div>');
+            var config = {};
 
-		switch (mode) {
-			case 'javascript':
-				exampleText = "// 例: 摂氏から華氏へ変換、小数点2桁以下切り捨て。\n// return (datasources[\"MyDatasource\"].sensor.tempInF * 1.8 + 32).toFixed(2);";
-				codeWindowHeader = $('<div class="code-window-header cm-s-ambiance">このJavaScriptは、参照データソースが更新されるたびに再評価されます。そして<span class="cm-keyword">戻り値</span>はウィジェットに表示されます。あなたは関数<code><span class="cm-keyword">function</span>(<span class="cm-def">datasources</span>)</code>の中身をJavaScriptで記述することができます。引数datasourcesは追加したデータソースの配列です。</div>');
+            switch (mode) {
+                case 'javascript':
+                    exampleText = $.i18n.t('JSEditor.javascript.exampleText') + " \n// return (datasources[\"MyDatasource\"].sensor.tempInF * 1.8 + 32).toFixed(2);";
+                    codeWindowHeader = $('<div class="code-window-header cm-s-ambiance">' + $.i18n.t('JSEditor.javascript.codeWindowHeader') + '</div>');
 
-				// If value is empty, go ahead and suggest something
-				if (!value)
-					value = exampleText;
+                    // If value is empty, go ahead and suggest something
+                    if (!value)
+                        value = exampleText;
 
-				config = {
-					value: value,
-					mode: "javascript",
-					theme: "ambiance",
-					indentUnit: 4,
-					lineNumbers: true,
-					matchBrackets: true,
-					autoCloseBrackets: true,
-					gutters: ["CodeMirror-lint-markers"],
-					lint: true
-				};
-				break;
-			case 'json':
-				exampleText = '// 例: {\n//    "title": "タイトル"\n//    "value": 10\n}';
-				codeWindowHeader = $('<div class="code-window-header cm-s-ambiance"><span class="cm-keyword">"(ダブルクォーテーション)</span>で括った文字列の中では適切なエスケープシーケンスを使用して下さい。<br>例: "function(label, series){return (\\\"ID:\\\"+label);}" </div>');
+                    config = {
+                        value: value,
+                        mode: "javascript",
+                        theme: "ambiance",
+                        indentUnit: 4,
+                        lineNumbers: true,
+                        matchBrackets: true,
+                        autoCloseBrackets: true,
+                        gutters: ["CodeMirror-lint-markers"],
+                        lint: true
+                    };
+                    break;
+                case 'json':
+                    exampleText = $.i18n.t('JSEditor.json.exampleText');
+                    codeWindowHeader = $('<div class="code-window-header cm-s-ambiance">' + $.i18n.t('JSEditor.json.codeWindowHeader') + '</div>');
 
-				config = {
-					value: value,
-					mode: "javascript",
-					json: true,
-					theme: "ambiance",
-					indentUnit: 4,
-					lineNumbers: true,
-					matchBrackets: true,
-					autoCloseBrackets: true,
-					gutters: ["CodeMirror-lint-markers"],
-					lint: true
-				};
-				break;
-		}
+                    config = {
+                        value: value,
+                        mode: "javascript",
+                        json: true,
+                        theme: "ambiance",
+                        indentUnit: 4,
+                        lineNumbers: true,
+                        matchBrackets: true,
+                        autoCloseBrackets: true,
+                        gutters: ["CodeMirror-lint-markers"],
+                        lint: true
+                    };
+                    break;
+            }
 
-		codeWindow.append([codeWindowHeader, codeMirrorWrapper, codeWindowFooter]);
+            codeWindow.append([codeWindowHeader, codeMirrorWrapper, codeWindowFooter]);
 
-		$("body").append(codeWindow);
+            $("body").append(codeWindow);
 
-		var codeMirrorEditor = CodeMirror(codeMirrorWrapper.get(0), config);
+            var codeMirrorEditor = CodeMirror(codeMirrorWrapper.get(0), config);
 
-		var closeButton = $('<span id="dialog-cancel" class="text-button">閉じる</span>').click(function () {
-			if (callback) {
-				var newValue = codeMirrorEditor.getValue();
+            var closeButton = $('<span id="dialog-cancel" class="text-button">' + $.i18n.t('JSEditor.cancel') + '</span>').click(function() {
+                if (callback) {
+                    var newValue = codeMirrorEditor.getValue();
 
-				if (newValue === exampleText) {
-					newValue = "";
-				}
+                    if (newValue === exampleText) {
+                        newValue = "";
+                    }
 
-				var error = null;
-				switch (mode) {
-					case 'json':
-						if (JSHINT.errors.length > 1) {
-							alert("Please correct the json error.");
-							return;
-						}
-						break;
-				}
-				callback(newValue);
-				codeWindow.remove();
-			}
-		});
+                    var error = null;
+                    switch (mode) {
+                        case 'json':
+                            if (JSHINT.errors.length > 1) {
+                                alert("Please correct the json error.");
+                                return;
+                            }
+                            break;
+                    }
+                    callback(newValue);
+                    codeWindow.remove();
+                }
+            });
 
-		codeWindowFooter.append(closeButton);
-	}
+            codeWindowFooter.append(closeButton);
+        }
 
-	// Public API
-	return {
-		displayJSEditor: function (value, mode, callback) {
-			displayJSEditor(value, mode, callback);
-		},
-		setAssetRoot: function (assetRoot) {
-			setAssetRoot(assetRoot)
-		}
-	}
+        // Public API
+    return {
+        displayJSEditor: function(value, mode, callback) {
+            displayJSEditor(value, mode, callback);
+        },
+        setAssetRoot: function(assetRoot) {
+            setAssetRoot(assetRoot)
+        }
+    }
 }
 
 // ┌────────────────────────────────────────────────────────────────────┐ \\
@@ -1418,115 +1279,113 @@ JSEditor = function () {
 // └────────────────────────────────────────────────────────────────────┘ \\
 
 function PaneModel(theFreeboardModel, widgetPlugins) {
-	var self = this;
+    var self = this;
 
-	this.title = ko.observable();
-	this.width = ko.observable(1);
-	this.row = {};
-	this.col = {};
+    this.title = ko.observable();
+    this.width = ko.observable(1);
+    this.row = {};
+    this.col = {};
 
-	this.col_width = ko.observable(1);
-	this.col_width.subscribe(function(newValue)
-	{
-		self.processSizeChange();
-	});
+    this.col_width = ko.observable(1);
+    this.col_width.subscribe(function(newValue) {
+        self.processSizeChange();
+    });
 
-	this.widgets = ko.observableArray();
+    this.widgets = ko.observableArray();
 
-	this.addWidget = function (widget) {
-		this.widgets.push(widget);
-	}
+    this.addWidget = function(widget) {
+        this.widgets.push(widget);
+    }
 
-	this.widgetCanMoveUp = function (widget) {
-		return (self.widgets.indexOf(widget) >= 1);
-	}
+    this.widgetCanMoveUp = function(widget) {
+        return (self.widgets.indexOf(widget) >= 1);
+    }
 
-	this.widgetCanMoveDown = function (widget) {
-		var i = self.widgets.indexOf(widget);
+    this.widgetCanMoveDown = function(widget) {
+        var i = self.widgets.indexOf(widget);
 
-		return (i < self.widgets().length - 1);
-	}
+        return (i < self.widgets().length - 1);
+    }
 
-	this.moveWidgetUp = function (widget) {
-		if (self.widgetCanMoveUp(widget)) {
-			var i = self.widgets.indexOf(widget);
-			var array = self.widgets();
-			self.widgets.splice(i - 1, 2, array[i], array[i - 1]);
-		}
-	}
+    this.moveWidgetUp = function(widget) {
+        if (self.widgetCanMoveUp(widget)) {
+            var i = self.widgets.indexOf(widget);
+            var array = self.widgets();
+            self.widgets.splice(i - 1, 2, array[i], array[i - 1]);
+        }
+    }
 
-	this.moveWidgetDown = function (widget) {
-		if (self.widgetCanMoveDown(widget)) {
-			var i = self.widgets.indexOf(widget);
-			var array = self.widgets();
-			self.widgets.splice(i, 2, array[i + 1], array[i]);
-		}
-	}
+    this.moveWidgetDown = function(widget) {
+        if (self.widgetCanMoveDown(widget)) {
+            var i = self.widgets.indexOf(widget);
+            var array = self.widgets();
+            self.widgets.splice(i, 2, array[i + 1], array[i]);
+        }
+    }
 
-	this.processSizeChange = function()
-	{
-		// Give the animation a moment to complete. Really hacky.
-		// TODO: Make less hacky. Also, doesn't work when screen resizes.
-		setTimeout(function(){
-			_.each(self.widgets(), function (widget) {
-				widget.processSizeChange();
-			});
-		}, 1000);
-	}
+    this.processSizeChange = function() {
+        // Give the animation a moment to complete. Really hacky.
+        // TODO: Make less hacky. Also, doesn't work when screen resizes.
+        setTimeout(function() {
+            _.each(self.widgets(), function(widget) {
+                widget.processSizeChange();
+            });
+        }, 1000);
+    }
 
-	this.getCalculatedHeight = function () {
-		var memo = 0;
-		var sumHeights = _.reduce(self.widgets(), function (memo, widget) {
-			return memo + widget.height();
-		}, 0);
+    this.getCalculatedHeight = function() {
+        var memo = 0;
+        var sumHeights = _.reduce(self.widgets(), function(memo, widget) {
+            return memo + widget.height();
+        }, 0);
 
-		sumHeights *= 6;
-		sumHeights += 3;
+        sumHeights *= 6;
+        sumHeights += 3;
 
-		sumHeights *= 10;
+        sumHeights *= 10;
 
-		var rows = Math.ceil((sumHeights + 20) / 30);
+        var rows = Math.ceil((sumHeights + 20) / 30);
 
-		return Math.max(4, rows);
-	}
+        return Math.max(4, rows);
+    }
 
-	this.serialize = function () {
-		var widgets = [];
+    this.serialize = function() {
+        var widgets = [];
 
-		_.each(self.widgets(), function (widget) {
-			widgets.push(widget.serialize());
-		});
+        _.each(self.widgets(), function(widget) {
+            widgets.push(widget.serialize());
+        });
 
-		return {
-			title: self.title(),
-			width: self.width(),
-			row: self.row,
-			col: self.col,
-			col_width: self.col_width(),
-			widgets: widgets
-		};
-	}
+        return {
+            title: self.title(),
+            width: self.width(),
+            row: self.row,
+            col: self.col,
+            col_width: self.col_width(),
+            widgets: widgets
+        };
+    }
 
-	this.deserialize = function (object) {
-		self.title(object.title);
-		self.width(object.width);
+    this.deserialize = function(object) {
+        self.title(object.title);
+        self.width(object.width);
 
-		self.row = object.row;
-		self.col = object.col;
-		self.col_width(object.col_width || 1);
+        self.row = object.row;
+        self.col = object.col;
+        self.col_width(object.col_width || 1);
 
-		_.each(object.widgets, function (widgetConfig) {
-			var widget = new WidgetModel(theFreeboardModel, widgetPlugins);
-			widget.deserialize(widgetConfig);
-			self.widgets.push(widget);
-		});
-	}
+        _.each(object.widgets, function(widgetConfig) {
+            var widget = new WidgetModel(theFreeboardModel, widgetPlugins);
+            widget.deserialize(widgetConfig);
+            self.widgets.push(widget);
+        });
+    }
 
-	this.dispose = function () {
-		_.each(self.widgets(), function (widget) {
-			widget.dispose();
-		});
-	}
+    this.dispose = function() {
+        _.each(self.widgets(), function(widget) {
+            widget.dispose();
+        });
+    }
 }
 
 // ┌────────────────────────────────────────────────────────────────────┐ \\
@@ -1539,16 +1398,11 @@ function PaneModel(theFreeboardModel, widgetPlugins) {
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
 
-PluginEditor = function(jsEditor, valueEditor)
-{
-    function _removeSettingsRows()
-    {
-        if($("#setting-row-instance-name").length)
-        {
+PluginEditor = function(jsEditor, valueEditor) {
+    function _removeSettingsRows() {
+        if ($("#setting-row-instance-name").length) {
             $("#setting-row-instance-name").nextAll().remove();
-        }
-        else
-        {
+        } else {
             $("#setting-row-plugin-types").nextAll().remove();
         }
     }
@@ -1564,21 +1418,19 @@ PluginEditor = function(jsEditor, valueEditor)
         return ret;
     }
 
-    function _isNumerical(n)
-    {
+    function _isNumerical(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
 
-    function _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, includeRemove)
-    {
+    function _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, includeRemove) {
         var input = $('<textarea></textarea>').addClass(_toValidateClassString(settingDef.validate, "text-input")).attr("style", settingDef.style);
 
-        if(settingDef.multi_input) {
+        if (settingDef.multi_input) {
             input.change(function() {
                 var arrayInput = [];
                 $(valueCell).find('textarea').each(function() {
                     var thisVal = $(this).val();
-                    if(thisVal) {
+                    if (thisVal) {
                         arrayInput = arrayInput.concat(thisVal);
                     }
                 });
@@ -1590,7 +1442,7 @@ PluginEditor = function(jsEditor, valueEditor)
             });
         }
 
-        if(currentValue) {
+        if (currentValue) {
             input.val(currentValue);
         }
 
@@ -1601,7 +1453,7 @@ PluginEditor = function(jsEditor, valueEditor)
 
         wrapperDiv.append(input).append(datasourceToolbox);
 
-        var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>データソース</label></li>')
+        var datasourceTool = $('<li><i class="icon-plus icon-white"></i><label>' + $.i18n.t('PluginEditor.datasourceTool') + '</label></li>')
             .mousedown(function(e) {
                 e.preventDefault();
                 $(input).val("").focus().insertAtCaret("datasources[\"").trigger("freeboard-eval");
@@ -1618,28 +1470,26 @@ PluginEditor = function(jsEditor, valueEditor)
             });
         datasourceToolbox.append(jsEditorTool);
 
-        if(includeRemove) {
+        if (includeRemove) {
             var removeButton = $('<li class="remove-setting-row"><i class="icon-minus icon-white"></i><label></label></li>')
                 .mousedown(function(e) {
                     e.preventDefault();
                     wrapperDiv.remove();
                     $(valueCell).find('textarea:first').change();
-            });
+                });
             datasourceToolbox.prepend(removeButton);
         }
 
         $(valueCell).append(wrapperDiv);
     }
 
-    function createPluginEditor(title, pluginTypes, currentTypeName, currentSettingsValues, settingsSavedCallback)
-    {
+    function createPluginEditor(title, pluginTypes, currentTypeName, currentSettingsValues, settingsSavedCallback) {
         var newSettings = {
-            type    : currentTypeName,
+            type: currentTypeName,
             settings: {}
         };
 
-        function createSettingRow(name, displayName)
-        {
+        function createSettingRow(name, displayName) {
             var tr = $('<div id="setting-row-' + name + '" class="form-row"></div>').appendTo(form);
 
             tr.append('<div class="form-label"><label class="control-label">' + displayName + '</label></div>');
@@ -1652,29 +1502,25 @@ PluginEditor = function(jsEditor, valueEditor)
         var pluginDescriptionElement = $('<div id="plugin-description"></div>').hide();
         form.append(pluginDescriptionElement);
 
-        function createSettingsFromDefinition(settingsDefs)
-        {
+        function createSettingsFromDefinition(settingsDefs) {
             var colorPickerID = 0;
 
-            _.each(settingsDefs, function(settingDef)
-            {
+            _.each(settingsDefs, function(settingDef) {
                 // Set a default value if one doesn't exist
-                if(!_.isUndefined(settingDef.default_value) && _.isUndefined(currentSettingsValues[settingDef.name]))
-                {
+                if (!_.isUndefined(settingDef.default_value) && _.isUndefined(currentSettingsValues[settingDef.name])) {
                     currentSettingsValues[settingDef.name] = settingDef.default_value;
                 }
 
                 var displayName = settingDef.name;
 
-                if(!_.isUndefined(settingDef.display_name))
-                {
+                if (!_.isUndefined(settingDef.display_name)) {
                     displayName = settingDef.display_name;
                 }
 
                 settingDef.style = _.isUndefined(settingDef.style) ? '' : settingDef.style;
 
                 // modify required field name
-                if(!_.isUndefined(settingDef.validate)) {
+                if (!_.isUndefined(settingDef.validate)) {
                     if (settingDef.validate.indexOf("required") != -1) {
                         displayName = "* " + displayName;
                     }
@@ -1682,334 +1528,295 @@ PluginEditor = function(jsEditor, valueEditor)
 
                 var valueCell = createSettingRow(settingDef.name, displayName);
 
-                switch (settingDef.type)
-                {
+                switch (settingDef.type) {
                     case "array":
-                    {
-                        var subTableDiv = $('<div class="form-table-value-subtable"></div>').appendTo(valueCell);
-
-                        var subTable = $('<table class="table table-condensed sub-table"></table>').appendTo(subTableDiv);
-                        var subTableHead = $("<thead></thead>").hide().appendTo(subTable);
-                        var subTableHeadRow = $("<tr></tr>").appendTo(subTableHead);
-                        var subTableBody = $('<tbody></tbody>').appendTo(subTable);
-
-                        var currentSubSettingValues = [];
-
-                        // Create our headers
-                        _.each(settingDef.settings, function(subSettingDef)
                         {
-                            var subsettingDisplayName = subSettingDef.name;
+                            var subTableDiv = $('<div class="form-table-value-subtable"></div>').appendTo(valueCell);
 
-                            if(!_.isUndefined(subSettingDef.display_name))
-                            {
-                                subsettingDisplayName = subSettingDef.display_name;
-                            }
+                            var subTable = $('<table class="table table-condensed sub-table"></table>').appendTo(subTableDiv);
+                            var subTableHead = $("<thead></thead>").hide().appendTo(subTable);
+                            var subTableHeadRow = $("<tr></tr>").appendTo(subTableHead);
+                            var subTableBody = $('<tbody></tbody>').appendTo(subTable);
 
-                            $('<th>' + subsettingDisplayName + '</th>').appendTo(subTableHeadRow);
-                        });
+                            var currentSubSettingValues = [];
 
-                        if(settingDef.name in currentSettingsValues)
-                        {
-                            currentSubSettingValues = currentSettingsValues[settingDef.name];
-                        }
+                            // Create our headers
+                            _.each(settingDef.settings, function(subSettingDef) {
+                                var subsettingDisplayName = subSettingDef.name;
 
-                        function processHeaderVisibility()
-                        {
-                            if(newSettings.settings[settingDef.name].length > 0)
-                            {
-                                subTableHead.show();
-                            }
-                            else
-                            {
-                                subTableHead.hide();
-                            }
-                        }
-
-                        function createSubsettingRow(subsettingValue)
-                        {
-                            var subsettingRow = $('<tr></tr>').appendTo(subTableBody);
-
-                            var newSetting = {};
-
-                            if(!_.isArray(newSettings.settings[settingDef.name]))
-                            {
-                                newSettings.settings[settingDef.name] = [];
-                            }
-
-                            newSettings.settings[settingDef.name].push(newSetting);
-
-                            _.each(settingDef.settings, function(subSettingDef)
-                            {
-                                var subsettingCol = $('<td></td>').appendTo(subsettingRow);
-                                var subsettingValueString = "";
-
-                                if(!_.isUndefined(subsettingValue[subSettingDef.name]))
-                                {
-                                    subsettingValueString = subsettingValue[subSettingDef.name];
+                                if (!_.isUndefined(subSettingDef.display_name)) {
+                                    subsettingDisplayName = subSettingDef.display_name;
                                 }
 
-                                newSetting[subSettingDef.name] = subsettingValueString;
+                                $('<th>' + subsettingDisplayName + '</th>').appendTo(subTableHeadRow);
+                            });
 
-                                $('<input class="table-row-value" type="text">')
+                            if (settingDef.name in currentSettingsValues) {
+                                currentSubSettingValues = currentSettingsValues[settingDef.name];
+                            }
+
+                            function processHeaderVisibility() {
+                                if (newSettings.settings[settingDef.name].length > 0) {
+                                    subTableHead.show();
+                                } else {
+                                    subTableHead.hide();
+                                }
+                            }
+
+                            function createSubsettingRow(subsettingValue) {
+                                var subsettingRow = $('<tr></tr>').appendTo(subTableBody);
+
+                                var newSetting = {};
+
+                                if (!_.isArray(newSettings.settings[settingDef.name])) {
+                                    newSettings.settings[settingDef.name] = [];
+                                }
+
+                                newSettings.settings[settingDef.name].push(newSetting);
+
+                                _.each(settingDef.settings, function(subSettingDef) {
+                                    var subsettingCol = $('<td></td>').appendTo(subsettingRow);
+                                    var subsettingValueString = "";
+
+                                    if (!_.isUndefined(subsettingValue[subSettingDef.name])) {
+                                        subsettingValueString = subsettingValue[subSettingDef.name];
+                                    }
+
+                                    newSetting[subSettingDef.name] = subsettingValueString;
+
+                                    $('<input class="table-row-value" type="text">')
                                         .addClass(_toValidateClassString(subSettingDef.validate, "text-input"))
                                         .attr("style", settingDef.style)
-                                        .appendTo(subsettingCol).val(subsettingValueString).change(function()
-                                {
-                                    newSetting[subSettingDef.name] = $(this).val();
+                                        .appendTo(subsettingCol).val(subsettingValueString).change(function() {
+                                            newSetting[subSettingDef.name] = $(this).val();
+                                        });
+                                });
+
+                                subsettingRow.append($('<td class="table-row-operation"></td>').append($('<ul class="board-toolbar"></ul>').append($('<li></li>').append($('<i class="icon-trash icon-white"></i>').click(function() {
+                                    var subSettingIndex = newSettings.settings[settingDef.name].indexOf(newSetting);
+
+                                    if (subSettingIndex != -1) {
+                                        newSettings.settings[settingDef.name].splice(subSettingIndex, 1);
+                                        subsettingRow.remove();
+                                        processHeaderVisibility();
+                                    }
+                                })))));
+
+                                subTableDiv.scrollTop(subTableDiv[0].scrollHeight);
+
+                                processHeaderVisibility();
+                            }
+
+                            $('<div class="table-operation text-button">' + $.i18n.t('PluginEditor.tableOperation') + '</div>').appendTo(valueCell).click(function() {
+                                var newSubsettingValue = {};
+
+                                _.each(settingDef.settings, function(subSettingDef) {
+                                    newSubsettingValue[subSettingDef.name] = "";
+                                });
+
+                                createSubsettingRow(newSubsettingValue);
+                            });
+
+                            // Create our rows
+                            _.each(currentSubSettingValues, function(currentSubSettingValue, subSettingIndex) {
+                                createSubsettingRow(currentSubSettingValue);
+                            });
+
+                            break;
+                        }
+                    case "boolean":
+                        {
+                            newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
+
+                            var onOffSwitch = $('<div class="onoffswitch"><label class="onoffswitch-label" for="' + settingDef.name + '-onoff"><div class="onoffswitch-inner"><span class="on">' + $.i18n.t('global.yes') + '</span><span class="off">' + $.i18n.t('global.no') + '</span></div><div class="onoffswitch-switch"></div></label></div>').appendTo(valueCell);
+
+                            var input = $('<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="' + settingDef.name + '-onoff">').prependTo(onOffSwitch).change(function() {
+                                newSettings.settings[settingDef.name] = this.checked;
+                            });
+
+                            if (settingDef.name in currentSettingsValues) {
+                                input.prop("checked", currentSettingsValues[settingDef.name]);
+                            }
+
+                            break;
+                        }
+                    case "option":
+                        {
+                            var defaultValue = currentSettingsValues[settingDef.name];
+
+                            var input = $('<select></select>')
+                                .addClass(_toValidateClassString(settingDef.validate))
+                                .attr("style", settingDef.style)
+                                .appendTo($('<div class="styled-select"></div>')
+                                    .appendTo(valueCell)).change(function() {
+                                    newSettings.settings[settingDef.name] = $(this).val();
+                                });
+
+                            _.each(settingDef.options, function(option) {
+
+                                var optionName;
+                                var optionValue;
+
+                                if (_.isObject(option)) {
+                                    optionName = option.name;
+                                    optionValue = option.value;
+                                } else {
+                                    optionName = option;
+                                }
+
+                                if (_.isUndefined(optionValue)) {
+                                    optionValue = optionName;
+                                }
+
+                                if (_.isUndefined(defaultValue)) {
+                                    defaultValue = optionValue;
+                                }
+
+                                $("<option></option>").text(optionName).attr("value", optionValue).appendTo(input);
+                            });
+
+                            newSettings.settings[settingDef.name] = defaultValue;
+
+                            if (settingDef.name in currentSettingsValues) {
+                                input.val(currentSettingsValues[settingDef.name]);
+                            }
+
+                            break;
+                        }
+                    case "color":
+                        {
+                            var curColorPickerID = "picker-" + colorPickerID++;
+                            var thisColorPickerID = "#" + curColorPickerID;
+                            var defaultValue = currentSettingsValues[settingDef.name];
+                            var input = $('<input id="' + curColorPickerID + '" type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell);
+
+                            newSettings.settings[settingDef.name] = defaultValue;
+
+                            $(thisColorPickerID).css({
+                                "border-right": "30px solid green",
+                                "width": "80px"
+                            });
+
+                            $(thisColorPickerID).css('border-color', defaultValue);
+
+                            var defhex = defaultValue;
+                            defhex.replace("#", "");
+
+                            $(thisColorPickerID).colpick({
+                                layout: 'hex',
+                                colorScheme: 'dark',
+                                color: defhex,
+                                submit: 0,
+                                onChange: function(hsb, hex, rgb, el, bySetColor) {
+                                    $(el).css('border-color', '#' + hex);
+                                    newSettings.settings[settingDef.name] = '#' + hex;
+                                    if (!bySetColor) {
+                                        $(el).val('#' + hex);
+                                    }
+                                }
+                            }).keyup(function() {
+                                $(this).colpickSetColor(this.value);
+                            });
+
+                            if (settingDef.name in currentSettingsValues) {
+                                input.val(currentSettingsValues[settingDef.name]);
+                            }
+
+                            break;
+                        }
+                    case 'json':
+                        {
+                            newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
+
+                            var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>')
+                                .addClass(_toValidateClassString(settingDef.validate, "text-input"))
+                                .attr("style", settingDef.style)
+                                .appendTo(valueCell).change(function() {
+                                    newSettings.settings[settingDef.name] = $(this).val();
+                                });
+
+                            if (settingDef.name in currentSettingsValues) {
+                                input.val(currentSettingsValues[settingDef.name]);
+                            }
+
+                            valueEditor.createValueEditor(input);
+
+                            var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
+
+                            var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JSON EDITOR</label></li>').mousedown(function(e) {
+                                e.preventDefault();
+
+                                jsEditor.displayJSEditor(input.val(), 'json', function(result) {
+                                    input.val(result);
+                                    input.change();
                                 });
                             });
 
-                            subsettingRow.append($('<td class="table-row-operation"></td>').append($('<ul class="board-toolbar"></ul>').append($('<li></li>').append($('<i class="icon-trash icon-white"></i>').click(function()
-                                                {
-                                                    var subSettingIndex = newSettings.settings[settingDef.name].indexOf(newSetting);
+                            $(valueCell).append(datasourceToolbox.append(jsEditorTool));
 
-                                                    if(subSettingIndex != -1)
-                                                    {
-                                                        newSettings.settings[settingDef.name].splice(subSettingIndex, 1);
-                                                        subsettingRow.remove();
-                                                        processHeaderVisibility();
-                                                    }
-                                                })))));
-
-                            subTableDiv.scrollTop(subTableDiv[0].scrollHeight);
-
-                            processHeaderVisibility();
+                            break;
                         }
-
-                        $('<div class="table-operation text-button">追加</div>').appendTo(valueCell).click(function()
-                        {
-                            var newSubsettingValue = {};
-
-                            _.each(settingDef.settings, function(subSettingDef)
-                            {
-                                newSubsettingValue[subSettingDef.name] = "";
-                            });
-
-                            createSubsettingRow(newSubsettingValue);
-                        });
-
-                        // Create our rows
-                        _.each(currentSubSettingValues, function(currentSubSettingValue, subSettingIndex)
-                        {
-                            createSubsettingRow(currentSubSettingValue);
-                        });
-
-                        break;
-                    }
-                    case "boolean":
-                    {
-                        newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
-
-                        var onOffSwitch = $('<div class="onoffswitch"><label class="onoffswitch-label" for="' + settingDef.name + '-onoff"><div class="onoffswitch-inner"><span class="on">はい</span><span class="off">いいえ</span></div><div class="onoffswitch-switch"></div></label></div>').appendTo(valueCell);
-
-                        var input = $('<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="' + settingDef.name + '-onoff">').prependTo(onOffSwitch).change(function()
-                        {
-                            newSettings.settings[settingDef.name] = this.checked;
-                        });
-
-                        if(settingDef.name in currentSettingsValues)
-                        {
-                            input.prop("checked", currentSettingsValues[settingDef.name]);
-                        }
-
-                        break;
-                    }
-                    case "option":
-                    {
-                        var defaultValue = currentSettingsValues[settingDef.name];
-
-                        var input = $('<select></select>')
-                                            .addClass(_toValidateClassString(settingDef.validate))
-                                            .attr("style", settingDef.style)
-                                            .appendTo($('<div class="styled-select"></div>')
-                                            .appendTo(valueCell)).change(function()
-                        {
-                            newSettings.settings[settingDef.name] = $(this).val();
-                        });
-
-                        _.each(settingDef.options, function(option)
-                        {
-
-                            var optionName;
-                            var optionValue;
-
-                            if(_.isObject(option))
-                            {
-                                optionName = option.name;
-                                optionValue = option.value;
-                            }
-                            else
-                            {
-                                optionName = option;
-                            }
-
-                            if(_.isUndefined(optionValue))
-                            {
-                                optionValue = optionName;
-                            }
-
-                            if(_.isUndefined(defaultValue))
-                            {
-                                defaultValue = optionValue;
-                            }
-
-                            $("<option></option>").text(optionName).attr("value", optionValue).appendTo(input);
-                        });
-
-                        newSettings.settings[settingDef.name] = defaultValue;
-
-                        if(settingDef.name in currentSettingsValues)
-                        {
-                            input.val(currentSettingsValues[settingDef.name]);
-                        }
-
-                        break;
-                    }
-                    case "color":
-                    {
-                        var curColorPickerID = "picker-" + colorPickerID++;
-                        var thisColorPickerID = "#" + curColorPickerID;
-                        var defaultValue = currentSettingsValues[settingDef.name];
-                        var input = $('<input id="' + curColorPickerID + '" type="text">').addClass(_toValidateClassString(settingDef.validate, "text-input")).appendTo(valueCell);
-
-                        newSettings.settings[settingDef.name] = defaultValue;
-
-                        $(thisColorPickerID).css({
-                            "border-right":"30px solid green",
-                            "width":"80px"
-                        });
-
-                        $(thisColorPickerID).css('border-color', defaultValue);
-
-                        var defhex = defaultValue;
-                        defhex.replace("#", "");
-
-                        $(thisColorPickerID).colpick({
-                            layout:'hex',
-                            colorScheme:'dark',
-                            color: defhex,
-                            submit:0,
-                            onChange:function(hsb,hex,rgb,el,bySetColor) {
-                                $(el).css('border-color','#'+hex);
-                                newSettings.settings[settingDef.name] = '#'+hex;
-                                if(!bySetColor) {
-                                    $(el).val('#'+hex);
-                                }
-                            }
-                        }).keyup(function(){
-                            $(this).colpickSetColor(this.value);
-                        });
-
-                        if(settingDef.name in currentSettingsValues) {
-                            input.val(currentSettingsValues[settingDef.name]);
-                        }
-
-                        break;
-                    }
-                    case 'json':
-                    {
-                        newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
-
-                        var input = $('<textarea class="calculated-value-input" style="z-index: 3000"></textarea>')
-                                .addClass(_toValidateClassString(settingDef.validate, "text-input"))
-                                .attr("style", settingDef.style)
-                                .appendTo(valueCell).change(function()
-                        {
-                            newSettings.settings[settingDef.name] = $(this).val();
-                        });
-
-                        if(settingDef.name in currentSettingsValues)
-                        {
-                            input.val(currentSettingsValues[settingDef.name]);
-                        }
-
-                        valueEditor.createValueEditor(input);
-
-                        var datasourceToolbox = $('<ul class="board-toolbar datasource-input-suffix"></ul>');
-
-                        var jsEditorTool = $('<li><i class="icon-fullscreen icon-white"></i><label>.JSON EDITOR</label></li>').mousedown(function(e)
-                        {
-                            e.preventDefault();
-
-                            jsEditor.displayJSEditor(input.val(), 'json', function(result){
-                                input.val(result);
-                                input.change();
-                            });
-                        });
-
-                        $(valueCell).append(datasourceToolbox.append(jsEditorTool));
-
-                        break;
-                    }
                     default:
-                    {
-                        newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
-
-                        if(settingDef.type == "calculated")
                         {
-                            if(settingDef.name in currentSettingsValues) {
-                                var currentValue = currentSettingsValues[settingDef.name];
-                                if(settingDef.multi_input && _.isArray(currentValue)) {
-                                    var includeRemove = false;
-                                    for(var i=0; i<currentValue.length; i++) {
-                                        _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue[i], includeRemove);
-                                        includeRemove = true;
+                            newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];
+
+                            if (settingDef.type == "calculated") {
+                                if (settingDef.name in currentSettingsValues) {
+                                    var currentValue = currentSettingsValues[settingDef.name];
+                                    if (settingDef.multi_input && _.isArray(currentValue)) {
+                                        var includeRemove = false;
+                                        for (var i = 0; i < currentValue.length; i++) {
+                                            _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue[i], includeRemove);
+                                            includeRemove = true;
+                                        }
+                                    } else {
+                                        _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, false);
                                     }
                                 } else {
-                                    _appendCalculatedSettingRow(valueCell, newSettings, settingDef, currentValue, false);
+                                    _appendCalculatedSettingRow(valueCell, newSettings, settingDef, null, false);
+                                }
+
+                                if (settingDef.multi_input) {
+                                    var inputAdder = $('<ul class="board-toolbar"><li class="add-setting-row"><i class="icon-plus icon-white"></i><label>' + $.i18n.t('PluginEditor.tableOperation') + '</label></li></ul>')
+                                        .mousedown(function(e) {
+                                            e.preventDefault();
+                                            _appendCalculatedSettingRow(valueCell, newSettings, settingDef, null, true);
+                                        });
+                                    $(valueCell).siblings('.form-label').append(inputAdder);
                                 }
                             } else {
-                                _appendCalculatedSettingRow(valueCell, newSettings, settingDef, null, false);
-                            }
-
-                            if(settingDef.multi_input) {
-                                var inputAdder = $('<ul class="board-toolbar"><li class="add-setting-row"><i class="icon-plus icon-white"></i><label>追加</label></li></ul>')
-                                    .mousedown(function(e) {
-                                        e.preventDefault();
-                                        _appendCalculatedSettingRow(valueCell, newSettings, settingDef, null, true);
+                                var input = $('<input type="text">')
+                                    .addClass(_toValidateClassString(settingDef.validate, "text-input"))
+                                    .attr("style", settingDef.style)
+                                    .appendTo(valueCell).change(function() {
+                                        if (settingDef.type == "number")
+                                            newSettings.settings[settingDef.name] = Number($(this).val());
+                                        else
+                                            newSettings.settings[settingDef.name] = $(this).val();
                                     });
-                                $(valueCell).siblings('.form-label').append(inputAdder);
-                            }
-                        }
-                        else
-                        {
-                            var input = $('<input type="text">')
-                                                .addClass(_toValidateClassString(settingDef.validate, "text-input"))
-                                                .attr("style", settingDef.style)
-                                                .appendTo(valueCell).change(function() {
-                                if (settingDef.type == "number")
-                                    newSettings.settings[settingDef.name] = Number($(this).val());
-                                else
-                                    newSettings.settings[settingDef.name] = $(this).val();
-                            });
 
-                            if(settingDef.name in currentSettingsValues)
-                            {
-                                input.val(currentSettingsValues[settingDef.name]);
+                                if (settingDef.name in currentSettingsValues) {
+                                    input.val(currentSettingsValues[settingDef.name]);
+                                }
                             }
-                        }
 
-                        break;
-                    }
+                            break;
+                        }
                 }
 
-                if(!_.isUndefined(settingDef.suffix))
-                {
+                if (!_.isUndefined(settingDef.suffix)) {
                     valueCell.append($('<div class="input-suffix">' + settingDef.suffix + '</div>'));
                 }
 
-                if(!_.isUndefined(settingDef.description))
-                {
+                if (!_.isUndefined(settingDef.description)) {
                     valueCell.append($('<div class="setting-description">' + settingDef.description + '</div>'));
                 }
             });
         }
 
-        new DialogBox(form, title, "保存", "キャンセル", function(okcancel)
-        {
+        new DialogBox(form, title, $.i18n.t('PluginEditor.dialog.yes'), $.i18n.t('PluginEditor.dialog.no'), function(okcancel) {
             if (okcancel == "ok") {
-                if(_.isFunction(settingsSavedCallback))
-                {
+                if (_.isFunction(settingsSavedCallback)) {
                     settingsSavedCallback(newSettings);
                 }
             }
@@ -2023,20 +1830,17 @@ PluginEditor = function(jsEditor, valueEditor)
         var pluginTypeNames = _.keys(pluginTypes);
         var typeSelect;
 
-        if(pluginTypeNames.length > 1)
-        {
-            var typeRow = createSettingRow("plugin-types", "タイプ");
+        if (pluginTypeNames.length > 1) {
+            var typeRow = createSettingRow("plugin-types", $.i18n.t('PluginEditor.type'));
             typeSelect = $('<select></select>').appendTo($('<div class="styled-select"></div>').appendTo(typeRow));
 
-            typeSelect.append($("<option>追加するタイプを選択してください。</option>").attr("value", "undefined"));
+            typeSelect.append($("<option>"+$.i18n.t('PluginEditor.firstOption')+"</option>").attr("value", "undefined"));
 
-            _.each(pluginTypes, function(pluginType)
-            {
+            _.each(pluginTypes, function(pluginType) {
                 typeSelect.append($("<option></option>").text(pluginType.display_name).attr("value", pluginType.type_name));
             });
 
-            typeSelect.change(function()
-            {
+            typeSelect.change(function() {
                 newSettings.type = $(this).val();
                 newSettings.settings = {};
 
@@ -2045,21 +1849,15 @@ PluginEditor = function(jsEditor, valueEditor)
 
                 selectedType = pluginTypes[typeSelect.val()];
 
-                if(_.isUndefined(selectedType))
-                {
+                if (_.isUndefined(selectedType)) {
                     $("#setting-row-instance-name").hide();
                     $("#dialog-ok").hide();
-                }
-                else
-                {
+                } else {
                     $("#setting-row-instance-name").show();
 
-                    if(selectedType.description && selectedType.description.length > 0)
-                    {
+                    if (selectedType.description && selectedType.description.length > 0) {
                         pluginDescriptionElement.html(selectedType.description).show();
-                    }
-                    else
-                    {
+                    } else {
                         pluginDescriptionElement.hide();
                     }
 
@@ -2067,24 +1865,18 @@ PluginEditor = function(jsEditor, valueEditor)
                     createSettingsFromDefinition(selectedType.settings);
                 }
             });
-        }
-        else if(pluginTypeNames.length == 1)
-        {
+        } else if (pluginTypeNames.length == 1) {
             selectedType = pluginTypes[pluginTypeNames[0]];
             newSettings.type = selectedType.type_name;
             newSettings.settings = {};
             createSettingsFromDefinition(selectedType.settings);
         }
 
-        if(typeSelect)
-        {
-            if(_.isUndefined(currentTypeName))
-            {
+        if (typeSelect) {
+            if (_.isUndefined(currentTypeName)) {
                 $("#setting-row-instance-name").hide();
                 $("#dialog-ok").hide();
-            }
-            else
-            {
+            } else {
                 $("#dialog-ok").show();
                 typeSelect.val(currentTypeName).trigger("change");
             }
@@ -2093,14 +1885,13 @@ PluginEditor = function(jsEditor, valueEditor)
 
     // Public API
     return {
-        createPluginEditor : function(
-                    title,
-                    pluginTypes,
-                    currentInstanceName,
-                    currentTypeName,
-                    currentSettingsValues,
-                    settingsSavedCallback)
-        {
+        createPluginEditor: function(
+            title,
+            pluginTypes,
+            currentInstanceName,
+            currentTypeName,
+            currentSettingsValues,
+            settingsSavedCallback) {
             createPluginEditor(title, pluginTypes, currentInstanceName, currentTypeName, currentSettingsValues, settingsSavedCallback);
         }
     }
@@ -2116,351 +1907,320 @@ PluginEditor = function(jsEditor, valueEditor)
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
 
-ValueEditor = function(theFreeboardModel)
-{
-	var _veDatasourceRegex = new RegExp(".*datasources\\[\"([^\"]*)(\"\\])?(.*)$");
+ValueEditor = function(theFreeboardModel) {
+    var _veDatasourceRegex = new RegExp(".*datasources\\[\"([^\"]*)(\"\\])?(.*)$");
 
-	var dropdown = null;
-	var selectedOptionIndex = 0;
-	var _autocompleteOptions = [];
-	var currentValue = null;
+    var dropdown = null;
+    var selectedOptionIndex = 0;
+    var _autocompleteOptions = [];
+    var currentValue = null;
 
-	var EXPECTED_TYPE = {
-		ANY : "any",
-		ARRAY : "array",
-		OBJECT : "object",
-		STRING : "string",
-		NUMBER : "number",
-		BOOLEAN : "boolean"
-	};
+    var EXPECTED_TYPE = {
+        ANY: "any",
+        ARRAY: "array",
+        OBJECT: "object",
+        STRING: "string",
+        NUMBER: "number",
+        BOOLEAN: "boolean"
+    };
 
-	function _isPotentialTypeMatch(value, expectsType)
-	{
-		if(_.isArray(value) || _.isObject(value))
-		{
-			return true;
-		}
-		return _isTypeMatch(value, expectsType);
-	}
+    function _isPotentialTypeMatch(value, expectsType) {
+        if (_.isArray(value) || _.isObject(value)) {
+            return true;
+        }
+        return _isTypeMatch(value, expectsType);
+    }
 
-	function _isTypeMatch(value, expectsType) {
-		switch(expectsType)
-		{
-		case EXPECTED_TYPE.ANY: return true;
-		case EXPECTED_TYPE.ARRAY: return _.isArray(value);
-		case EXPECTED_TYPE.OBJECT: return _.isObject(value);
-		case EXPECTED_TYPE.STRING: return _.isString(value);
-		case EXPECTED_TYPE.NUMBER: return _.isNumber(value);
-		case EXPECTED_TYPE.BOOLEAN: return _.isBoolean(value);
-		}
-	}
+    function _isTypeMatch(value, expectsType) {
+        switch (expectsType) {
+            case EXPECTED_TYPE.ANY:
+                return true;
+            case EXPECTED_TYPE.ARRAY:
+                return _.isArray(value);
+            case EXPECTED_TYPE.OBJECT:
+                return _.isObject(value);
+            case EXPECTED_TYPE.STRING:
+                return _.isString(value);
+            case EXPECTED_TYPE.NUMBER:
+                return _.isNumber(value);
+            case EXPECTED_TYPE.BOOLEAN:
+                return _.isBoolean(value);
+        }
+    }
 
-	function _checkCurrentValueType(element, expectsType) {
-		$(element).parent().find(".validation-error").remove();
-		if(!_isTypeMatch(currentValue, expectsType)) {
-			$(element).parent().append("<div class='validation-error'>" +
-				"This field expects an expression that evaluates to type " +
-				expectsType + ".</div>");
-		}
-	}
+    function _checkCurrentValueType(element, expectsType) {
+        $(element).parent().find(".validation-error").remove();
+        if (!_isTypeMatch(currentValue, expectsType)) {
+            $(element).parent().append("<div class='validation-error'>" +
+                "This field expects an expression that evaluates to type " +
+                expectsType + ".</div>");
+        }
+    }
 
-	function _resizeValueEditor(element)
-	{
-		var lineBreakCount = ($(element).val().match(/\n/g) || []).length;
+    function _resizeValueEditor(element) {
+        var lineBreakCount = ($(element).val().match(/\n/g) || []).length;
 
-		var newHeight = Math.min(200, 20 * (lineBreakCount + 1));
+        var newHeight = Math.min(200, 20 * (lineBreakCount + 1));
 
-		$(element).css({height: newHeight + "px"});
-	}
+        $(element).css({
+            height: newHeight + "px"
+        });
+    }
 
-	function _autocompleteFromDatasource(inputString, datasources, expectsType)
-	{
-		var match = _veDatasourceRegex.exec(inputString);
+    function _autocompleteFromDatasource(inputString, datasources, expectsType) {
+        var match = _veDatasourceRegex.exec(inputString);
 
-		var options = [];
+        var options = [];
 
-		if(match)
-		{
-			// Editor value is: datasources["; List all datasources
-			if(match[1] == "")
-			{
-				_.each(datasources, function(datasource)
-				{
-					options.push({value: datasource.name(), entity: undefined,
-						precede_char: "", follow_char: "\"]"});
-				});
-			}
-			// Editor value is a partial match for a datasource; list matching datasources
-			else if(match[1] != "" && _.isUndefined(match[2]))
-			{
-				var replacementString = match[1];
+        if (match) {
+            // Editor value is: datasources["; List all datasources
+            if (match[1] == "") {
+                _.each(datasources, function(datasource) {
+                    options.push({
+                        value: datasource.name(),
+                        entity: undefined,
+                        precede_char: "",
+                        follow_char: "\"]"
+                    });
+                });
+            }
+            // Editor value is a partial match for a datasource; list matching datasources
+            else if (match[1] != "" && _.isUndefined(match[2])) {
+                var replacementString = match[1];
 
-				_.each(datasources, function(datasource)
-				{
-					var dsName = datasource.name();
+                _.each(datasources, function(datasource) {
+                    var dsName = datasource.name();
 
-					if(dsName != replacementString && dsName.indexOf(replacementString) == 0)
-					{
-						options.push({value: dsName, entity: undefined,
-							precede_char: "", follow_char: "\"]"});
-					}
-				});
-			}
-			// Editor value matches a datasources; parse JSON in order to populate list
-			else
-			{
-				// We already have a datasource selected; find it
-				var datasource = _.find(datasources, function(datasource)
-				{
-					return (datasource.name() === match[1]);
-				});
+                    if (dsName != replacementString && dsName.indexOf(replacementString) == 0) {
+                        options.push({
+                            value: dsName,
+                            entity: undefined,
+                            precede_char: "",
+                            follow_char: "\"]"
+                        });
+                    }
+                });
+            }
+            // Editor value matches a datasources; parse JSON in order to populate list
+            else {
+                // We already have a datasource selected; find it
+                var datasource = _.find(datasources, function(datasource) {
+                    return (datasource.name() === match[1]);
+                });
 
-				if(!_.isUndefined(datasource))
-				{
-					var dataPath = "data";
-					var remainder = "";
+                if (!_.isUndefined(datasource)) {
+                    var dataPath = "data";
+                    var remainder = "";
 
-					// Parse the partial JSON selectors
-					if(!_.isUndefined(match[2]))
-					{
-						// Strip any incomplete field values, and store the remainder
-						var remainderIndex = match[3].lastIndexOf("]") + 1;
-						dataPath = dataPath + match[3].substring(0, remainderIndex);
-						remainder = match[3].substring(remainderIndex, match[3].length);
-						remainder = remainder.replace(/^[\[\"]*/, "");
-						remainder = remainder.replace(/[\"\]]*$/, "");
-					}
+                    // Parse the partial JSON selectors
+                    if (!_.isUndefined(match[2])) {
+                        // Strip any incomplete field values, and store the remainder
+                        var remainderIndex = match[3].lastIndexOf("]") + 1;
+                        dataPath = dataPath + match[3].substring(0, remainderIndex);
+                        remainder = match[3].substring(remainderIndex, match[3].length);
+                        remainder = remainder.replace(/^[\[\"]*/, "");
+                        remainder = remainder.replace(/[\"\]]*$/, "");
+                    }
 
-					// Get the data for the last complete JSON field
-					var dataValue = datasource.getDataRepresentation(dataPath);
-					currentValue = dataValue;
+                    // Get the data for the last complete JSON field
+                    var dataValue = datasource.getDataRepresentation(dataPath);
+                    currentValue = dataValue;
 
-					// For arrays, list out the indices
-					if(_.isArray(dataValue))
-					{
-						for(var index = 0; index < dataValue.length; index++)
-						{
-							if(index.toString().indexOf(remainder) == 0)
-							{
-								var value = dataValue[index];
-								if(_isPotentialTypeMatch(value, expectsType))
-								{
-									options.push({value: index, entity: value,
-										precede_char: "[", follow_char: "]",
-										preview: value.toString()});
-								}
-							}
-						}
-					}
-					// For objects, list out the keys
-					else if(_.isObject(dataValue))
-					{
-						_.each(dataValue, function(value, name)
-						{
-							if(name.indexOf(remainder) == 0)
-							{
-								if(_isPotentialTypeMatch(value, expectsType))
-								{
-									options.push({value: name, entity: value,
-										precede_char: "[\"", follow_char: "\"]"});
-								}
-							}
-						});
-					}
-					// For everything else, do nothing (no further selection possible)
-					else
-					{
-						// no-op
-					}
-				}
-			}
-		}
-		_autocompleteOptions = options;
-	}
+                    // For arrays, list out the indices
+                    if (_.isArray(dataValue)) {
+                        for (var index = 0; index < dataValue.length; index++) {
+                            if (index.toString().indexOf(remainder) == 0) {
+                                var value = dataValue[index];
+                                if (_isPotentialTypeMatch(value, expectsType)) {
+                                    options.push({
+                                        value: index,
+                                        entity: value,
+                                        precede_char: "[",
+                                        follow_char: "]",
+                                        preview: value.toString()
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    // For objects, list out the keys
+                    else if (_.isObject(dataValue)) {
+                        _.each(dataValue, function(value, name) {
+                            if (name.indexOf(remainder) == 0) {
+                                if (_isPotentialTypeMatch(value, expectsType)) {
+                                    options.push({
+                                        value: name,
+                                        entity: value,
+                                        precede_char: "[\"",
+                                        follow_char: "\"]"
+                                    });
+                                }
+                            }
+                        });
+                    }
+                    // For everything else, do nothing (no further selection possible)
+                    else {
+                        // no-op
+                    }
+                }
+            }
+        }
+        _autocompleteOptions = options;
+    }
 
-	function _renderAutocompleteDropdown(element, expectsType)
-	{
-		var inputString = $(element).val().substring(0, $(element).getCaretPosition());
+    function _renderAutocompleteDropdown(element, expectsType) {
+        var inputString = $(element).val().substring(0, $(element).getCaretPosition());
 
-		// Weird issue where the textarea box was putting in ASCII (nbsp) for spaces.
-		inputString = inputString.replace(String.fromCharCode(160), " ");
+        // Weird issue where the textarea box was putting in ASCII (nbsp) for spaces.
+        inputString = inputString.replace(String.fromCharCode(160), " ");
 
-		_autocompleteFromDatasource(inputString, theFreeboardModel.datasources(), expectsType);
+        _autocompleteFromDatasource(inputString, theFreeboardModel.datasources(), expectsType);
 
-		if(_autocompleteOptions.length > 0)
-		{
-			if(!dropdown)
-			{
-				dropdown = $('<ul id="value-selector" class="value-dropdown"></ul>')
-					.insertAfter(element)
-					.width($(element).outerWidth() - 2)
-					.css("left", $(element).position().left)
-					.css("top", $(element).position().top + $(element).outerHeight() - 1);
-			}
+        if (_autocompleteOptions.length > 0) {
+            if (!dropdown) {
+                dropdown = $('<ul id="value-selector" class="value-dropdown"></ul>')
+                    .insertAfter(element)
+                    .width($(element).outerWidth() - 2)
+                    .css("left", $(element).position().left)
+                    .css("top", $(element).position().top + $(element).outerHeight() - 1);
+            }
 
-			dropdown.empty();
-			dropdown.scrollTop(0);
+            dropdown.empty();
+            dropdown.scrollTop(0);
 
-			var selected = true;
-			selectedOptionIndex = 0;
+            var selected = true;
+            selectedOptionIndex = 0;
 
-			_.each(_autocompleteOptions, function(option, index)
-			{
-				var li = _renderAutocompleteDropdownOption(element, inputString, option, index);
-				if(selected)
-				{
-					$(li).addClass("selected");
-					selected = false;
-				}
-			});
-		}
-		else
-		{
-			_checkCurrentValueType(element, expectsType);
-			$(element).next("ul#value-selector").remove();
-			dropdown = null;
-			selectedOptionIndex = -1;
-		}
-	}
+            _.each(_autocompleteOptions, function(option, index) {
+                var li = _renderAutocompleteDropdownOption(element, inputString, option, index);
+                if (selected) {
+                    $(li).addClass("selected");
+                    selected = false;
+                }
+            });
+        } else {
+            _checkCurrentValueType(element, expectsType);
+            $(element).next("ul#value-selector").remove();
+            dropdown = null;
+            selectedOptionIndex = -1;
+        }
+    }
 
-	function _renderAutocompleteDropdownOption(element, inputString, option, currentIndex)
-	{
-		var optionLabel = option.value;
-		if(option.preview)
-		{
-			optionLabel = optionLabel + "<span class='preview'>" + option.preview + "</span>";
-		}
-		var li = $('<li>' + optionLabel + '</li>').appendTo(dropdown)
-			.mouseenter(function()
-			{
-				$(this).trigger("freeboard-select");
-			})
-			.mousedown(function(event)
-			{
-				$(this).trigger("freeboard-insertValue");
-				event.preventDefault();
-			})
-			.data("freeboard-optionIndex", currentIndex)
-			.data("freeboard-optionValue", option.value)
-			.bind("freeboard-insertValue", function()
-			{
-				var optionValue = option.value;
-				optionValue = option.precede_char + optionValue + option.follow_char;
+    function _renderAutocompleteDropdownOption(element, inputString, option, currentIndex) {
+        var optionLabel = option.value;
+        if (option.preview) {
+            optionLabel = optionLabel + "<span class='preview'>" + option.preview + "</span>";
+        }
+        var li = $('<li>' + optionLabel + '</li>').appendTo(dropdown)
+            .mouseenter(function() {
+                $(this).trigger("freeboard-select");
+            })
+            .mousedown(function(event) {
+                $(this).trigger("freeboard-insertValue");
+                event.preventDefault();
+            })
+            .data("freeboard-optionIndex", currentIndex)
+            .data("freeboard-optionValue", option.value)
+            .bind("freeboard-insertValue", function() {
+                var optionValue = option.value;
+                optionValue = option.precede_char + optionValue + option.follow_char;
 
-				var replacementIndex = inputString.lastIndexOf("]");
-				if(replacementIndex != -1)
-				{
-					$(element).replaceTextAt(replacementIndex+1, $(element).val().length,
-						optionValue);
-				}
-				else
-				{
-					$(element).insertAtCaret(optionValue);
-				}
+                var replacementIndex = inputString.lastIndexOf("]");
+                if (replacementIndex != -1) {
+                    $(element).replaceTextAt(replacementIndex + 1, $(element).val().length,
+                        optionValue);
+                } else {
+                    $(element).insertAtCaret(optionValue);
+                }
 
-				currentValue = option.entity;
-				$(element).triggerHandler("mouseup");
-			})
-			.bind("freeboard-select", function()
-			{
-				$(this).parent().find("li.selected").removeClass("selected");
-				$(this).addClass("selected");
-				selectedOptionIndex = $(this).data("freeboard-optionIndex");
-			});
-		return li;
-	}
+                currentValue = option.entity;
+                $(element).triggerHandler("mouseup");
+            })
+            .bind("freeboard-select", function() {
+                $(this).parent().find("li.selected").removeClass("selected");
+                $(this).addClass("selected");
+                selectedOptionIndex = $(this).data("freeboard-optionIndex");
+            });
+        return li;
+    }
 
-	function createValueEditor(element, expectsType)
-	{
-		$(element).addClass("calculated-value-input")
-			.bind("keyup mouseup freeboard-eval", function(event) {
-				// Ignore arrow keys and enter keys
-				if(dropdown && event.type == "keyup"
-					&& (event.keyCode == 38 || event.keyCode == 40 || event.keyCode == 13))
-				{
-					event.preventDefault();
-					return;
-				}
-				_renderAutocompleteDropdown(element, expectsType);
-			})
-			.focus(function()
-			{
-				$(element).css({"z-index" : 3001});
-				_resizeValueEditor(element);
-			})
-			.focusout(function()
-			{
-				_checkCurrentValueType(element, expectsType);
-				$(element).css({
-					"height": "",
-					"z-index" : 3000
-				});
-				$(element).next("ul#value-selector").remove();
-				dropdown = null;
-				selectedOptionIndex = -1;
-			})
-			.bind("keydown", function(event)
-			{
+    function createValueEditor(element, expectsType) {
+        $(element).addClass("calculated-value-input")
+            .bind("keyup mouseup freeboard-eval", function(event) {
+                // Ignore arrow keys and enter keys
+                if (dropdown && event.type == "keyup" && (event.keyCode == 38 || event.keyCode == 40 || event.keyCode == 13)) {
+                    event.preventDefault();
+                    return;
+                }
+                _renderAutocompleteDropdown(element, expectsType);
+            })
+            .focus(function() {
+                $(element).css({
+                    "z-index": 3001
+                });
+                _resizeValueEditor(element);
+            })
+            .focusout(function() {
+                _checkCurrentValueType(element, expectsType);
+                $(element).css({
+                    "height": "",
+                    "z-index": 3000
+                });
+                $(element).next("ul#value-selector").remove();
+                dropdown = null;
+                selectedOptionIndex = -1;
+            })
+            .bind("keydown", function(event) {
 
-				if(dropdown)
-				{
-					if(event.keyCode == 38 || event.keyCode == 40) // Handle Arrow keys
-					{
-						event.preventDefault();
+                if (dropdown) {
+                    if (event.keyCode == 38 || event.keyCode == 40) // Handle Arrow keys
+                    {
+                        event.preventDefault();
 
-						var optionItems = $(dropdown).find("li");
+                        var optionItems = $(dropdown).find("li");
 
-						if(event.keyCode == 38) // Up Arrow
-						{
-							selectedOptionIndex--;
-						}
-						else if(event.keyCode == 40) // Down Arrow
-						{
-							selectedOptionIndex++;
-						}
+                        if (event.keyCode == 38) // Up Arrow
+                        {
+                            selectedOptionIndex--;
+                        } else if (event.keyCode == 40) // Down Arrow
+                        {
+                            selectedOptionIndex++;
+                        }
 
-						if(selectedOptionIndex < 0)
-						{
-							selectedOptionIndex = optionItems.size() - 1;
-						}
-						else if(selectedOptionIndex >= optionItems.size())
-						{
-							selectedOptionIndex = 0;
-						}
+                        if (selectedOptionIndex < 0) {
+                            selectedOptionIndex = optionItems.size() - 1;
+                        } else if (selectedOptionIndex >= optionItems.size()) {
+                            selectedOptionIndex = 0;
+                        }
 
-						var optionElement = $(optionItems).eq(selectedOptionIndex);
+                        var optionElement = $(optionItems).eq(selectedOptionIndex);
 
-						optionElement.trigger("freeboard-select");
-						$(dropdown).scrollTop($(optionElement).position().top);
-					}
-					else if(event.keyCode == 13) // Handle enter key
-					{
-						event.preventDefault();
+                        optionElement.trigger("freeboard-select");
+                        $(dropdown).scrollTop($(optionElement).position().top);
+                    } else if (event.keyCode == 13) // Handle enter key
+                    {
+                        event.preventDefault();
 
-						if(selectedOptionIndex != -1)
-						{
-							$(dropdown).find("li").eq(selectedOptionIndex)
-								.trigger("freeboard-insertValue");
-						}
-					}
-				}
-			});
-	}
+                        if (selectedOptionIndex != -1) {
+                            $(dropdown).find("li").eq(selectedOptionIndex)
+                                .trigger("freeboard-insertValue");
+                        }
+                    }
+                }
+            });
+    }
 
-	// Public API
-	return {
-		createValueEditor : function(element, expectsType)
-		{
-			if(expectsType)
-			{
-				createValueEditor(element, expectsType);
-			}
-			else {
-				createValueEditor(element, EXPECTED_TYPE.ANY);
-			}
-		},
-		EXPECTED_TYPE : EXPECTED_TYPE
-	}
+    // Public API
+    return {
+        createValueEditor: function(element, expectsType) {
+            if (expectsType) {
+                createValueEditor(element, expectsType);
+            } else {
+                createValueEditor(element, EXPECTED_TYPE.ANY);
+            }
+        },
+        EXPECTED_TYPE: EXPECTED_TYPE
+    }
 }
 
 // ┌────────────────────────────────────────────────────────────────────┐ \\
@@ -2474,236 +2234,232 @@ ValueEditor = function(theFreeboardModel)
 // └────────────────────────────────────────────────────────────────────┘ \\
 
 function WidgetModel(theFreeboardModel, widgetPlugins) {
-	function disposeWidgetInstance() {
-		if (!_.isUndefined(self.widgetInstance)) {
-			if (_.isFunction(self.widgetInstance.onDispose)) {
-				self.widgetInstance.onDispose();
-			}
+    function disposeWidgetInstance() {
+        if (!_.isUndefined(self.widgetInstance)) {
+            if (_.isFunction(self.widgetInstance.onDispose)) {
+                self.widgetInstance.onDispose();
+            }
 
-			self.widgetInstance = undefined;
-		}
-	}
+            self.widgetInstance = undefined;
+        }
+    }
 
-	var self = this;
+    var self = this;
 
-	this.datasourceRefreshNotifications = {};
-	this.calculatedSettingScripts = {};
+    this.datasourceRefreshNotifications = {};
+    this.calculatedSettingScripts = {};
 
-	this.isEditing = ko.observable(false); // editing by PluginEditor
-	this.title = ko.observable();
-	this.fillSize = ko.observable(false);
+    this.isEditing = ko.observable(false); // editing by PluginEditor
+    this.title = ko.observable();
+    this.fillSize = ko.observable(false);
 
-	this.type = ko.observable();
-	this.type.subscribe(function (newValue) {
-		disposeWidgetInstance();
+    this.type = ko.observable();
+    this.type.subscribe(function(newValue) {
+        disposeWidgetInstance();
 
-		if ((newValue in widgetPlugins) && _.isFunction(widgetPlugins[newValue].newInstance)) {
-			var widgetType = widgetPlugins[newValue];
+        if ((newValue in widgetPlugins) && _.isFunction(widgetPlugins[newValue].newInstance)) {
+            var widgetType = widgetPlugins[newValue];
 
-			function finishLoad() {
-				widgetType.newInstance(self.settings(), function (widgetInstance) {
+            function finishLoad() {
+                widgetType.newInstance(self.settings(), function(widgetInstance) {
 
-					self.fillSize((widgetType.fill_size === true));
-					self.widgetInstance = widgetInstance;
-					self.shouldRender(true);
-					self._heightUpdate.valueHasMutated();
+                    self.fillSize((widgetType.fill_size === true));
+                    self.widgetInstance = widgetInstance;
+                    self.shouldRender(true);
+                    self._heightUpdate.valueHasMutated();
 
-				});
-			}
+                });
+            }
 
-			// Do we need to load any external scripts?
-			if (widgetType.external_scripts) {
-				head.js(widgetType.external_scripts.slice(0), finishLoad); // Need to clone the array because head.js adds some weird functions to it
-			}
-			else {
-				finishLoad();
-			}
-		}
-	});
+            // Do we need to load any external scripts?
+            if (widgetType.external_scripts) {
+                head.js(widgetType.external_scripts.slice(0), finishLoad); // Need to clone the array because head.js adds some weird functions to it
+            } else {
+                finishLoad();
+            }
+        }
+    });
 
-	this.settings = ko.observable({});
-	this.settings.subscribe(function (newValue) {
-		if (!_.isUndefined(self.widgetInstance) && _.isFunction(self.widgetInstance.onSettingsChanged)) {
-			self.widgetInstance.onSettingsChanged(newValue);
-		}
+    this.settings = ko.observable({});
+    this.settings.subscribe(function(newValue) {
+        if (!_.isUndefined(self.widgetInstance) && _.isFunction(self.widgetInstance.onSettingsChanged)) {
+            self.widgetInstance.onSettingsChanged(newValue);
+        }
 
-		self.updateCalculatedSettings();
-		self._heightUpdate.valueHasMutated();
-	});
+        self.updateCalculatedSettings();
+        self._heightUpdate.valueHasMutated();
+    });
 
-	this.processDatasourceUpdate = function (datasourceName) {
-		var refreshSettingNames = self.datasourceRefreshNotifications[datasourceName];
+    this.processDatasourceUpdate = function(datasourceName) {
+        var refreshSettingNames = self.datasourceRefreshNotifications[datasourceName];
 
-		if (_.isArray(refreshSettingNames)) {
-			_.each(refreshSettingNames, function (settingName) {
-				self.processCalculatedSetting(settingName);
-			});
-		}
-	}
+        if (_.isArray(refreshSettingNames)) {
+            _.each(refreshSettingNames, function(settingName) {
+                self.processCalculatedSetting(settingName);
+            });
+        }
+    }
 
-	this.callValueFunction = function (theFunction) {
-		return theFunction.call(undefined, theFreeboardModel.datasourceData);
-	}
+    this.callValueFunction = function(theFunction) {
+        return theFunction.call(undefined, theFreeboardModel.datasourceData);
+    }
 
-	this.processSizeChange = function () {
-		if (!_.isUndefined(self.widgetInstance) && _.isFunction(self.widgetInstance.onSizeChanged)) {
-			self.widgetInstance.onSizeChanged();
-		}
-	}
+    this.processSizeChange = function() {
+        if (!_.isUndefined(self.widgetInstance) && _.isFunction(self.widgetInstance.onSizeChanged)) {
+            self.widgetInstance.onSizeChanged();
+        }
+    }
 
-	this.processCalculatedSetting = function (settingName) {
-		if (_.isFunction(self.calculatedSettingScripts[settingName])) {
-			var returnValue = undefined;
+    this.processCalculatedSetting = function(settingName) {
+        if (_.isFunction(self.calculatedSettingScripts[settingName])) {
+            var returnValue = undefined;
 
-			try {
-				returnValue = self.callValueFunction(self.calculatedSettingScripts[settingName]);
-			}
-			catch (e) {
-				var rawValue = self.settings()[settingName];
+            try {
+                returnValue = self.callValueFunction(self.calculatedSettingScripts[settingName]);
+            } catch (e) {
+                var rawValue = self.settings()[settingName];
 
-				// If there is a reference error and the value just contains letters and numbers, then
-				if (e instanceof ReferenceError && (/^\w+$/).test(rawValue)) {
-					returnValue = rawValue;
-				}
-			}
+                // If there is a reference error and the value just contains letters and numbers, then
+                if (e instanceof ReferenceError && (/^\w+$/).test(rawValue)) {
+                    returnValue = rawValue;
+                }
+            }
 
-			if (!_.isUndefined(self.widgetInstance) && _.isFunction(self.widgetInstance.onCalculatedValueChanged) && !_.isUndefined(returnValue)) {
-				try {
-					self.widgetInstance.onCalculatedValueChanged(settingName, returnValue);
-				}
-				catch (e) {
-					console.log(e.toString());
-				}
-			}
-		}
-	}
+            if (!_.isUndefined(self.widgetInstance) && _.isFunction(self.widgetInstance.onCalculatedValueChanged) && !_.isUndefined(returnValue)) {
+                try {
+                    self.widgetInstance.onCalculatedValueChanged(settingName, returnValue);
+                } catch (e) {
+                    console.log(e.toString());
+                }
+            }
+        }
+    }
 
-	this.updateDatasourceNameRef = function (newDatasourceName, oldDatasourceName) {
-		if (_.isUndefined(self.type()))
-			return;
+    this.updateDatasourceNameRef = function(newDatasourceName, oldDatasourceName) {
+        if (_.isUndefined(self.type()))
+            return;
 
-		var settingsDefs = widgetPlugins[self.type()].settings;
-		var oldRegex = new RegExp("datasources\\[['\"]" + _.escapeRegExp(oldDatasourceName) + "['\"]\\]", "g");
-		var rep = "datasources[\"" + newDatasourceName + "\"]";
-		var currentSettings = self.settings();
+        var settingsDefs = widgetPlugins[self.type()].settings;
+        var oldRegex = new RegExp("datasources\\[['\"]" + _.escapeRegExp(oldDatasourceName) + "['\"]\\]", "g");
+        var rep = "datasources[\"" + newDatasourceName + "\"]";
+        var currentSettings = self.settings();
 
-		_.each(settingsDefs, function (settingDef) {
-			if (settingDef.type == "calculated") {
-				var script = currentSettings[settingDef.name];
+        _.each(settingsDefs, function(settingDef) {
+            if (settingDef.type == "calculated") {
+                var script = currentSettings[settingDef.name];
 
-				if (!_.isUndefined(script)) {
-					script = script.replace(oldRegex, rep);
-					currentSettings[settingDef.name] = script;
-					self.settings(currentSettings);
-				}
-			}
-		});
-	}
+                if (!_.isUndefined(script)) {
+                    script = script.replace(oldRegex, rep);
+                    currentSettings[settingDef.name] = script;
+                    self.settings(currentSettings);
+                }
+            }
+        });
+    }
 
-	this.updateCalculatedSettings = function () {
-		self.datasourceRefreshNotifications = {};
-		self.calculatedSettingScripts = {};
+    this.updateCalculatedSettings = function() {
+        self.datasourceRefreshNotifications = {};
+        self.calculatedSettingScripts = {};
 
-		if (_.isUndefined(self.type())) {
-			return;
-		}
+        if (_.isUndefined(self.type())) {
+            return;
+        }
 
-		// Check for any calculated settings
-		var settingsDefs = widgetPlugins[self.type()].settings;
-		var datasourceRegex = new RegExp("datasources.([\\w_-]+)|datasources\\[['\"]([^'\"]+)", "g");
-		var currentSettings = self.settings();
+        // Check for any calculated settings
+        var settingsDefs = widgetPlugins[self.type()].settings;
+        var datasourceRegex = new RegExp("datasources.([\\w_-]+)|datasources\\[['\"]([^'\"]+)", "g");
+        var currentSettings = self.settings();
 
-		_.each(settingsDefs, function (settingDef) {
-			if (settingDef.type == "calculated") {
-				var script = currentSettings[settingDef.name];
+        _.each(settingsDefs, function(settingDef) {
+            if (settingDef.type == "calculated") {
+                var script = currentSettings[settingDef.name];
 
-				if (!_.isUndefined(script)) {
+                if (!_.isUndefined(script)) {
 
-					if(_.isArray(script)) {
-						script = "[" + script.join(",") + "]";
-					}
+                    if (_.isArray(script)) {
+                        script = "[" + script.join(",") + "]";
+                    }
 
-					// If there is no return, add one
-					if ((script.match(/;/g) || []).length <= 1 && script.indexOf("return") == -1) {
-						script = "return " + script;
-					}
+                    // If there is no return, add one
+                    if ((script.match(/;/g) || []).length <= 1 && script.indexOf("return") == -1) {
+                        script = "return " + script;
+                    }
 
-					var valueFunction;
+                    var valueFunction;
 
- 					try {
-						valueFunction = new Function("datasources", script);
-					}
-					catch (e) {
-						var literalText = currentSettings[settingDef.name].replace(/"/g, '\\"').replace(/[\r\n]/g, ' \\\n');
+                    try {
+                        valueFunction = new Function("datasources", script);
+                    } catch (e) {
+                        var literalText = currentSettings[settingDef.name].replace(/"/g, '\\"').replace(/[\r\n]/g, ' \\\n');
 
-						// If the value function cannot be created, then go ahead and treat it as literal text
-						valueFunction = new Function("datasources", "return \"" + literalText + "\";");
-					}
+                        // If the value function cannot be created, then go ahead and treat it as literal text
+                        valueFunction = new Function("datasources", "return \"" + literalText + "\";");
+                    }
 
-					self.calculatedSettingScripts[settingDef.name] = valueFunction;
-					self.processCalculatedSetting(settingDef.name);
+                    self.calculatedSettingScripts[settingDef.name] = valueFunction;
+                    self.processCalculatedSetting(settingDef.name);
 
-					// Are there any datasources we need to be subscribed to?
-					var matches;
+                    // Are there any datasources we need to be subscribed to?
+                    var matches;
 
-					while (matches = datasourceRegex.exec(script)) {
-						var dsName = (matches[1] || matches[2]);
-						var refreshSettingNames = self.datasourceRefreshNotifications[dsName];
+                    while (matches = datasourceRegex.exec(script)) {
+                        var dsName = (matches[1] || matches[2]);
+                        var refreshSettingNames = self.datasourceRefreshNotifications[dsName];
 
-						if (_.isUndefined(refreshSettingNames)) {
-							refreshSettingNames = [];
-							self.datasourceRefreshNotifications[dsName] = refreshSettingNames;
-						}
+                        if (_.isUndefined(refreshSettingNames)) {
+                            refreshSettingNames = [];
+                            self.datasourceRefreshNotifications[dsName] = refreshSettingNames;
+                        }
 
-						if(_.indexOf(refreshSettingNames, settingDef.name) == -1) // Only subscribe to this notification once.
-						{
-							refreshSettingNames.push(settingDef.name);
-						}
-					}
-				}
-			}
-		});
-	}
+                        if (_.indexOf(refreshSettingNames, settingDef.name) == -1) // Only subscribe to this notification once.
+                        {
+                            refreshSettingNames.push(settingDef.name);
+                        }
+                    }
+                }
+            }
+        });
+    }
 
-	this._heightUpdate = ko.observable();
-	this.height = ko.computed({
-		read: function () {
-			self._heightUpdate();
+    this._heightUpdate = ko.observable();
+    this.height = ko.computed({
+        read: function() {
+            self._heightUpdate();
 
-			if (!_.isUndefined(self.widgetInstance) && _.isFunction(self.widgetInstance.getHeight)) {
-				return self.widgetInstance.getHeight();
-			}
+            if (!_.isUndefined(self.widgetInstance) && _.isFunction(self.widgetInstance.getHeight)) {
+                return self.widgetInstance.getHeight();
+            }
 
-			return 1;
-		}
-	});
+            return 1;
+        }
+    });
 
-	this.shouldRender = ko.observable(false);
-	this.render = function (element) {
-		self.shouldRender(false);
-		if (!_.isUndefined(self.widgetInstance) && _.isFunction(self.widgetInstance.render)) {
-			self.widgetInstance.render(element);
-			self.updateCalculatedSettings();
-		}
-	}
+    this.shouldRender = ko.observable(false);
+    this.render = function(element) {
+        self.shouldRender(false);
+        if (!_.isUndefined(self.widgetInstance) && _.isFunction(self.widgetInstance.render)) {
+            self.widgetInstance.render(element);
+            self.updateCalculatedSettings();
+        }
+    }
 
-	this.dispose = function () {
+    this.dispose = function() {
 
-	}
+    }
 
-	this.serialize = function () {
-		return {
-			title: self.title(),
-			type: self.type(),
-			settings: self.settings()
-		};
-	}
+    this.serialize = function() {
+        return {
+            title: self.title(),
+            type: self.type(),
+            settings: self.settings()
+        };
+    }
 
-	this.deserialize = function (object) {
-		self.title(object.title);
-		self.settings(object.settings);
-		self.type(object.type);
-	}
+    this.deserialize = function(object) {
+        self.title(object.title);
+        self.settings(object.settings);
+        self.type(object.type);
+    }
 }
 
 // ┌────────────────────────────────────────────────────────────────────┐ \\
@@ -2716,29 +2472,21 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
 // └────────────────────────────────────────────────────────────────────┘ \\
 
 // Jquery plugin to watch for attribute changes
-(function($)
-{
-    function isDOMAttrModifiedSupported()
-    {
+(function($) {
+
+    function isDOMAttrModifiedSupported() {
         var p = document.createElement('p');
         var flag = false;
 
-        if(p.addEventListener)
-        {
-            p.addEventListener('DOMAttrModified', function()
-            {
+        if (p.addEventListener) {
+            p.addEventListener('DOMAttrModified', function() {
                 flag = true
             }, false);
-        }
-        else if(p.attachEvent)
-        {
-            p.attachEvent('onDOMAttrModified', function()
-            {
+        } else if (p.attachEvent) {
+            p.attachEvent('onDOMAttrModified', function() {
                 flag = true
             });
-        }
-        else
-        {
+        } else {
             return false;
         }
 
@@ -2747,16 +2495,12 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
         return flag;
     }
 
-    function checkAttributes(chkAttr, e)
-    {
-        if(chkAttr)
-        {
+    function checkAttributes(chkAttr, e) {
+        if (chkAttr) {
             var attributes = this.data('attr-old-value');
 
-            if(e.attributeName.indexOf('style') >= 0)
-            {
-                if(!attributes['style'])
-                {
+            if (e.attributeName.indexOf('style') >= 0) {
+                if (!attributes['style']) {
                     attributes['style'] = {};
                 } //initialize
                 var keys = e.attributeName.split('.');
@@ -2764,9 +2508,7 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
                 e.oldValue = attributes['style'][keys[1]]; //old value
                 e.newValue = keys[1] + ':' + this.prop("style")[$.camelCase(keys[1])]; //new value
                 attributes['style'][keys[1]] = e.newValue;
-            }
-            else
-            {
+            } else {
                 e.oldValue = attributes[e.attributeName];
                 e.newValue = this.attr(e.attributeName);
                 attributes[e.attributeName] = e.newValue;
@@ -2779,31 +2521,24 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
     //initialize Mutation Observer
     var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
-    $.fn.attrchange = function(o)
-    {
+    $.fn.attrchange = function(o) {
 
         var cfg = {
             trackValues: false,
-            callback   : $.noop
+            callback: $.noop
         };
 
         //for backward compatibility
-        if(typeof o === "function")
-        {
+        if (typeof o === "function") {
             cfg.callback = o;
-        }
-        else
-        {
+        } else {
             $.extend(cfg, o);
         }
 
-        if(cfg.trackValues)
-        { //get attributes old value
-            $(this).each(function(i, el)
-            {
+        if (cfg.trackValues) { //get attributes old value
+            $(this).each(function(i, el) {
                 var attributes = {};
-                for(var attr, i = 0, attrs = el.attributes, l = attrs.length; i < l; i++)
-                {
+                for (var attr, i = 0, attrs = el.attributes, l = attrs.length; i < l; i++) {
                     attr = attrs.item(i);
                     attributes[attr.nodeName] = attr.value;
                 }
@@ -2812,27 +2547,23 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
             });
         }
 
-        if(MutationObserver)
-        { //Modern Browsers supporting MutationObserver
+        if (MutationObserver) { //Modern Browsers supporting MutationObserver
             /*
              Mutation Observer is still new and not supported by all browsers.
              http://lists.w3.org/Archives/Public/public-webapps/2011JulSep/1622.html
              */
             var mOptions = {
-                subtree          : false,
-                attributes       : true,
+                subtree: false,
+                attributes: true,
                 attributeOldValue: cfg.trackValues
             };
 
-            var observer = new MutationObserver(function(mutations)
-            {
-                mutations.forEach(function(e)
-                {
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(e) {
                     var _this = e.target;
 
                     //get new value if trackValues is true
-                    if(cfg.trackValues)
-                    {
+                    if (cfg.trackValues) {
                         /**
                          * @KNOWN_ISSUE: The new value is buggy for STYLE attribute as we don't have
                          * any additional information on which style is getting updated.
@@ -2844,30 +2575,22 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
                 });
             });
 
-            return this.each(function()
-            {
+            return this.each(function() {
                 observer.observe(this, mOptions);
             });
-        }
-        else if(isDOMAttrModifiedSupported())
-        { //Opera
+        } else if (isDOMAttrModifiedSupported()) { //Opera
             //Good old Mutation Events but the performance is no good
             //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
-            return this.on('DOMAttrModified', function(event)
-            {
-                if(event.originalEvent)
-                {
+            return this.on('DOMAttrModified', function(event) {
+                if (event.originalEvent) {
                     event = event.originalEvent;
                 } //jQuery normalization is not required for us
                 event.attributeName = event.attrName; //property names to be consistent with MutationObserver
                 event.oldValue = event.prevValue; //property names to be consistent with MutationObserver
                 cfg.callback.call(this, event);
             });
-        }
-        else if('onpropertychange' in document.body)
-        { //works only in IE
-            return this.on('propertychange', function(e)
-            {
+        } else if ('onpropertychange' in document.body) { //works only in IE
+            return this.on('propertychange', function(e) {
                 e.attributeName = window.event.propertyName;
                 //to set the attr old value
                 checkAttributes.call($(this), cfg.trackValues, e);
@@ -2905,8 +2628,7 @@ function WidgetModel(theFreeboardModel, widgetPlugins) {
 
 }(jQuery));
 
-var freeboard = (function()
-{
+var freeboard = (function() {
     var browsername;
     var datasourcePlugins = {};
     var widgetPlugins = {};
@@ -2924,129 +2646,99 @@ var freeboard = (function()
         values: {
             "font-family-light": '"HelveticaNeue-UltraLight", "Helvetica Neue Ultra Light", "Helvetica Neue", "Open Sans", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, Arial, sans-serif',
             "font-family": '"Helvetica Neue", Helvetica, "Open Sans", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, Arial, sans-serif',
-            "color"      : "#d3d4d4",
+            "color": "#d3d4d4",
             "font-weight": 100
         }
     };
 
     ko.bindingHandlers.pluginEditor = {
-        init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-        {
+        init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
             var options = ko.unwrap(valueAccessor());
-
             var types = {};
             var settings = undefined;
             var title = "";
 
-            if(options.type == 'datasource')
-            {
+            if (options.type == 'datasource') {
                 types = datasourcePlugins;
                 title = $.i18n.t('dataSource.title');
-            }
-            else if(options.type == 'widget')
-            {
+            } else if (options.type == 'widget') {
                 types = widgetPlugins;
-                title = "ウィジェット";
-            }
-            else if(options.type == 'pane')
-            {
+                title = $.i18n.t('widgets.title');
+            } else if (options.type == 'pane') {
                 title = $.i18n.t('panel.title');
             }
 
-            $(element).click(function(event)
-            {
-                if(options.operation == 'delete')
-                {
-                    var phraseElement = $('<p>' + title + ' を削除してもよろしいですか？</p>');
-                    new DialogBox(phraseElement, "削除確認", "はい", "いいえ", function(okcancel)
-                    {
+            $(element).click(function(event) {
+                if (options.operation == 'delete') {
+                    var _title = $.i18n.t('panel.delete.title'),
+                        _yes = $.i18n.t('global.yes'),
+                        _no = $.i18n.t('global.no'),
+                        _ask = $.i18n.t('panel.delete.text');
+
+                    var phraseElement = $('<p>' + title + ' ' + _ask + ' ？</p>');
+                    new DialogBox(phraseElement, _title, _yes, _no, function(okcancel) {
                         if (okcancel == 'ok') {
-                            if(options.type == 'datasource')
-                            {
+                            if (options.type == 'datasource') {
                                 theFreeboardModel.deleteDatasource(viewModel);
-                            }
-                            else if(options.type == 'widget')
-                            {
+                            } else if (options.type == 'widget') {
                                 theFreeboardModel.deleteWidget(viewModel);
-                            }
-                            else if(options.type == 'pane')
-                            {
+                            } else if (options.type == 'pane') {
                                 theFreeboardModel.deletePane(viewModel);
                             }
                         }
                     });
-                }
-                else
-                {
+                } else {
                     var instanceType = undefined;
 
-                    if(options.type == 'datasource')
-                    {
-                        if(options.operation == 'add')
-                        {
+                    if (options.type == 'datasource') {
+                        if (options.operation == 'add') {
                             settings = {};
-                        }
-                        else
-                        {
+                        } else {
                             instanceType = viewModel.type();
                             settings = viewModel.settings();
                             settings.name = viewModel.name();
                             viewModel.isEditing(true);
                         }
-                    }
-                    else if(options.type == 'widget')
-                    {
-                        if(options.operation == 'add')
-                        {
+                    } else if (options.type == 'widget') {
+                        if (options.operation == 'add') {
                             settings = {};
-                        }
-                        else
-                        {
+                        } else {
                             instanceType = viewModel.type();
                             settings = viewModel.settings();
                             viewModel.isEditing(true);
                         }
-                    }
-                    else if(options.type == 'pane')
-                    {
+                    } else if (options.type == 'pane') {
                         settings = {};
 
-                        if(options.operation == 'edit')
-                        {
+                        if (options.operation == 'edit') {
                             settings.title = viewModel.title();
                             settings.col_width = viewModel.col_width();
                         }
 
                         types = {
                             settings: {
-                                settings: [
-                                    {
-                                        name: "title",
-                                        display_name: "タイトル",
-                                        validate: "optional,maxSize[100]",
-                                        type: "text",
-                                        description: "最大100文字"
-                                    },
-                                    {
-                                        name : "col_width",
-                                        display_name : "カラム幅",
-                                        validate: "required,custom[integer],min[1],max[10]",
-                                        style: "width:100px",
-                                        type: "number",
-                                        default_value : 1,
-                                        description: "最大10ブロック"
-                                    }
-                                ]
+                                settings: [{
+                                    name: "title",
+                                    display_name: $.i18n.t('panel.edit.title'),
+                                    validate: "optional,maxSize[100]",
+                                    type: "text",
+                                    description: $.i18n.t('panel.edit.description')
+                                }, {
+                                    name: "col_width",
+                                    display_name: $.i18n.t('panel.edit.colWidth'),
+                                    validate: "required,custom[integer],min[1],max[10]",
+                                    style: "width:100px",
+                                    type: "number",
+                                    default_value: 1,
+                                    description: $.i18n.t('panel.edit.colWidthDescription')
+                                }]
                             }
                         }
                     }
 
-                    pluginEditor.createPluginEditor(title, types, instanceType, settings, function(newSettings)
-                    {
-                        if(options.operation == 'add')
-                        {
-                            if(options.type == 'datasource')
-                            {
+                    pluginEditor.createPluginEditor(title, types, instanceType, settings, function(newSettings) {
+                        if (options.operation == 'add') {
+                            if (options.type == 'datasource') {
                                 var newViewModel = new DatasourceModel(theFreeboardModel, datasourcePlugins);
                                 theFreeboardModel.addDatasource(newViewModel);
 
@@ -3055,9 +2747,7 @@ var freeboard = (function()
 
                                 newViewModel.settings(newSettings.settings);
                                 newViewModel.type(newSettings.type);
-                            }
-                            else if(options.type == 'widget')
-                            {
+                            } else if (options.type == 'widget') {
                                 var newViewModel = new WidgetModel(theFreeboardModel, widgetPlugins);
                                 newViewModel.settings(newSettings.settings);
                                 newViewModel.type(newSettings.type);
@@ -3066,19 +2756,13 @@ var freeboard = (function()
 
                                 freeboardUI.attachWidgetEditIcons(element);
                             }
-                        }
-                        else if(options.operation == 'edit')
-                        {
-                            if(options.type == 'pane')
-                            {
+                        } else if (options.operation == 'edit') {
+                            if (options.type == 'pane') {
                                 viewModel.title(newSettings.settings.title);
                                 viewModel.col_width(newSettings.settings.col_width);
                                 freeboardUI.processResize(false);
-                            }
-                            else
-                            {
-                                if(options.type == 'datasource')
-                                {
+                            } else {
+                                if (options.type == 'datasource') {
                                     if (viewModel.name() != newSettings.settings.name) {
                                         theFreeboardModel.updateDatasourceNameRef(newSettings.settings.name, viewModel.name());
                                     }
@@ -3098,27 +2782,24 @@ var freeboard = (function()
 
     ko.virtualElements.allowedBindings.datasourceTypeSettings = true;
     ko.bindingHandlers.datasourceTypeSettings = {
-        update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-        {
+        update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
             processPluginSettings(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext);
         }
     }
 
     ko.bindingHandlers.pane = {
-        init  : function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-        {
-            if(theFreeboardModel.isEditing())
-            {
-                $(element).css({cursor: "pointer"});
+        init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+            if (theFreeboardModel.isEditing()) {
+                $(element).css({
+                    cursor: "pointer"
+                });
             }
 
             freeboardUI.addPane(element, viewModel, bindingContext.$root.isEditing());
         },
-        update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-        {
+        update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
             // If pane has been removed
-            if(theFreeboardModel.panes.indexOf(viewModel) == -1)
-            {
+            if (theFreeboardModel.panes.indexOf(viewModel) == -1) {
                 freeboardUI.removePane(element);
             }
             freeboardUI.updatePane(element, viewModel);
@@ -3126,17 +2807,13 @@ var freeboard = (function()
     }
 
     ko.bindingHandlers.widget = {
-        init  : function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-        {
-            if(theFreeboardModel.isEditing())
-            {
+        init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+            if (theFreeboardModel.isEditing()) {
                 freeboardUI.attachWidgetEditIcons($(element).parent());
             }
         },
-        update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext)
-        {
-            if(viewModel.shouldRender())
-            {
+        update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+            if (viewModel.shouldRender()) {
                 $(element).empty();
                 viewModel.render(element);
             }
@@ -3149,34 +2826,34 @@ var freeboard = (function()
      *  @return     browsername(ie6、ie7、ie8、ie9、ie10、ie11、chrome、safari、opera、firefox、unknown)
      *
      */
-    var getBrowser = function(){
+    var getBrowser = function() {
         var ua = window.navigator.userAgent.toLowerCase();
         var ver = window.navigator.appVersion.toLowerCase();
         var name = 'unknown';
 
-        if (ua.indexOf("msie") != -1){
-            if (ver.indexOf("msie 6.") != -1){
+        if (ua.indexOf("msie") != -1) {
+            if (ver.indexOf("msie 6.") != -1) {
                 name = 'ie6';
-            }else if (ver.indexOf("msie 7.") != -1){
+            } else if (ver.indexOf("msie 7.") != -1) {
                 name = 'ie7';
-            }else if (ver.indexOf("msie 8.") != -1){
+            } else if (ver.indexOf("msie 8.") != -1) {
                 name = 'ie8';
-            }else if (ver.indexOf("msie 9.") != -1){
+            } else if (ver.indexOf("msie 9.") != -1) {
                 name = 'ie9';
-            }else if (ver.indexOf("msie 10.") != -1){
+            } else if (ver.indexOf("msie 10.") != -1) {
                 name = 'ie10';
-            }else{
+            } else {
                 name = 'ie';
             }
-        }else if(ua.indexOf('trident/7') != -1){
+        } else if (ua.indexOf('trident/7') != -1) {
             name = 'ie11';
-        }else if (ua.indexOf('chrome') != -1){
+        } else if (ua.indexOf('chrome') != -1) {
             name = 'chrome';
-        }else if (ua.indexOf('safari') != -1){
+        } else if (ua.indexOf('safari') != -1) {
             name = 'safari';
-        }else if (ua.indexOf('opera') != -1){
+        } else if (ua.indexOf('opera') != -1) {
             name = 'opera';
-        }else if (ua.indexOf('firefox') != -1){
+        } else if (ua.indexOf('firefox') != -1) {
             name = 'firefox';
         }
         return name;
@@ -3189,10 +2866,10 @@ var freeboard = (function()
      *  @return             returns whether support is in true / false
      *
      */
-    var isSupported = function(browsers){
+    var isSupported = function(browsers) {
         var thusBrowser = getBrowser();
-        for(var i=0; i<browsers.length; i++){
-            if(browsers[i] == thusBrowser){
+        for (var i = 0; i < browsers.length; i++) {
+            if (browsers[i] == thusBrowser) {
                 return true;
                 exit;
             }
@@ -3200,15 +2877,14 @@ var freeboard = (function()
         return false;
     };
 
-    function getParameterByName(name)
-    {
+    function getParameterByName(name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
         return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
-    $(function()
-    { //DOM Ready
+    $(function() { //DOM Ready
         // Show the loading indicator when we first load
         freeboardUI.showLoadingIndicator(true);
 
@@ -3219,32 +2895,26 @@ var freeboard = (function()
 
     // PUBLIC FUNCTIONS
     return {
-        initialize          : function(allowEdit, finishedCallback)
-        {
+        initialize: function(allowEdit, finishedCallback) {
             freeboard.browsername = getBrowser();
 
             // Check to see if we have a query param called load. If so, we should load that dashboard initially
             var freeboardLocation = getParameterByName("load");
 
-            if(freeboardLocation != "")
-            {
+            if (freeboardLocation != "") {
                 ko.applyBindings(theFreeboardModel);
 
                 $.ajax({
-                    url    : freeboardLocation,
-                    success: function(data)
-                    {
+                    url: freeboardLocation,
+                    success: function(data) {
                         theFreeboardModel.loadDashboard(data);
 
-                        if(_.isFunction(finishedCallback))
-                        {
+                        if (_.isFunction(finishedCallback)) {
                             finishedCallback();
                         }
                     }
                 });
-            }
-            else
-            {
+            } else {
                 theFreeboardModel.allow_edit(allowEdit);
 
                 ko.applyBindings(theFreeboardModel);
@@ -3252,38 +2922,32 @@ var freeboard = (function()
                 theFreeboardModel.setEditing(allowEdit);
 
                 freeboardUI.showLoadingIndicator(false);
-                if(_.isFunction(finishedCallback))
-                {
+                if (_.isFunction(finishedCallback)) {
                     finishedCallback();
                 }
 
                 freeboard.emit("initialized");
             }
         },
-        newDashboard        : function()
-        {
-            theFreeboardModel.loadDashboard({allow_edit: true});
+        newDashboard: function() {
+            theFreeboardModel.loadDashboard({
+                allow_edit: true
+            });
         },
-        loadDashboard       : function(configuration, callback)
-        {
+        loadDashboard: function(configuration, callback) {
             theFreeboardModel.loadDashboard(configuration, callback);
         },
-        serialize           : function()
-        {
+        serialize: function() {
             return theFreeboardModel.serialize();
         },
-        setEditing          : function(editing, animate)
-        {
+        setEditing: function(editing, animate) {
             theFreeboardModel.setEditing(editing, animate);
         },
-        isEditing           : function()
-        {
+        isEditing: function() {
             return theFreeboardModel.isEditing();
         },
-        loadDatasourcePlugin: function(plugin)
-        {
-            if(_.isUndefined(plugin.display_name))
-            {
+        loadDatasourcePlugin: function(plugin) {
+            if (_.isUndefined(plugin.display_name)) {
                 plugin.display_name = plugin.type_name;
             }
 
@@ -3300,25 +2964,22 @@ var freeboard = (function()
 
             // Add a required setting called name to the beginning
             plugin.settings.unshift({
-                name : "name",
-                display_name : "名前",
+                name: "name",
+                display_name: $.i18n.t('dataSource.givenName'),
                 validate: "funcCall[freeboard.isUniqueDatasourceName],required,maxSize[100]",
                 type: "text",
-                description: "最大100文字まで"
+                description: $.i18n.t('dataSource.limit100')
             });
 
             theFreeboardModel.addPluginSource(plugin.source);
             datasourcePlugins[plugin.type_name] = plugin;
             theFreeboardModel._datasourceTypes.valueHasMutated();
         },
-        resize : function()
-        {
+        resize: function() {
             freeboardUI.processResize(true);
         },
-        loadWidgetPlugin    : function(plugin)
-        {
-            if(_.isUndefined(plugin.display_name))
-            {
+        loadWidgetPlugin: function(plugin) {
+            if (_.isUndefined(plugin.display_name)) {
                 plugin.display_name = plugin.type_name;
             }
 
@@ -3327,68 +2988,54 @@ var freeboard = (function()
             theFreeboardModel._widgetTypes.valueHasMutated();
         },
         // To be used if freeboard is going to load dynamic assets from a different root URL
-        setAssetRoot        : function(assetRoot)
-        {
+        setAssetRoot: function(assetRoot) {
             jsEditor.setAssetRoot(assetRoot);
         },
-        addStyle            : function(selector, rules)
-        {
+        addStyle: function(selector, rules) {
             var styleString = selector + "{" + rules + "}";
 
             var styleElement = $("style#fb-styles");
 
-            if(styleElement.length == 0)
-            {
+            if (styleElement.length == 0) {
                 styleElement = $('<style id="fb-styles" type="text/css"></style>');
                 $("head").append(styleElement);
             }
 
-            if(styleElement[0].styleSheet)
-            {
+            if (styleElement[0].styleSheet) {
                 styleElement[0].styleSheet.cssText += styleString;
-            }
-            else
-            {
+            } else {
                 styleElement.text(styleElement.text() + styleString);
             }
         },
-        showLoadingIndicator: function(show)
-        {
+        showLoadingIndicator: function(show) {
             freeboardUI.showLoadingIndicator(show);
         },
-        showDialog          : function(contentElement, title, okTitle, cancelTitle, okCallback)
-        {
+        showDialog: function(contentElement, title, okTitle, cancelTitle, okCallback) {
             new DialogBox(contentElement, title, okTitle, cancelTitle, okCallback);
         },
-        getDatasourceSettings : function(datasourceName)
-        {
+        getDatasourceSettings: function(datasourceName) {
             var datasources = theFreeboardModel.datasources();
 
             // Find the datasource with the name specified
-            var datasource = _.find(datasources, function(datasourceModel){
+            var datasource = _.find(datasources, function(datasourceModel) {
                 return (datasourceModel.name() === datasourceName);
             });
 
-            if(datasource)
-            {
+            if (datasource) {
                 return datasource.settings();
-            }
-            else
-            {
+            } else {
                 return null;
             }
         },
-        setDatasourceSettings : function(datasourceName, settings)
-        {
+        setDatasourceSettings: function(datasourceName, settings) {
             var datasources = theFreeboardModel.datasources();
 
             // Find the datasource with the name specified
-            var datasource = _.find(datasources, function(datasourceModel){
+            var datasource = _.find(datasources, function(datasourceModel) {
                 return (datasourceModel.name() === datasourceName);
             });
 
-            if(!datasource)
-            {
+            if (!datasource) {
                 console.log("Datasource not found");
                 return;
             }
@@ -3396,23 +3043,19 @@ var freeboard = (function()
             var combinedSettings = _.defaults(settings, datasource.settings());
             datasource.settings(combinedSettings);
         },
-        getStyleString      : function(name)
-        {
+        getStyleString: function(name) {
             var returnString = "";
 
-            _.each(currentStyle[name], function(value, name)
-            {
+            _.each(currentStyle[name], function(value, name) {
                 returnString = returnString + name + ":" + value + ";";
             });
 
             return returnString;
         },
-        getStyleObject      : function(name)
-        {
+        getStyleObject: function(name) {
             return currentStyle[name];
         },
-        showDeveloperConsole : function()
-        {
+        showDeveloperConsole: function() {
             developerConsole.showDeveloperConsole();
         }
     };
@@ -3430,10 +3073,13 @@ $.extend(freeboard, jQuery.eventEmitter);
 // ├────────────────────────────────────────────────────────────────────┤ \\
 // │ Licensed under the MIT license.                                    │ \\
 // └────────────────────────────────────────────────────────────────────┘ \\
+(function($) {
 
-(function ($) {
+    var _t = function(str) {
+        return $.i18n.t('plugins.datasource.' + str);
+    };
 
-    var clockDatasource = function (settings, updateCallback) {
+    var clockDatasource = function(settings, updateCallback) {
         var self = this;
         var currentSettings = settings;
         var timer;
@@ -3450,7 +3096,7 @@ $.extend(freeboard, jQuery.eventEmitter);
             timer = setInterval(self.updateNow, currentSettings.refresh * 1000);
         }
 
-        this.updateNow = function () {
+        this.updateNow = function() {
             var now = moment().tz(currentSettings.timezone);
 
             var data = {
@@ -3464,11 +3110,11 @@ $.extend(freeboard, jQuery.eventEmitter);
             updateCallback(data);
         }
 
-        this.onDispose = function () {
+        this.onDispose = function() {
             stopTimer();
         }
 
-        this.onSettingsChanged = function (newSettings) {
+        this.onSettingsChanged = function(newSettings) {
             currentSettings = newSettings;
             if (_.isUndefined(currentSettings.timezone))
                 currentSettings.timezone = "Asia/Tokyo";
@@ -3480,490 +3126,379 @@ $.extend(freeboard, jQuery.eventEmitter);
 
     freeboard.loadDatasourcePlugin({
         type_name: "clock",
-        display_name: $.i18n.t('plugins.clock.title'),
-        description: "指定の間隔で更新され、異なるフォーマットで現在の時刻を返します。画面上にタイマーを表示したり、ウィジェットが一定の間隔でリフレッシュさせるために使用することができます。",
-        settings: [
-            {
-                name: "timezone",
-                display_name: "タイムゾーン",
-                type: "option",
-                default_value: "Asia/Tokyo",
-                options: [
-                    {
-                        name: "(UTC-12:00) 国際日付変更線 西側",
-                        value: "Etc/GMT+12"
-                    },
-                    {
-                        name: "(UTC-11:00) 協定世界時-11",
-                        value: "Etc/GMT+11"
-                    },
-                    {
-                        name: "(UTC-10:00) ハワイ",
-                        value: "Pacific/Honolulu"
-                    },
-                    {
-                        name: "(UTC-09:00) アラスカ",
-                        value: "America/Anchorage"
-                    },
-                    {
-                        name: "(UTC-08:00) バハカリフォルニア",
-                        value: "America/Santa_Isabel"
-                    },
-                    {
-                        name: "(UTC-08:00) 太平洋標準時(米国およびカナダ)",
-                        value: "America/Los_Angeles"
-                    },
-                    {
-                        name: "(UTC-07:00) チワワ、ラパス、マサトラン",
-                        value: "America/Chihuahua"
-                    },
-                    {
-                        name: "(UTC-07:00) アリゾナ",
-                        value: "America/Phoenix"
-                    },
-                    {
-                        name: "(UTC-07:00) 山地標準時(米国およびカナダ)",
-                        value: "America/Denver"
-                    },
-                    {
-                        name: "(UTC-06:00) 中央アメリカ",
-                        value: "America/Guatemala"
-                    },
-                    {
-                        name: "(UTC-06:00) 中部標準時(米国およびカナダ)",
-                        value: "America/Chicago"
-                    },
-                    {
-                        name: "(UTC-06:00) サスカチュワン",
-                        value: "America/Regina"
-                    },
-                    {
-                        name: "(UTC-06:00) グアダラハラ、メキシコシティ、モンテレー",
-                        value: "America/Mexico_City"
-                    },
-                    {
-                        name: "(UTC-05:00) ボゴタ、リマ、キト",
-                        value: "America/Bogota"
-                    },
-                    {
-                        name: "(UTC-05:00) インディアナ東部",
-                        value: "America/Indiana/Indianapolis"
-                    },
-                    {
-                        name: "(UTC-05:00) 東部標準時(米国およびカナダ)",
-                        value: "America/New_York"
-                    },
-                    {
-                        name: "(UTC-04:30) カラカス",
-                        value: "America/Caracas"
-                    },
-                    {
-                        name: "(UTC-04:00) 大西洋標準時(カナダ)",
-                        value: "America/Halifax"
-                    },
-                    {
-                        name: "(UTC-04:00) アスンシオン",
-                        value: "America/Asuncion"
-                    },
-                    {
-                        name: "(UTC-04:00) ジョージタウン、ラパス、マナウス、サンフアン",
-                        value: "America/La_Paz"
-                    },
-                    {
-                        name: "(UTC-04:00) クイアバ",
-                        value: "America/Cuiaba"
-                    },
-                    {
-                        name: "(UTC-04:00) サンチアゴ",
-                        value: "America/Santiago"
-                    },
-                    {
-                        name: "(UTC-03:30) ニューファンドランド",
-                        value: "America/St_Johns"
-                    },
-                    {
-                        name: "(UTC-03:00) ブラジリア",
-                        value: "America/Sao_Paulo"
-                    },
-                    {
-                        name: "(UTC-03:00) グリーンランド",
-                        value: "America/Godthab"
-                    },
-                    {
-                        name: "(UTC-03:00) カイエンヌ、フォルタレザ",
-                        value: "America/Cayenne"
-                    },
-                    {
-                        name: "(UTC-03:00) ブエノスアイレス",
-                        value: "America/Argentina/Buenos_Aires"
-                    },
-                    {
-                        name: "(UTC-03:00) モンテビデオ",
-                        value: "America/Montevideo"
-                    },
-                    {
-                        name: "(UTC-02:00) 協定世界時-2",
-                        value: "Etc/GMT+2"
-                    },
-                    {
-                        name: "(UTC-01:00) カーボベルデ諸島",
-                        value: "America/Cape_Verde"
-                    },
-                    {
-                        name: "(UTC-01:00) アゾレス",
-                        value: "Atlantic/Azores"
-                    },
-                    {
-                        name: "(UTC+00:00) カサブランカ",
-                        value: "America/Casablanca"
-                    },
-                    {
-                        name: "(UTC+00:00) モンロビア、レイキャビク",
-                        value: "Atlantic/Reykjavik"
-                    },
-                    {
-                        name: "(UTC+00:00) ダブリン、エジンバラ、リスボン、ロンドン",
-                        value: "Europe/London"
-                    },
-                    {
-                        name: "(UTC+00:00) 協定世界時",
-                        value: "Etc/GMT"
-                    },
-                    {
-                        name: "(UTC+01:00) アムステルダム、ベルリン、ベルン、ローマ、ストックホルム、ウィーン",
-                        value: "Europe/Berlin"
-                    },
-                    {
-                        name: "(UTC+01:00) ブリュッセル、コペンハーゲン、マドリード、パリ",
-                        value: "Europe/Paris"
-                    },
-                    {
-                        name: "(UTC+01:00) 西中央アフリカ",
-                        value: "Africa/Lagos"
-                    },
-                    {
-                        name: "(UTC+01:00) ベオグラード、ブラチスラバ、ブダペスト、リュブリャナ、プラハ",
-                        value: "Europe/Budapest"
-                    },
-                    {
-                        name: "(UTC+01:00) サラエボ、スコピエ、ワルシャワ、ザグレブ",
-                        value: "Europe/Warsaw"
-                    },
-                    {
-                        name: "(UTC+01:00) ウィントフック",
-                        value: "Africa/Windhoek"
-                    },
-                    {
-                        name: "(UTC+02:00) アテネ、ブカレスト、イスタンブール",
-                        value: "Europe/Istanbul"
-                    },
-                    {
-                        name: "(UTC+02:00) ヘルシンキ、キエフ、リガ、ソフィア、タリン、ビリニュス",
-                        value: "Europe/Kiev"
-                    },
-                    {
-                        name: "(UTC+02:00) カイロ",
-                        value: "Africa/Cairo"
-                    },
-                    {
-                        name: "(UTC+02:00) ダマスカス",
-                        value: "Asia/Damascus"
-                    },
-                    {
-                        name: "(UTC+02:00) アンマン",
-                        value: "Asia/Amman"
-                    },
-                    {
-                        name: "(UTC+02:00) ハラーレ、プレトリア",
-                        value: "Africa/Johannesburg"
-                    },
-                    {
-                        name: "(UTC+02:00) エルサレム",
-                        value: "Asia/Jerusalem"
-                    },
-                    {
-                        name: "(UTC+02:00) ベイルート",
-                        value: "Asia/Beirut"
-                    },
-                    {
-                        name: "(UTC+03:00) バグダッド",
-                        value: "Asia/Baghdad"
-                    },
-                    {
-                        name: "(UTC+03:00) ミンスク",
-                        value: "Europe/Minsk"
-                    },
-                    {
-                        name: "(UTC+03:00) クエート、リヤド",
-                        value: "Asia/Riyadh"
-                    },
-                    {
-                        name: "(UTC+03:00) ナイロビ",
-                        value: "Africa/Nairobi"
-                    },
-                    {
-                        name: "(UTC+03:30) テヘラン",
-                        value: "Asia/Tehran"
-                    },
-                    {
-                        name: "(UTC+04:00) モスクワ、サンクトペテルブルグ、ボルゴグラード",
-                        value: "Europe/Moscow"
-                    },
-                    {
-                        name: "(UTC+04:00) トビリシ",
-                        value: "Asia/Tbilisi"
-                    },
-                    {
-                        name: "(UTC+04:00) エレバン",
-                        value: "Asia/Yerevan"
-                    },
-                    {
-                        name: "(UTC+04:00) アブダビ、マスカット",
-                        value: "Asia/Dubai"
-                    },
-                    {
-                        name: "(UTC+04:00) バクー",
-                        value: "Asia/Baku"
-                    },
-                    {
-                        name: "(UTC+04:00) ポートルイス",
-                        value: "Indian/Mauritius"
-                    },
-                    {
-                        name: "(UTC+04:30) カブール",
-                        value: "Asia/Kabul"
-                    },
-                    {
-                        name: "(UTC+05:00) タシケント",
-                        value: "Asia/Tashkent"
-                    },
-                    {
-                        name: "(UTC+05:00) イスラマバード、カラチ",
-                        value: "Asia/Karachi"
-                    },
-                    {
-                        name: "(UTC+05:30) スリジャヤワルダナプラコッテ",
-                        value: "Asia/Colombo"
-                    },
-                    {
-                        name: "(UTC+05:30) チェンナイ、コルカタ、ムンバイ、ニューデリー",
-                        value: "Indian/Kolkata"
-                    },
-                    {
-                        name: "(UTC+05:45) カトマンズ",
-                        value: "Asia/Kathmandu"
-                    },
-                    {
-                        name: "(UTC+06:00) アスタナ",
-                        value: "Asia/Almaty"
-                    },
-                    {
-                        name: "(UTC+06:00) ダッカ",
-                        value: "Asia/Dhaka"
-                    },
-                    {
-                        name: "(UTC+06:00) エカテリンブルグ",
-                        value: "Asia/Yekaterinburg"
-                    },
-                    {
-                        name: "(UTC+06:30) ヤンゴン(ラングーン)",
-                        value: "Asia/Rangoon"
-                    },
-                    {
-                        name: "(UTC+07:00) バンコク、ハノイ、ジャカルタ",
-                        value: "Asia/Bangkok"
-                    },
-                    {
-                        name: "(UTC+07:00) ノヴォシビルスク",
-                        value: "Asia/Novosibirsk"
-                    },
-                    {
-                        name: "(UTC+08:00) クラスノヤルスク",
-                        value: "Asia/Krasnoyarsk"
-                    },
-                    {
-                        name: "(UTC+08:00) ウランバートル",
-                        value: "Asia/Ulaanbaatar"
-                    },
-                    {
-                        name: "(UTC+08:00) 北京、重慶、香港特別行政区、ウルムチ",
-                        value: "Asia/Shanghai"
-                    },
-                    {
-                        name: "(UTC+08:00) パース",
-                        value: "Australia/Perth"
-                    },
-                    {
-                        name: "(UTC+08:00) クアラルンプール、シンガポール",
-                        value: "Asia/Singapore"
-                    },
-                    {
-                        name: "(UTC+08:00) 台北",
-                        value: "Asia/Taipei"
-                    },
-                    {
-                        name: "(UTC+09:00) イルクーツク",
-                        value: "Asia/Irkutsk"
-                    },
-                    {
-                        name: "(UTC+09:00) ソウル",
-                        value: "Asia/Seoul"
-                    },
-                    {
-                        name: "(UTC+09:00) 大阪、札幌、東京",
-                        value: "Asia/Tokyo"
-                    },
-                    {
-                        name: "(UTC+09:30) ダーウィン",
-                        value: "Australia/Darwin"
-                    },
-                    {
-                        name: "(UTC+09:30) アデレード",
-                        value: "Australia/Adelaide"
-                    },
-                    {
-                        name: "(UTC+10:00) ホバート",
-                        value: "Australia/Hobart"
-                    },
-                    {
-                        name: "(UTC+10:00) ヤクーツク",
-                        value: "Asia/Yakutsk"
-                    },
-                    {
-                        name: "(UTC+10:00) ブリスベン",
-                        value: "Australia/Brisbane"
-                    },
-                    {
-                        name: "(UTC+10:00) グアム、ポートモレスビー",
-                        value: "Pacific/Port_Moresby"
-                    },
-                    {
-                        name: "(UTC+10:00) キャンベラ、メルボルン、シドニー",
-                        value: "Australia/Sydney"
-                    },
-                    {
-                        name: "(UTC+11:00) ウラジオストク",
-                        value: "Asia/Vladivostok"
-                    },
-                    {
-                        name: "(UTC+11:00) ソロモン諸島、ニューカレドニア",
-                        value: "Pacific/Guadalcanal"
-                    },
-                    {
-                        name: "(UTC+12:00) 協定世界時+12",
-                        value: "Etc/GMT-12"
-                    },
-                    {
-                        name: "(UTC+12:00) フィジー、マーシャル諸島",
-                        value: "Pacific/Fiji"
-                    },
-                    {
-                        name: "(UTC+12:00) マガダン",
-                        value: "Asia/Magadan"
-                    },
-                    {
-                        name: "(UTC+12:00) オークランド、ウェリントン",
-                        value: "Pacific/Auckland"
-                    },
-                    {
-                        name: "(UTC+13:00) ヌクアロファ",
-                        value: "Pacific/Tongatapu"
-                    },
-                    {
-                        name: "(UTC+13:00) サモア",
-                        value: "Pacific/Apia"
-                    }
-                ]
-            },
-            {
-                name: "refresh",
-                display_name: "更新頻度",
-                validate: "required,custom[integer],min[1]",
-                style: "width:100px",
-                type: "number",
-                suffix: "秒",
-                default_value: 1
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback, updateCallback) {
+        display_name: _t('clock.title'),
+        description: _t('clock,description'),
+        settings: [{
+            name: "timezone",
+            display_name: _t('clock.zones.title'),
+            type: "option",
+            default_value: "Asia/Tokyo",
+            options: [{
+                name: _t('clock.zones.options.utc-12'),
+                value: "Etc/GMT+12"
+            }, {
+                name: _t('clock.zones.options.utc-11'),
+                value: "Etc/GMT+11"
+            }, {
+                name: _t('clock.zones.options.utc-10'),
+                value: "Pacific/Honolulu"
+            }, {
+                name: _t('clock.zones.options.utc-09'),
+                value: "America/Anchorage"
+            }, {
+                name: _t('clock.zones.options.utc-08-1'),
+                value: "America/Santa_Isabel"
+            }, {
+                name: _t('clock.zones.options.utc-08-2'),
+                value: "America/Los_Angeles"
+            }, {
+                name: _t('clock.zones.options.utc-07-1'),
+                value: "America/Chihuahua"
+            }, {
+                name: _t('clock.zones.options.utc-07-2'),
+                value: "America/Phoenix"
+            }, {
+                name: _t('clock.zones.options.utc-07-3'),
+                value: "America/Denver"
+            }, {
+                name: _t('clock.zones.options.utc-06-1'),
+                value: "America/Guatemala"
+            }, {
+                name: _t('clock.zones.options.utc-06-2'),
+                value: "America/Chicago"
+            }, {
+                name: _t('clock.zones.options.utc-06-3'),
+                value: "America/Regina"
+            }, {
+                name: _t('clock.zones.options.utc-06-4'),
+                value: "America/Mexico_City"
+            }, {
+                name: _t('clock.zones.options.utc-05-1'),
+                value: "America/Bogota"
+            }, {
+                name: _t('clock.zones.options.utc-05-2'),
+                value: "America/Indiana/Indianapolis"
+            }, {
+                name: _t('clock.zones.options.utc-05-3'),
+                value: "America/New_York"
+            }, {
+                name: _t('clock.zones.options.utc-0403'),
+                value: "America/Caracas"
+            }, {
+                name: _t('clock.zones.options.utc-04-1'),
+                value: "America/Halifax"
+            }, {
+                name: _t('clock.zones.options.utc-04-2'),
+                value: "America/Asuncion"
+            }, {
+                name: _t('clock.zones.options.utc-04-3'),
+                value: "America/La_Paz"
+            }, {
+                name: _t('clock.zones.options.utc-04-4'),
+                value: "America/Cuiaba"
+            }, {
+                name: _t('clock.zones.options.utc-04-5'),
+                value: "America/Santiago"
+            }, {
+                name: _t('clock.zones.options.utc-0330'),
+                value: "America/St_Johns"
+            }, {
+                name: _t('clock.zones.options.utc-03-1'),
+                value: "America/Sao_Paulo"
+            }, {
+                name: _t('clock.zones.options.utc-03-2'),
+                value: "America/Godthab"
+            }, {
+                name: _t('clock.zones.options.utc-03-3'),
+                value: "America/Cayenne"
+            }, {
+                name: _t('clock.zones.options.utc-03-4'),
+                value: "America/Argentina/Buenos_Aires"
+            }, {
+                name: _t('clock.zones.options.utc-03-5'),
+                value: "America/Montevideo"
+            }, {
+                name: _t('clock.zones.options.utc-02'),
+                value: "Etc/GMT+2"
+            }, {
+                name: _t('clock.zones.options.utc-01-1'),
+                value: "America/Cape_Verde"
+            }, {
+                name: _t('clock.zones.options.utc-01-2'),
+                value: "Atlantic/Azores"
+            }, {
+                name: _t('clock.zones.options.utc-00-1'),
+                value: "America/Casablanca"
+            }, {
+                name: _t('clock.zones.options.utc-00-2'),
+                value: "Atlantic/Reykjavik"
+            }, {
+                name: _t('clock.zones.options.utc-00-3'),
+                value: "Europe/London"
+            }, {
+                name: _t('clock.zones.options.utc-00-4'),
+                value: "Etc/GMT"
+            }, {
+                name: _t('clock.zones.options.utc+01-1'),
+                value: "Europe/Berlin"
+            }, {
+                name: _t('clock.zones.options.utc+01-2'),
+                value: "Europe/Paris"
+            }, {
+                name: _t('clock.zones.options.utc+01-3'),
+                value: "Africa/Lagos"
+            }, {
+                name: _t('clock.zones.options.utc+01-4'),
+                value: "Europe/Budapest"
+            }, {
+                name: _t('clock.zones.options.utc+01-5'),
+                value: "Europe/Warsaw"
+            }, {
+                name: _t('clock.zones.options.utc+01-6'),
+                value: "Africa/Windhoek"
+            }, {
+                name: _t('clock.zones.options.utc+02-1'),
+                value: "Europe/Istanbul"
+            }, {
+                name: _t('clock.zones.options.utc+02-2'),
+                value: "Europe/Kiev"
+            }, {
+                name: _t('clock.zones.options.utc+02-3'),
+                value: "Africa/Cairo"
+            }, {
+                name: _t('clock.zones.options.utc+02-4'),
+                value: "Asia/Damascus"
+            }, {
+                name: _t('clock.zones.options.utc+02-5'),
+                value: "Asia/Amman"
+            }, {
+                name: _t('clock.zones.options.utc+02-6'),
+                value: "Africa/Johannesburg"
+            }, {
+                name: _t('clock.zones.options.utc+02-7'),
+                value: "Asia/Jerusalem"
+            }, {
+                name: _t('clock.zones.options.utc+02-8'),
+                value: "Asia/Beirut"
+            }, {
+                name: _t('clock.zones.options.utc+03-1'),
+                value: "Asia/Baghdad"
+            }, {
+                name: _t('clock.zones.options.utc+03-2'),
+                value: "Europe/Minsk"
+            }, {
+                name: _t('clock.zones.options.utc+03-3'),
+                value: "Asia/Riyadh"
+            }, {
+                name: _t('clock.zones.options.utc+03-4'),
+                value: "Africa/Nairobi"
+            }, {
+                name: _t('clock.zones.options.utc+0330'),
+                value: "Asia/Tehran"
+            }, {
+                name: _t('clock.zones.options.utc+04-1'),
+                value: "Europe/Moscow"
+            }, {
+                name: _t('clock.zones.options.utc+04-2'),
+                value: "Asia/Tbilisi"
+            }, {
+                name: _t('clock.zones.options.utc+04-3'),
+                value: "Asia/Yerevan"
+            }, {
+                name: _t('clock.zones.options.utc+04-4'),
+                value: "Asia/Dubai"
+            }, {
+                name: _t('clock.zones.options.utc+04-5'),
+                value: "Asia/Baku"
+            }, {
+                name: _t('clock.zones.options.utc+04-6'),
+                value: "Indian/Mauritius"
+            }, {
+                name: _t('clock.zones.options.utc+0430'),
+                value: "Asia/Kabul"
+            }, {
+                name: _t('clock.zones.options.utc+05-1'),
+                value: "Asia/Tashkent"
+            }, {
+                name: _t('clock.zones.options.utc+05-2'),
+                value: "Asia/Karachi"
+            }, {
+                name: _t('clock.zones.options.utc+0530-1'),
+                value: "Asia/Colombo"
+            }, {
+                name: _t('clock.zones.options.utc+0530-2'),
+                value: "Indian/Kolkata"
+            }, {
+                name: _t('clock.zones.options.utc+0545'),
+                value: "Asia/Kathmandu"
+            }, {
+                name: _t('clock.zones.options.utc+06-1'),
+                value: "Asia/Almaty"
+            }, {
+                name: _t('clock.zones.options.utc+06-2'),
+                value: "Asia/Dhaka"
+            }, {
+                name: _t('clock.zones.options.utc+06-3'),
+                value: "Asia/Yekaterinburg"
+            }, {
+                name: _t('clock.zones.options.utc+0630'),
+                value: "Asia/Rangoon"
+            }, {
+                name: _t('clock.zones.options.utc+07-1'),
+                value: "Asia/Bangkok"
+            }, {
+                name: _t('clock.zones.options.utc+07-2'),
+                value: "Asia/Novosibirsk"
+            }, {
+                name: _t('clock.zones.options.utc+08-1'),
+                value: "Asia/Krasnoyarsk"
+            }, {
+                name: _t('clock.zones.options.utc+08-2'),
+                value: "Asia/Ulaanbaatar"
+            }, {
+                name: _t('clock.zones.options.utc+08-3'),
+                value: "Asia/Shanghai"
+            }, {
+                name: _t('clock.zones.options.utc+08-4'),
+                value: "Australia/Perth"
+            }, {
+                name: _t('clock.zones.options.utc+08-5'),
+                value: "Asia/Singapore"
+            }, {
+                name: _t('clock.zones.options.utc+08-6'),
+                value: "Asia/Taipei"
+            }, {
+                name: _t('clock.zones.options.utc+09-1'),
+                value: "Asia/Irkutsk"
+            }, {
+                name: _t('clock.zones.options.utc+09-2'),
+                value: "Asia/Seoul"
+            }, {
+                name: _t('clock.zones.options.utc+09-3'),
+                value: "Asia/Tokyo"
+            }, {
+                name: _t('clock.zones.options.utc+0930-1'),
+                value: "Australia/Darwin"
+            }, {
+                name: _t('clock.zones.options.utc+0930-2'),
+                value: "Australia/Adelaide"
+            }, {
+                name: _t('clock.zones.options.utc+10-1'),
+                value: "Australia/Hobart"
+            }, {
+                name: _t('clock.zones.options.utc+10-2'),
+                value: "Asia/Yakutsk"
+            }, {
+                name: _t('clock.zones.options.utc+10-3'),
+                value: "Australia/Brisbane"
+            }, {
+                name: _t('clock.zones.options.utc+10-4'),
+                value: "Pacific/Port_Moresby"
+            }, {
+                name: _t('clock.zones.options.utc+10-5'),
+                value: "Australia/Sydney"
+            }, {
+                name: _t('clock.zones.options.utc+11-1'),
+                value: "Asia/Vladivostok"
+            }, {
+                name: _t('clock.zones.options.utc+11-2'),
+                value: "Pacific/Guadalcanal"
+            }, {
+                name: _t('clock.zones.options.utc+12-1'),
+                value: "Etc/GMT-12"
+            }, {
+                name: _t('clock.zones.options.utc+12-2'),
+                value: "Pacific/Fiji"
+            }, {
+                name: _t('clock.zones.options.utc+12-3'),
+                value: "Asia/Magadan"
+            }, {
+                name: _t('clock.zones.options.utc+12-4'),
+                value: "Pacific/Auckland"
+            }, {
+                name: _t('clock.zones.options.utc+13-1'),
+                value: "Pacific/Tongatapu"
+            }, {
+                name: _t('clock.zones.options.utc+13-2'),
+                value: "Pacific/Apia"
+            }]
+        }, {
+            name: "refresh",
+            display_name: _t('refresh'),
+            validate: "required,custom[integer],min[1]",
+            style: "width:100px",
+            type: "number",
+            suffix: "秒",
+            default_value: 1
+        }],
+        newInstance: function(settings, newInstanceCallback, updateCallback) {
             newInstanceCallback(new clockDatasource(settings, updateCallback));
         }
     });
 
-    var jsonWebSocketDatasource = function(settings, updateCallback)
-    {
+    var jsonWebSocketDatasource = function(settings, updateCallback) {
         var self = this;
         var currentSettings = settings;
         var ws;
 
-        var onOpen = function()
-        {
+        var onOpen = function() {
             console.info("WebSocket(%s) Opened", currentSettings.url);
         }
 
-        var onClose = function()
-        {
+        var onClose = function() {
             console.info("WebSocket Closed");
         }
 
-        var onMessage = function(event)
-        {
+        var onMessage = function(event) {
             var data = event.data;
 
-            console.info("WebSocket received %s",data);
+            console.info("WebSocket received %s", data);
 
             var objdata = JSON.parse(data);
 
-            if(typeof objdata == "object")
-            {
+            if (typeof objdata == "object") {
                 updateCallback(objdata);
-            }
-            else
-            {
+            } else {
                 updateCallback(data);
             }
 
         }
 
-        function createWebSocket()
-        {
-            if(ws) {
-                ws.close();
+            function createWebSocket() {
+                if (ws) {
+                    ws.close();
+                }
+
+                var url = currentSettings.url;
+                ws = new WebSocket(url);
+
+                ws.onopen = onOpen;
+                ws.onclose = onClose;
+                ws.onmessage = onMessage;
             }
-
-            var url = currentSettings.url;
-            ws = new WebSocket(url);
-
-            ws.onopen = onOpen;
-            ws.onclose = onClose;
-            ws.onmessage = onMessage;
-        }
 
         createWebSocket();
 
-        this.updateNow = function()
-        {
+        this.updateNow = function() {
             createWebSocket();
         }
 
-        this.onDispose = function()
-        {
+        this.onDispose = function() {
             ws.close();
         }
 
-        this.onSettingsChanged = function(newSettings)
-        {
+        this.onSettingsChanged = function(newSettings) {
             currentSettings = newSettings;
 
             createWebSocket();
         }
     };
 
-    var jsonDatasource = function (settings, updateCallback) {
+    var jsonDatasource = function(settings, updateCallback) {
         var self = this;
         var updateTimer = null;
         var currentSettings = settings;
-        var errorStage = 0;     // 0 = try standard request
+        var errorStage = 0; // 0 = try standard request
         // 1 = try JSONP
         // 2 = try thingproxy.freeboard.io
         var lockErrorStage = false;
@@ -3973,14 +3508,14 @@ $.extend(freeboard, jQuery.eventEmitter);
                 clearInterval(updateTimer);
             }
 
-            updateTimer = setInterval(function () {
+            updateTimer = setInterval(function() {
                 self.updateNow();
             }, refreshTime);
         }
 
         updateRefresh(currentSettings.refresh * 1000);
 
-        this.updateNow = function () {
+        this.updateNow = function() {
             if ((errorStage > 1 && !currentSettings.use_thingproxy) || errorStage > 2) // We've tried everything, let's quit
             {
                 return; // TODO: Report an error
@@ -3998,9 +3533,7 @@ $.extend(freeboard, jQuery.eventEmitter);
             if (body) {
                 try {
                     body = JSON.parse(body);
-                }
-                catch (e) {
-                }
+                } catch (e) {}
             }
 
             $.ajax({
@@ -4008,9 +3541,9 @@ $.extend(freeboard, jQuery.eventEmitter);
                 dataType: (errorStage == 1) ? "JSONP" : "JSON",
                 type: currentSettings.method || "GET",
                 data: body,
-                beforeSend: function (xhr) {
+                beforeSend: function(xhr) {
                     try {
-                        _.each(currentSettings.headers, function (header) {
+                        _.each(currentSettings.headers, function(header) {
                             var name = header.name;
                             var value = header.value;
 
@@ -4018,15 +3551,13 @@ $.extend(freeboard, jQuery.eventEmitter);
                                 xhr.setRequestHeader(name, value);
                             }
                         });
-                    }
-                    catch (e) {
-                    }
+                    } catch (e) {}
                 },
-                success: function (data) {
+                success: function(data) {
                     lockErrorStage = true;
                     updateCallback(data);
                 },
-                error: function (xhr, status, error) {
+                error: function(xhr, status, error) {
                     if (!lockErrorStage) {
                         // TODO: Figure out a way to intercept CORS errors only. The error message for CORS errors seems to be a standard 404.
                         errorStage++;
@@ -4036,12 +3567,12 @@ $.extend(freeboard, jQuery.eventEmitter);
             });
         }
 
-        this.onDispose = function () {
+        this.onDispose = function() {
             clearInterval(updateTimer);
             updateTimer = null;
         }
 
-        this.onSettingsChanged = function (newSettings) {
+        this.onSettingsChanged = function(newSettings) {
             lockErrorStage = false;
             errorStage = 0;
 
@@ -4050,93 +3581,78 @@ $.extend(freeboard, jQuery.eventEmitter);
             self.updateNow();
         }
     };
-
+    alert($.i18n.t('plugin.datasource.json.description'));
     freeboard.loadDatasourcePlugin({
         type_name: "JSON",
         display_name: "JSON",
-        description: "指定のURLからJSONデータを受信します。",
-        settings: [
-            {
-                name: "url",
-                display_name: "URL",
-                validate: "required,custom[url]",
-                type: "text"
-            },
-            {
-                name: "use_thingproxy",
-                display_name: "プロキシサーバー試行",
-                description: 'まず直接接続し、失敗した場合、JSONP接続を試みます。これも失敗した場合、プロキシサーバーを使用することができます。使用することで多くのAPI接続トラブルを解決できるでしょう。<a href="https://github.com/Freeboard/thingproxy" target="_blank">詳細</a>',
-                type: "boolean",
-                default_value: true
-            },
-            {
-                name: "refresh",
-                display_name: "更新頻度",
-                validate: "required,custom[integer],min[1]",
-                style: "width:100px",
-                type: "number",
-                suffix: "秒",
-                default_value: 5
-            },
-            {
-                name: "method",
-                display_name: "メソッド",
-                type: "option",
-                style: "width:200px",
-                options: [
-                    {
-                        name: "GET",
-                        value: "GET"
-                    },
-                    {
-                        name: "POST",
-                        value: "POST"
-                    },
-                    {
-                        name: "PUT",
-                        value: "PUT"
-                    },
-                    {
-                        name: "DELETE",
-                        value: "DELETE"
-                    }
-                ]
-            },
-            {
-                name: "body",
-                display_name: "Body",
-                type: "json",
-                validate: "optional,maxSize[2000]",
-                description: "リクエスト本文。通常はPOSTメソッド時に使用される。最大2000文字"
-            },
-            {
-                name: "headers",
-                display_name: "Header",
-                type: "array",
-                settings: [
-                    {
-                        name: "name",
-                        display_name: "名前",
-                        type: "text",
-                        validate: "optional,maxSize[500]",
-                        description: "最大500文字"
-                    },
-                    {
-                        name: "value",
-                        display_name: "値",
-                        type: "text",
-                        validate: "optional,maxSize[500]",
-                        description: "最大500文字"
-                    }
-                ]
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback, updateCallback) {
+        description: _t('json.description'),
+        settings: [{
+            name: "url",
+            display_name: "URL",
+            validate: "required,custom[url]",
+            type: "text"
+        }, {
+            name: "use_thingproxy",
+            display_name: _t('json.use_proxy_name'),
+            description: _t('json.use_proxy_description'),
+            type: "boolean",
+            default_value: true
+        }, {
+            name: "refresh",
+            display_name: _t('refresh'),
+            validate: "required,custom[integer],min[1]",
+            style: "width:100px",
+            type: "number",
+            suffix: _t('json.sufix'),
+            default_value: 5
+        }, {
+            name: "method",
+            display_name: _t('json.method'),
+            type: "option",
+            style: "width:200px",
+            options: [{
+                name: "GET",
+                value: "GET"
+            }, {
+                name: "POST",
+                value: "POST"
+            }, {
+                name: "PUT",
+                value: "PUT"
+            }, {
+                name: "DELETE",
+                value: "DELETE"
+            }]
+        }, {
+            name: "body",
+            display_name: "Body",
+            type: "json",
+            validate: "optional,maxSize[2000]",
+            description: _t('json.body_description')
+        }, {
+            name: "headers",
+            display_name: "Header",
+            type: "array",
+            settings: [{
+                name: "name",
+                display_name: _t('json.header_name_name'),
+                type: "text",
+                validate: "optional,maxSize[500]",
+                description: _t('json.header__name_description')
+            }, {
+                name: "value",
+                display_name: _t('json.header_value_name'),
+                type: "text",
+                validate: "optional,maxSize[500]",
+                description: _t('json.header_value_description')
+            }]
+        }],
+        newInstance: function(settings, newInstanceCallback, updateCallback) {
             newInstanceCallback(new jsonDatasource(settings, updateCallback));
         }
     });
 
-    var openWeatherMapDatasource = function (settings, updateCallback) {
+    var openWeatherMapDatasource = function(settings, updateCallback) {
         var self = this;
         var updateTimer = null;
         var currentSettings = settings;
@@ -4146,24 +3662,24 @@ $.extend(freeboard, jQuery.eventEmitter);
                 clearInterval(updateTimer);
             }
 
-            updateTimer = setInterval(function () {
+            updateTimer = setInterval(function() {
                 self.updateNow();
             }, refreshTime);
         }
 
         function toTitleCase(str) {
-            return str.replace(/\w\S*/g, function (txt) {
+            return str.replace(/\w\S*/g, function(txt) {
                 return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
             });
         }
 
         updateRefresh(currentSettings.refresh * 1000);
 
-        this.updateNow = function () {
+        this.updateNow = function() {
             $.ajax({
                 url: "http://api.openweathermap.org/data/2.5/weather?q=" + encodeURIComponent(currentSettings.location) + "&units=" + currentSettings.units,
                 dataType: "JSONP",
-                success: function (data) {
+                success: function(data) {
                     // Rejigger our data into something easier to understand
                     var newData = {
                         place_name: data.name,
@@ -4183,17 +3699,16 @@ $.extend(freeboard, jQuery.eventEmitter);
 
                     updateCallback(newData);
                 },
-                error: function (xhr, status, error) {
-                }
+                error: function(xhr, status, error) {}
             });
         }
 
-        this.onDispose = function () {
+        this.onDispose = function() {
             clearInterval(updateTimer);
             updateTimer = null;
         }
 
-        this.onSettingsChanged = function (newSettings) {
+        this.onSettingsChanged = function(newSettings) {
             currentSettings = newSettings;
             self.updateNow();
             updateRefresh(currentSettings.refresh * 1000);
@@ -4202,102 +3717,87 @@ $.extend(freeboard, jQuery.eventEmitter);
 
     freeboard.loadDatasourcePlugin({
         type_name: "openweathermap",
-        display_name: "Open Weather Map API",
-        description: "天候や予測履歴を含む各種気象データを受信します。",
-        settings: [
-            {
-                name: "location",
-                display_name: "場所",
-                validate: "required,maxSize[200]",
-                type: "text",
-                description: "最大200文字<br>例: London, UK"
-            },
-            {
-                name: "units",
-                display_name: "単位",
-                style: "width:200px",
-                type: "option",
-                default_value: "metric",
-                options: [
-                    {
-                        name: "メトリック",
-                        value: "metric"
-                    },
-                    {
-                        name: "インペリアル",
-                        value: "imperial"
-                    }
-                ]
-            },
-            {
-                name: "refresh",
-                display_name: "更新頻度",
-                validate: "required,custom[integer],min[1]",
-                style: "width:100px",
-                type: "number",
-                suffix: "秒",
-                default_value: 5
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback, updateCallback) {
+        display_name: _t('openweathermap.display_name'),
+        description: _t('openweathermap.description'),
+        settings: [{
+            name: "location",
+            display_name: _t('openweathermap.settings.location_name'),
+            validate: "required,maxSize[200]",
+            type: "text",
+            description: _t('openweathermap.settings.location_description')
+        }, {
+            name: "units",
+            display_name: _t('openweathermap.settings.unit_name'),
+            style: "width:200px",
+            type: "option",
+            default_value: "metric",
+            options: [{
+                name: _t('openweathermap.settings.unit_metric'),
+                value: "metric"
+            }, {
+                name: _t('openweathermap.settings.unit_imperial'),
+                value: "imperial"
+            }]
+        }, {
+            name: "refresh",
+            display_name: _t('refresh'),
+            validate: "required,custom[integer],min[1]",
+            style: "width:100px",
+            type: "number",
+            suffix: _t('sufix'),
+            default_value: 5
+        }],
+        newInstance: function(settings, newInstanceCallback, updateCallback) {
             newInstanceCallback(new openWeatherMapDatasource(settings, updateCallback));
         }
     });
 
     freeboard.loadDatasourcePlugin({
         "type_name": "playback",
-        "display_name": "Playback",
-        "description": "指定された間隔で連続したデータを再生します。オブジェクトの配列を含む有効なJSONファイルを待ち受けします。",
-        "settings": [
-            {
-                name: "datafile",
-                display_name: "データファイルURL",
-                validate: "required,custom[url]",
-                type: "text",
-                description: "JSON配列データへのリンク"
-            },
-            {
-                name: "is_jsonp",
-                display_name: "JSONP使用",
-                type: "boolean"
-            },
-            {
-                name: "loop",
-                display_name: "ループ再生",
-                type: "boolean",
-                description: "巻戻しとループ再生時終了"
-            },
-            {
-                name: "refresh",
-                display_name: "更新頻度",
-                validate: "required,custom[integer],min[1]",
-                style: "width:100px",
-                type: "number",
-                suffix: "秒",
-                default_value: 5
-            }
-        ],
-        newInstance: function (settings, newInstanceCallback, updateCallback) {
+        "display_name": _t('playback.name'),
+        "description": _t('playback.description'),
+        "settings": [{
+            name: "datafile",
+            display_name: _t('playback.settins.data_namne'),
+            validate: "required,custom[url]",
+            type: "text",
+            description: _t('playback.settings.datafile_description')
+        }, {
+            name: "is_jsonp",
+            display_name: _t('playback.settings.is_json'),
+            type: "boolean"
+        }, {
+            name: "loop",
+            display_name: _t('playback.settings.loop_name'),
+            type: "boolean",
+            description: _t('playback.settings.loop_description')
+        }, {
+            name: "refresh",
+            display_name: _t('refresh'),
+            validate: "required,custom[integer],min[1]",
+            style: "width:100px",
+            type: "number",
+            suffix: _t('sufix'),
+            default_value: 5
+        }],
+        newInstance: function(settings, newInstanceCallback, updateCallback) {
             newInstanceCallback(new playbackDatasource(settings, updateCallback));
         }
     });
 
     freeboard.loadDatasourcePlugin({
-        type_name  : "JSON WebSocket",
-        display_name : "JSON WebSocket",
-        description : "ブラウザ内蔵のWebSocket APIを使用しJSON形式のデータを取得します。",
-        settings   : [
-            {
-                name: "url",
-                display_name: "DNSホスト名",
-                validate: "required,maxSize[1000]",
-                type: "text",
-                description: "最大1000文字"
-            }
-        ],
-        newInstance: function(settings, newInstanceCallback, updateCallback)
-        {
-            newInstanceCallback( new jsonWebSocketDatasource(settings, updateCallback));
+        type_name: "JSON WebSocket",
+        display_name: _t('json_websocket.name'),
+        description: _t('json_websocket.description'),
+        settings: [{
+            name: "url",
+            display_name: _t('json_websocket.settings.url_name'),
+            validate: "required,maxSize[1000]",
+            type: "text",
+            description: _t('json_websocket.url_description')
+        }],
+        newInstance: function(settings, newInstanceCallback, updateCallback) {
+            newInstanceCallback(new jsonWebSocketDatasource(settings, updateCallback));
         }
     });
 
@@ -4335,7 +3835,9 @@ $.extend(freeboard, jQuery.eventEmitter);
         function connectToServer(url, rooms) {
             // Establish connection with server
             self.url = url;
-            self.socket = io.connect(self.url,{'forceNew':true});
+            self.socket = io.connect(self.url, {
+                'forceNew': true
+            });
 
             // Join the rooms
             self.socket.on('connect', function() {
@@ -4408,49 +3910,45 @@ $.extend(freeboard, jQuery.eventEmitter);
     };
 
     freeboard.loadDatasourcePlugin({
-        type_name : "node_js",
-        display_name : "Node.js (Socket.io)",
-        description : "<a href='http://socket.io/', target='_blank'>Socket.io</a>を使用したnode.jsサーバーからデータソースをリアルタイムでストリーミングします。",
-        external_scripts : [ "https://cdn.socket.io/socket.io-1.2.1.js" ],
-        settings : [
-            {
-                name: "url",
-                display_name: "DNSホスト名",
-                validate: "required,maxSize[1000]",
-                type: "text",
-                description: "最大1000文字 (オプション) カスタム名前空間を使用する場合、URLの最後に名前空間を追加して下さい。<br>例: http://localhost/chat"
-            },
-            {
-                name : "events",
-                display_name : "イベント",
-                description : "データソースへ追加するイベント名を指定して下さい。",
-                type : "array",
-                settings : [ {
-                    name : "eventName",
-                    display_name : "イベント名",
-                    validate: "optional,maxSize[100]",
-                    type: "text"
-                } ]
-            },
-            {
-                name : "rooms",
-                display_name : "(オプション) ルーム",
-                description : "ルームを使用する場合, 追加したいルーム名を指定して下さい。その他の場合は空白のままにしておいて下さい。",
-                type : "array",
-                settings : [ {
-                    name : "roomName",
-                    display_name : "ルーム名",
-                    validate: "optional,maxSize[100]",
-                    type: "text"
-                }, {
-                    name : "roomEvent",
-                    display_name : "ルームに参加するイベント名",
-                    validate: "optional,maxSize[100]",
-                    type: "text"
-                } ]
-            }
-        ],
-        newInstance : function(settings, newInstanceCallback, updateCallback) {
+        type_name: "node_js",
+        display_name: _t('node_js.name'),
+        description: _t('node_js.description') ,
+        external_scripts: ["https://cdn.socket.io/socket.io-1.2.1.js"],
+        settings: [{
+            name: "url",
+            display_name: _t('node_js.settings.url_name'),
+            validate: "required,maxSize[1000]",
+            type: "text",
+            description: _t('node_js.settings.url_description')
+        }, {
+            name: "events",
+            display_name: _t('node_js.settings.events_name'),
+            description: _t('node_js.settings.events_description'),
+            type: "array",
+            settings: [{
+                name: "eventName",
+                display_name: _t('node_js.settings.events_options_1'),
+                validate: "optional,maxSize[100]",
+                type: "text"
+            }]
+        }, {
+            name: "rooms",
+            display_name: _t('node_js.settings.rooms_name'),
+            description: _t('node_js.settings.rooms_descriptions'),
+            type: "array",
+            settings: [{
+                name: "roomName",
+                display_name: _t('node_js.settings.rooms_settings_name'),
+                validate: "optional,maxSize[100]",
+                type: "text"
+            }, {
+                name: "roomEvent",
+                display_name: _t('node_js.settings.rooms_settings_event_name'),
+                validate: "optional,maxSize[100]",
+                type: "text"
+            }]
+        }],
+        newInstance: function(settings, newInstanceCallback, updateCallback) {
             newInstanceCallback(new nodeJSDatasource(settings, updateCallback));
         }
     });
@@ -4483,7 +3981,7 @@ $.extend(freeboard, jQuery.eventEmitter);
         }
 
         function onMessageArrived(message) {
-            console.info("MQTT Received %s from %s", message,  currentSettings.url);
+            console.info("MQTT Received %s from %s", message, currentSettings.url);
 
             var objdata = JSON.parse(message.payloadString);
             if (typeof objdata == "object") {
@@ -4548,65 +4046,57 @@ $.extend(freeboard, jQuery.eventEmitter);
     };
 
     freeboard.loadDatasourcePlugin({
-        type_name : "mqtt",
-        display_name : "MQTT over Websocket",
-        description : "<a href='http://mqtt.org/', target='_blank'>MQTT</a>プロトコルをWebSocketを介し使用し、MQTTブローカーサーバーからデータソースをリアルタイムで取得します。",
-        external_scripts : [ "plugins/thirdparty/mqttws31.js" ],
-        settings : [
-            {
-                name : "url",
-                display_name : "DNSホスト名",
-                validate: "required,maxSize[1000]",
-                type: "text",
-                description: "最大1000文字<br>MQTTブローカーサーバーのDNSホスト名を設定して下さい。<br>例: location.hostname"
-            },
-            {
-                name : "port",
-                display_name : "ポート番号",
-                validate: "required,custom[integer],min[1]",
-                type: "number",
-                style: "width:100px",
-                default_value: 8080
-            },
-            {
-                name : "clientID",
-                display_name : "クライアントID",
-                validate: "required,maxSize[23]",
-                type: "text",
-                description: "最大23文字<br>任意のクライアントID文字列",
-                default_value: "SensorCorpus"
-            },
-            {
-                name : "topic",
-                display_name : "トピック",
-                validate: "required,maxSize[500]",
-                type: "text",
-                description: "最大500文字<br>購読するトピック名を設定して下さい。<br>例: my/topic",
-                default_value: ""
-            },
-            {
-                name : "username",
-                display_name : "(オプション) ユーザー名",
-                validate: "optional,maxSize[100]",
-                type: "text",
-                description: "最大100文字<br>必要ない場合は空白。"
-            },
-            {
-                name : "password",
-                display_name : "(オプション) パスワード",
-                validate: "optional,maxSize[100]",
-                type: "text",
-                description: "最大100文字<br>必要ない場合は空白。"
-            },
-            {
-                name : "reconnect",
-                display_name : "自動再接続",
-                type: "boolean",
-                description : "接続が切れた場合、自動的に再接続します。",
-                default_value: true
-            }
-        ],
-        newInstance : function(settings, newInstanceCallback, updateCallback) {
+        type_name: "mqtt",
+        display_name: "MQTT over Websocket",
+        description: "<a href='http://mqtt.org/', target='_blank'>MQTT</a>プロトコルをWebSocketを介し使用し、MQTTブローカーサーバーからデータソースをリアルタイムで取得します。",
+        external_scripts: ["plugins/thirdparty/mqttws31.js"],
+        settings: [{
+            name: "url",
+            display_name: "DNSホスト名",
+            validate: "required,maxSize[1000]",
+            type: "text",
+            description: "最大1000文字<br>MQTTブローカーサーバーのDNSホスト名を設定して下さい。<br>例: location.hostname"
+        }, {
+            name: "port",
+            display_name: "ポート番号",
+            validate: "required,custom[integer],min[1]",
+            type: "number",
+            style: "width:100px",
+            default_value: 8080
+        }, {
+            name: "clientID",
+            display_name: "クライアントID",
+            validate: "required,maxSize[23]",
+            type: "text",
+            description: "最大23文字<br>任意のクライアントID文字列",
+            default_value: "SensorCorpus"
+        }, {
+            name: "topic",
+            display_name: "トピック",
+            validate: "required,maxSize[500]",
+            type: "text",
+            description: "最大500文字<br>購読するトピック名を設定して下さい。<br>例: my/topic",
+            default_value: ""
+        }, {
+            name: "username",
+            display_name: "(オプション) ユーザー名",
+            validate: "optional,maxSize[100]",
+            type: "text",
+            description: "最大100文字<br>必要ない場合は空白。"
+        }, {
+            name: "password",
+            display_name: "(オプション) パスワード",
+            validate: "optional,maxSize[100]",
+            type: "text",
+            description: "最大100文字<br>必要ない場合は空白。"
+        }, {
+            name: "reconnect",
+            display_name: "自動再接続",
+            type: "boolean",
+            description: "接続が切れた場合、自動的に再接続します。",
+            default_value: true
+        }],
+        newInstance: function(settings, newInstanceCallback, updateCallback) {
             newInstanceCallback(new mqttDatasource(settings, updateCallback));
         }
     })

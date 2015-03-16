@@ -30,14 +30,6 @@
             "colWidthDescription": "Up to 10 block"
         }
     },
-    "plugins": {
-        "clock": {
-            "title": "Clock"
-        }
-    },
-    "widgets": {
-        "title": "Widget"
-    },
     "JSEditor": {
         "javascript": {
             "exampleText": "// Example: Convert from Celsius to Fahrenheit, Truncation point two digits below",
@@ -50,14 +42,413 @@
         "cancel": "Close"
     },
     "PluginEditor": {
-        "datasourceTool": "データソース",
-        "tableOperation": "追加",
+        "datasourceTool": "data source",
+        "tableOperation": "Add",
         "dialog": {
-            "yes": "保存",
-            "no": "キャンセル"
+            "yes": "Save",
+            "no": "Cancel"
         },
-        "type": "タイプ",
-        "firstOption": "追加するタイプを選択してください。"
-    }
+        "type": "type",
+        "firstOption": "Please select the type you want to add."
+    },
+    "plugins": {
+        "datasource": {
+            "sufix": "Seconds",
+            "refresh": "update frequency",
+            "clock": {
+                "title": "Clock",
+                "description": ". Is updated at specified intervals, and returns the current time in different formats or view a timer on the screen, the widget can be used in order to refresh at regular intervals.",
+                "zones": {
+                    "title": "Time zone",
+                    "options": {
+                        "utc-12": "(UTC-12: 00) International Date Line west",
+                        "utc-11": "(UTC-11: 00) UTC -11",
+                        "utc-10": "(UTC-10: 00) Hawai",
+                        "utc-09": "(UTC-09: 00) Alaska",
+                        "utc-08-1": "(UTC-08: 00) Baja California",
+                        "utc-08-2": "(UTC-08: 00) Pacific Ocean Time (US & Canada)",
+                        "utc-07-1": "(UTC-07: 00) Chihuahua, La Paz, Mazatlan",
+                        "utc-07-2": "(UTC-07: 00) Arizona",
+                        "utc-07-3": "(UTC-07: 00) Mountain Time (US and Canada)",
+                        "utc-06-1": "(UTC-06: 00) Central America",
+                        "utc-06-2": "(UTC-06: 00) Central Time (US & Canada)",
+                        "utc-06-3": "(UTC-06: 00) Saskatchewan",
+                        "utc-06-4": "(UTC-06: 00) Guadalajara, Mexico City, Monterrey",
+                        "utc-05-1": "(UTC-05: 00) Bogota, Lima, Quito",
+                        "utc-05-2": "(UTC-05: 00) Eastern Indiana",
+                        "utc-05-3": "(UTC-05: 00) Eastern Time (US & Canada)",
+                        "utc-0430": "(UTC-04: 30) Caracas",
+                        "utc-04-1": "(UTC-04: 00) Atlantic Standard Time (Canada) ",
+                        "utc-04-2": "(UTC-04: 00) Asuncion",
+                        "utc-04-3": "(UTC-04: 00) Georgetown, La Paz, Manaus, San Juan",
+                        "utc-04-4": "(UTC-04: 00) Cuiaba",
+                        "utc-04-5": "(UTC-04: 00) Santiago",
+                        "utc-0330": "(UTC-03: 30) Newfoundland",
+                        "utc-03-1": "(UTC-03: 00) Brasilia",
+                        "utc-03-2": "(UTC-03: 00) Greenland",
+                        "utc-03-3": "(UTC-03: 00) Cayenne, Fortaleza",
+                        "utc-03-4": "(UTC-03: 00) Buenos Aires",
+                        "utc-03-5": "(UTC-03: 00) Montevideo",
+                        "utc-02": "(UTC-02: 00) UTC -2",
+                        "utc-01-1": "(UTC-01: 00) Cape Verde Islands",
+                        "utc-01-2": "(UTC-01: 00) Azores",
+                        "utc-00-1": "(UTC + 00: 00) Casablanca",
+                        "utc-00-2": "(UTC + 00: 00) Monrovia, Reykjavik",
+                        "utc-00-3": "(UTC + 00: 00) Dublin, Edinburgh, Lisbon, London",
+                        "utc-00-4": "(UTC + 00: 00) Coordinated Universal Time",
+                        "utc + 01-1": "(UTC + 01: 00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna",
+                        "utc + 01-2": "(UTC + 01: 00) Brussels, Copenhagen, Madrid, Paris",
+                        "utc + 01-3": "(UTC + 01: 00) West Central Africa",
+                        "utc + 01-4": "(UTC + 01: 00) Belgrade, Bratislava, Budapest, Ljubljana, Prague",
+                        "utc + 01-5": "(UTC + 01: 00) Sarajevo, Skopje, Warsaw, Zagreb",
+                        "utc + 01-6": "(UTC + 01: 00) Windhoek",
+                        "utc + 02-1": "(UTC + 02: 00) Athens, Bucharest, Istanbul",
+                        "utc + 02-2": "(UTC + 02: 00) Helsinki, Kiev, Riga, Sofia, Tallinn, Vilnius",
+                        "utc + 02-3": "(UTC + 02: 00) Cairo",
+                        "utc + 02-4": "(UTC + 02: 00) Damascus",
+                        "utc + 02-5": "(UTC + 02: 00) Amman",
+                        "utc + 02-6": "(UTC + 02: 00) Harare, Pretoria",
+                        "utc + 02-7": "(UTC + 02: 00) Jerusalem",
+                        "utc + 02-8": "(UTC + 02: 00) Beirut",
+                        "utc + 03-1": "(UTC + 03: 00) Baghdad",
+                        "utc + 03-2": "(UTC + 03: 00) Minsk",
+                        "utc + 03-3": "(UTC + 03: 00) Kuwait, Riyadh",
+                        "utc + 03-4": "(UTC + 03: 00) Nairobi",
+                        "utc + 0330": "(UTC + 03: 30) Tehran",
+                        "utc + 04-1": "(UTC + 04: 00) Moscow, St. Petersburg, Volgograd",
+                        "utc + 04-2": "(UTC + 04: 00) Tbilisi",
+                        "utc + 04-3": "(UTC + 04: 00) Yerevan",
+                        "utc + 04-4": "(UTC + 04: 00) Abu Dhabi, Muscat",
+                        "utc + 04-5": "(UTC + 04: 00) Baku",
+                        "utc + 04-6": "(UTC + 04: 00) Port Louis",
+                        "utc + 4030": "(UTC + 04: 30) Kabul",
+                        "utc + 05-1": "(UTC + 05: 00) Tashkent",
+                        "utc + 05-2": "(UTC + 05: 00) Islamabad, Karachi",
+                        "utc + 0530-1": "(UTC + 05: 30) Sri Jayawardenepura Kotte",
+                        "utc + 0530-2": "(UTC + 05: 30) Chennai, Kolkata, Mumbai, New Delhi",
+                        "utc + 0545": "(UTC + 05: 45) Kathmandu",
+                        "utc + 06-1": "(UTC + 06: 00) Astana",
+                        "utc + 06-2": "(UTC + 06: 00) Dhaka",
+                        "utc + 06-3": "(UTC + 06: 00) Yekaterinburg",
+                        "utc + 0630": "(UTC + 06: 30) Yangon (Rangoon)",
+                        "utc + 07-1": "(UTC + 07: 00) Bangkok, Hanoi, Jakarta",
+                        "utc + 07-2": "(UTC + 07: 00) Novosibirsk",
+                        "utc + 08-1": "(UTC + 08: 00) Krasnoyarsk",
+                        "utc + 08-2": "(UTC + 08: 00) Ulaanbaatar",
+                        "utc + 08-3": "(UTC + 08: 00) Beijing, Chongqing, Hong Kong Special Administrative Region, Urumqi",
+                        "utc + 08-4": "(UTC + 08: 00) Perth",
+                        "utc + 08-5": "(UTC + 08: 00) Kuala Lumpur, Singapore",
+                        "utc + 08-6": "(UTC + 08: 00) Taipei",
+                        "utc + 09-1": "(UTC + 09: 00) Irkutsk",
+                        "utc + 09-2": "(UTC + 09: 00) Seoul",
+                        "utc + 09-3": "(UTC + 09: 00) Osaka, Sapporo, Tokyo",
+                        "utc + 0930-1": "(UTC + 09: 30) Darwin",
+                        "utc + 0930-2": "(UTC + 09: 30) Adelaide",
+                        "utc + 10-1": "(UTC + 10: 00) Hobart",
+                        "utc + 10-2": "(UTC + 10: 00) Yakutsk",
+                        "utc + 10-3": "(UTC + 10: 00) Brisbane",
+                        "utc + 10-4": "(UTC + 10: 00) Guam, Port Moresby",
+                        "utc + 10-5": "(UTC + 10: 00) Canberra, Melbourne, Sydney",
+                        "utc + 11-1": "(UTC + 11: 00) Vladivostok",
+                        "utc + 11-2": "(UTC + 11: 00) Solomon Islands, New Caledonia",
+                        "utc + 12-1": "(UTC + 12: 00) UTC +12",
+                        "utc + 12-2": "(UTC + 12: 00) Fiji, Marshall Islands",
+                        "utc + 12-3": "(UTC + 12: 00) Magadan",
+                        "utc + 12-4": "(UTC + 12: 00) Auckland, Wellington",
+                        "utc + 13-1": "(UTC + 13: 00) Nuku'alofa",
+                        "utc + 13-2": "(UTC + 13: 00) Samoa"
+                    }
+                }
+            },
+            "json": {
+                "description": "I will receive the JSON data from the specified URL.",
+                "use_proxy_name": "proxy server attempts",
+                "use_proxy_description": "The first direct connection, if it fails, it will attempt to JSONP connection If this also fails, you can use a proxy server will be able to solve many of the API connection trouble by using . <a href='https://github.com/Freeboard/thingproxy' target='_blank'> details </a> ",
+                "method": "method",
+                "body_description": ". To. The request body normally used during POST method up to 2000 characters",
+                "header_name_name": "name",
+                "header_name_description": "Up to 500 characters",
+                "header_value_name": "value",
+                "header_value_description": "Up to 500 characters"
+            },
+            "openweathermap": {
+                "display_name": "Open Weather Map API",
+                "description": "I will receive a variety of weather data, including the weather and forecasts history. ",
+                "settings": {
+                    "location_name": "location",
+                    "location_description": "up to 200 characters <br> example: London, UK",
+                    "unit_name": "Unit",
+                    "unit_metric": "metric",
+                    "unit_imperial": "Imperial"
+                }
+            },
+            "playback": {
+                "name": "Playback",
+                "description": "Play the continuous data at a specified interval and then waiting a valid JSON file that contains an array of objects.",
+                "settings": {
+                    "datafile_name": "data file URL",
+                    "datafile_description": "link to the JSON array data",
+                    "is_json": "JSONP use",
+                    "loop_name": "loop playback",
+                    "loop_description": "rewind and during loop playback Exit"
+                }
+            },
+            "json_websocket": {
+                "name": "JSON WebSocket",
+                "description": "Use the WebSocket API browser built-in to get the data of the JSON format.",
+                "settings": {
+                    "url_name": "DNS host name",
+                    "url_description": "up to 1000 characters"
+                }
+            },
+            "node_js": {
+                "name": "Node.js (Socket.io)",
+                "description": "I will streaming <a from node.js server using href='http://socket.io/', target='_blank'> Socket.io </a> the data source in real time. ",
+                "settings": {
+                    "url_name": "DNS host name",
+                    "url_description": "up to 1000 characters (optional) If you want to use a custom namespace, add the last name space of URL <br> example:. Http: // localhost / chat",
+                    "events_name": "events",
+                    "events_description": "Please specify the event name to be added to the data source. ",
+                    "events_options_1": "event name",
+                    "rooms_name": "(optional) Room",
+                    "room_description": ". If you want to use the room, you must specify the room name you want to add other cases Leave blank.",
+                    "rooms_settings_name": "room name",
+                    "rooms_settings_event_name": "event name to participate in the Room"
+                }
+            },
+            "mqtt": {
+                "display_name": "MQTT over Websocket",
+                "description": "<a href='http://mqtt.org/', target='_blank'>MQTT</a>プロトコルをWebSocketを介し使用し、MQTTブローカーサーバーからデータソースをリアルタイムで取得します。",
+                "settings": {
+                    "url": {
+                        "display_name": "DNSホスト名",
+                        "description": "最大1000文字<br>MQTTブローカーサーバーのDNSホスト名を設定して下さい。<br>例: location.hostname"
+                    },
+                    "port": {
+                        "display_name": "ポート番号"
+                    },
+                    "clientID": {
+                        "display_name": "クライアントID",
+                        "description": "最大23文字<br>任意のクライアントID文字列"
+                    },
+                    "topic": {
+                        "display_name": "トピック",
+                        "description": "最大500文字<br>購読するトピック名を設定して下さい。<br>例: my/topic"
+                    },
+                    "username": {
+                        "display_name": "(オプション) ユーザー名",
+                        "description": "最大100文字<br>必要ない場合は空白。"
+                    },
+                    "password": {
+                        "display_name": "(オプション) パスワード",
+                        "description": "最大100文字<br>必要ない場合は空白。"
+                    },
+                    "reconnect": {
+                        "display_name": "自動再接続",
+                        "description": "接続が切れた場合、自動的に再接続します。"
+                    }
 
-}
+                }
+            },
+            "widgets": {
+                "title": "Widget",
+                "suffix": "秒",
+
+                "text_widget": {
+                    "display_name": "テキスト",
+                    "settings": {
+                        "title": {
+                            "display_name": "タイトル",
+                            "description": "最大100文字"
+                        },
+                        "size": {
+                            "display_name": "サイズ",
+                            "options": {
+                                "regular": "レギュラー",
+                                "big": "ビッグ"
+                            }
+                        },
+                        "value": {
+                            "display_name": "値",
+                            "description": "最大2000文字"
+                        },
+                        "sparkline": {
+                            "display_name": "スパークラインを含む"
+                        },
+                        "animate": {
+                            "display_name": "値変化アニメーション"
+                        },
+                        "units": {
+                            "display_name": "単位",
+                            "description": "最大20文字"
+                        }
+                    }
+                },
+
+                "sparkline": {
+                    "display_name": "スパークラインチャート",
+                    "settings": {
+                        "title": {
+                            "display_name": "タイトル",
+                            "description": "最大100文字"
+                        },
+                        "value": {
+                            "display_name": "値",
+                            "description": "最大500文字"
+                        }
+                    }
+                },
+
+
+                "gauge": {
+                    "display_name": "ゲージ",
+                    "settings": {
+                        "title": {
+                            "display_name": "タイトル",
+                            "description": "最大100文字"
+                        },
+                        "value": {
+                            "display_name": "値",
+                            "description": "最大2000文字"
+                        },
+                        "shape": {
+                            "display_name": "型",
+                            "options": {
+                                "value_0": "ハーフ",
+                                "value_1": "ファン",
+                                "value_2": "ドーナッツ"
+                            }
+                        },
+                        "units": {
+                            "display_name": "単位",
+                            "description": "最大20文字"
+                        },
+                        "value_fontcolor": {
+                            "display_name": "値フォント色",
+                            "description": "デフォルト色: #d3d4d4"
+                        },
+                        "gauge_upper_color": {
+                            "display_name": "ゲージ色 Upper",
+                            "description": "デフォルト色: #ff0000"
+                        },
+                        "gauge_mid_color": {
+                            "display_name": "ゲージ色 Mid",
+                            "description": "デフォルト色: #f9c802"
+                        },
+                        "gauge_lower_color": {
+                            "display_name": "ゲージ色 Lower",
+                            "description": "デフォルト色: #a9d70b"
+                        },
+                        "gauge_color": {
+                            "display_name": "ゲージ背景色",
+                            "description": "デフォルト色: #edebeb"
+                        },
+                        "gauge_widthscale": {
+                            "display_name": "ゲージ太さ",
+                            "description": "0から200まで"
+                        },
+                        "min_value": {
+                            "display_name": "最小値",
+                            "description": "数値のみ"
+                        },
+                        "max_value": {
+                            "display_name": "最大値",
+                            "description": "最小値以上"
+                        }
+                    }
+                },
+                "pointer": {
+                    "display_name": "ポインタ",
+                    "settings": {
+                        "title": {
+                            "display_name": "タイトル",
+                            "description": "最大100文字"
+                        },
+                        "direction": {
+                            "display_name": "方向",
+                            "description": "最大2000文字<br>角度を入力して下さい。"
+                        },
+                        "value_text": {
+                            "display_name": "値テキスト",
+                            "description": "最大2000文字"
+                        },
+                        "units": {
+                            "display_name": "単位",
+                            "description": "最大20文字"
+                        },
+                        "circle_color": {
+                            "display_name": "サークル色",
+                            "description": "デフォルト色: #ff9900"
+                        },
+                        "pointer_color": {
+                            "display_name": "ポインタ色",
+                            "description": "デフォルト色: #fff"
+                        }
+                    }
+                },
+                "picture": {
+                    "display_name": "画像",
+                    "settings": {
+                        "src": {
+                            "display_name": "画像URL",
+                            "description": "最大2000文字"
+                        },
+                        "number": {
+                            "display_name": "更新頻度",
+                            "description": "更新する必要がない場合は空白のまま"
+                        }
+                    }
+                },
+                "indicator": {
+                    "display_name": "インジケータライト",
+                    "settings": {
+                        "title": {
+                            "display_name": "タイトル",
+                            "description": "最大100文字"
+                        },
+                        "value": {
+                            "display_name": "値",
+                            "description": "最大2000文字"
+                        },
+                        "on_text": {
+                            "display_name": "ON時テキスト",
+                            "description": "最大2000文字"
+                        },
+                        "off_text": {
+                            "display_name": "OFF時テキスト",
+                            "description": "最大500文字"
+                        }
+                    }
+                },
+                "google_map": {
+                    "display_name": "Google Map",
+                    "settings": {
+                        "lat": {
+                            "display_name": "緯度",
+                            "description": "最大2000文字"
+                        },
+                        "lon": {
+                            "display_name": "経度",
+                            "description": "最大2000文字"
+                        },
+                        "blocks": {
+                            "display_name": "高さ (ブロック数)",
+                            "description": "1ブロック60ピクセル。20ブロックまで"
+                        }
+                    }
+                },
+                "html": {
+                    "display_name": "HTML",
+                    "settings": {
+                        "html": {
+                            "display_name": "HTML",
+                            "description": "最大2000文字<br>HTML文字列かjavascriptが使用できます。"
+                        },
+                        "height": {
+                            "display_name": "ブロック高さ",
+                            "description": "1ブロック60ピクセル。20ブロックまで"
+                        }
+                    }
+                }
+            }
+        }

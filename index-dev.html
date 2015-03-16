@@ -21,13 +21,17 @@
     <script type="text/javascript">
         head.js("lib/js/thirdparty/knockout.js",
                 "lib/js/thirdparty/jquery.js",
+
+                /*Load and init localization*/
+                "lib/js/thirdparty/i18next-1.7.7.min.js",
+                "js/locales/init.js",
+
                 "lib/js/thirdparty/jquery.ba-resize.js",
                 "lib/js/thirdparty/jquery-ui.js",
                 "lib/js/thirdparty/lodash.js",
                 "lib/js/thirdparty/jquery.gridster.js",
                 "lib/js/thirdparty/jquery.caret.js",
                 "lib/js/thirdparty/jquery.xdomainrequest.js",
-                "lib/js/thirdparty/jquery.validationEngine-ja.js",
                 "lib/js/thirdparty/jquery.validationEngine.js",
                 "lib/js/thirdparty/moment.js",
                 "lib/js/thirdparty/moment-timezone.js",
@@ -36,7 +40,6 @@
                 "lib/js/thirdparty/codemirror-csslint.js",
                 "lib/js/thirdparty/colpick.js",
                 "lib/js/thirdparty/webfont.js",
-                "lib/js/thirdparty/i18next-1.7.7.min.js",
 
                 "lib/js/freeboard/FreeboardModel.js",
                 "lib/js/freeboard/DatasourceModel.js",
@@ -55,7 +58,6 @@
                 "plugins/freeboard/plugin.c3js.js",
                 "examples/wsDataSourcePlugin.js",
 
-                "js/locales/init.js",
 
                 // *** Load more plugins here ***
                 function(){
@@ -63,7 +65,6 @@
                     { //DOM Ready
                         freeboard.setAssetRoot("/freeboard-ui/");
                         freeboard.initialize(true);
-                        freeboard.i18n = "aaa";
 
                         var hashpattern = window.location.hash.match(/(&|#)source=([^&]+)/);
                         if (hashpattern !== null) {

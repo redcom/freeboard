@@ -21,7 +21,6 @@ module.exports = function(grunt) {
                         'lib/js/thirdparty/jquery.gridster.js',
                         'lib/js/thirdparty/jquery.caret.js',
                         'lib/js/thirdparty/jquery.xdomainrequest.js',
-                        'lib/js/thirdparty/jquery.validationEngine-ja.js',
                         'lib/js/thirdparty/jquery.validationEngine.js',
                         'lib/js/thirdparty/moment.js',
                         'lib/js/thirdparty/moment-timezone.js',
