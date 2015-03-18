@@ -218,237 +218,234 @@
             },
             "mqtt": {
                 "display_name": "MQTT over Websocket",
-                "description": "<a href='http://mqtt.org/', target='_blank'>MQTT</a>プロトコルをWebSocketを介し使用し、MQTTブローカーサーバーからデータソースをリアルタイムで取得します。",
+                "description": "<a href='http://mqtt.org/', target = '_blank'> MQTT</a> through the WebSocket Protocol to use, MQTT broker server from data sources gets in real time.",
                 "settings": {
                     "url": {
-                        "display_name": "DNSホスト名",
-                        "description": "最大1000文字<br>MQTTブローカーサーバーのDNSホスト名を設定して下さい。<br>例: location.hostname"
+                        "display_name": "DNS host name",
+                        "description": "up to 1000 characters < br > MQTT broker server's DNS host name. Example < br >: location.hostname "
                     },
                     "port": {
-                        "display_name": "ポート番号"
+                        "display_name": "port number"
                     },
                     "clientID": {
-                        "display_name": "クライアントID",
-                        "description": "最大23文字<br>任意のクライアントID文字列"
+                        "display_name": "client ID",
+                        "description": "up to 23 characters < br > any of client ID string"
                     },
                     "topic": {
-                        "display_name": "トピック",
-                        "description": "最大500文字<br>購読するトピック名を設定して下さい。<br>例: my/topic"
+                        "display_name": "topic",
+                        "Please set the description ':' up to 500 characters, < br > subscribe to topic names. < Br > example: my/topic "
                     },
                     "username": {
-                        "display_name": "(オプション) ユーザー名",
-                        "description": "最大100文字<br>必要ない場合は空白。"
+                        "display_name": "(optional) user name",
+                        "the description if you do not have ':' up to 100 characters and < br > blank. "
                     },
                     "password": {
-                        "display_name": "(オプション) パスワード",
-                        "description": "最大100文字<br>必要ない場合は空白。"
+                        "display_name": "(optional) password",
+                        "the description if you do not have ':' up to 100 characters and < br > blank. "
                     },
                     "reconnect": {
-                        "display_name": "自動再接続",
-                        "description": "接続が切れた場合、自動的に再接続します。"
-                    }
-
-                }
-            },
-            "widgets": {
-                "title": "Widget",
-                "suffix": "秒",
-
-                "text_widget": {
-                    "display_name": "テキスト",
-                    "settings": {
-                        "title": {
-                            "display_name": "タイトル",
-                            "description": "最大100文字"
-                        },
-                        "size": {
-                            "display_name": "サイズ",
-                            "options": {
-                                "regular": "レギュラー",
-                                "big": "ビッグ"
-                            }
-                        },
-                        "value": {
-                            "display_name": "値",
-                            "description": "最大2000文字"
-                        },
-                        "sparkline": {
-                            "display_name": "スパークラインを含む"
-                        },
-                        "animate": {
-                            "display_name": "値変化アニメーション"
-                        },
-                        "units": {
-                            "display_name": "単位",
-                            "description": "最大20文字"
-                        }
-                    }
-                },
-
-                "sparkline": {
-                    "display_name": "スパークラインチャート",
-                    "settings": {
-                        "title": {
-                            "display_name": "タイトル",
-                            "description": "最大100文字"
-                        },
-                        "value": {
-                            "display_name": "値",
-                            "description": "最大500文字"
-                        }
-                    }
-                },
-
-
-                "gauge": {
-                    "display_name": "ゲージ",
-                    "settings": {
-                        "title": {
-                            "display_name": "タイトル",
-                            "description": "最大100文字"
-                        },
-                        "value": {
-                            "display_name": "値",
-                            "description": "最大2000文字"
-                        },
-                        "shape": {
-                            "display_name": "型",
-                            "options": {
-                                "value_0": "ハーフ",
-                                "value_1": "ファン",
-                                "value_2": "ドーナッツ"
-                            }
-                        },
-                        "units": {
-                            "display_name": "単位",
-                            "description": "最大20文字"
-                        },
-                        "value_fontcolor": {
-                            "display_name": "値フォント色",
-                            "description": "デフォルト色: #d3d4d4"
-                        },
-                        "gauge_upper_color": {
-                            "display_name": "ゲージ色 Upper",
-                            "description": "デフォルト色: #ff0000"
-                        },
-                        "gauge_mid_color": {
-                            "display_name": "ゲージ色 Mid",
-                            "description": "デフォルト色: #f9c802"
-                        },
-                        "gauge_lower_color": {
-                            "display_name": "ゲージ色 Lower",
-                            "description": "デフォルト色: #a9d70b"
-                        },
-                        "gauge_color": {
-                            "display_name": "ゲージ背景色",
-                            "description": "デフォルト色: #edebeb"
-                        },
-                        "gauge_widthscale": {
-                            "display_name": "ゲージ太さ",
-                            "description": "0から200まで"
-                        },
-                        "min_value": {
-                            "display_name": "最小値",
-                            "description": "数値のみ"
-                        },
-                        "max_value": {
-                            "display_name": "最大値",
-                            "description": "最小値以上"
-                        }
-                    }
-                },
-                "pointer": {
-                    "display_name": "ポインタ",
-                    "settings": {
-                        "title": {
-                            "display_name": "タイトル",
-                            "description": "最大100文字"
-                        },
-                        "direction": {
-                            "display_name": "方向",
-                            "description": "最大2000文字<br>角度を入力して下さい。"
-                        },
-                        "value_text": {
-                            "display_name": "値テキスト",
-                            "description": "最大2000文字"
-                        },
-                        "units": {
-                            "display_name": "単位",
-                            "description": "最大20文字"
-                        },
-                        "circle_color": {
-                            "display_name": "サークル色",
-                            "description": "デフォルト色: #ff9900"
-                        },
-                        "pointer_color": {
-                            "display_name": "ポインタ色",
-                            "description": "デフォルト色: #fff"
-                        }
-                    }
-                },
-                "picture": {
-                    "display_name": "画像",
-                    "settings": {
-                        "src": {
-                            "display_name": "画像URL",
-                            "description": "最大2000文字"
-                        },
-                        "number": {
-                            "display_name": "更新頻度",
-                            "description": "更新する必要がない場合は空白のまま"
-                        }
-                    }
-                },
-                "indicator": {
-                    "display_name": "インジケータライト",
-                    "settings": {
-                        "title": {
-                            "display_name": "タイトル",
-                            "description": "最大100文字"
-                        },
-                        "value": {
-                            "display_name": "値",
-                            "description": "最大2000文字"
-                        },
-                        "on_text": {
-                            "display_name": "ON時テキスト",
-                            "description": "最大2000文字"
-                        },
-                        "off_text": {
-                            "display_name": "OFF時テキスト",
-                            "description": "最大500文字"
-                        }
-                    }
-                },
-                "google_map": {
-                    "display_name": "Google Map",
-                    "settings": {
-                        "lat": {
-                            "display_name": "緯度",
-                            "description": "最大2000文字"
-                        },
-                        "lon": {
-                            "display_name": "経度",
-                            "description": "最大2000文字"
-                        },
-                        "blocks": {
-                            "display_name": "高さ (ブロック数)",
-                            "description": "1ブロック60ピクセル。20ブロックまで"
-                        }
-                    }
-                },
-                "html": {
-                    "display_name": "HTML",
-                    "settings": {
-                        "html": {
-                            "display_name": "HTML",
-                            "description": "最大2000文字<br>HTML文字列かjavascriptが使用できます。"
-                        },
-                        "height": {
-                            "display_name": "ブロック高さ",
-                            "description": "1ブロック60ピクセル。20ブロックまで"
-                        }
+                        "display_name": "auto-reconnect",
+                        "reconnect automatically if the description": "connection is broken. "
                     }
                 }
             }
         }
+    },
+    "widgets": {
+        "title": "Widget",
+        "suffix": "second",
+        "text_widget": {
+            "display_name": "text",
+            "settings": {
+                "title": {
+                    "display_name": "title",
+                    "description": "up to 100 characters long"
+                },
+                "size": {
+                    "display_name": "size",
+                    "options": {
+                        "regular": "regular",
+                        "big": "big"
+                    }
+                },
+                "value": {
+                    "display_name": "value",
+                    "description": "up to 2000 characters"
+                },
+                "sparkline": {
+                    "including display_name": "Sparklines"
+                },
+                "animate": {
+                    "display_name": "value changes in animation"
+                },
+                "units": {
+                    "display_name": "unit",
+                    "description": "up to 20 characters long"
+                }
+            }
+        },
+        "sparkline": {
+            "display_name": "sparklinchart",
+            "settings": {
+                "title": {
+                    "display_name": "title",
+                    "description": "up to 100 characters long"
+                },
+                "value": {
+                    "display_name": "value",
+                    "description": "up to 500 characters long"
+                }
+            }
+        },
+        "gauge": {
+            "display_name": "language",
+            "settings": {
+                "title": {
+                    "display_name": "title",
+                    "description": "up to 100 characters long"
+                },
+                "value": {
+                    "display_name": "value",
+                    "description": "up to 2000 characters"
+                },
+                "shape": {
+                    "display_name": "type",
+                    "options": {
+                        "value_0": "half",
+                        "vale_1": "fans",
+                        "value_2": "donut"
+                    }
+                },
+                "units": {
+                    "display_name": "unit",
+                    "description": "up to 20 characters long"
+                },
+                "value_fontcolor": {
+                    "display_name": "value font color",
+                    "description": "default color: #d3d4d4"
+                },
+                "gauge_upper_color": {
+                    "display_name": "gauge color Upper",
+                    "description": "default color: #ff0000"
+                },
+                "gauge_mid_color": {
+                    "display_name": "gauge color Mid",
+                    "description": "default color: #f9c802"
+                },
+                "gauge_lower_color": {
+                    "display_name": "gauge color Lower",
+                    "description": "default color: #a9d70b"
+                },
+                "gauge_color": {
+                    "display_name": "gauge background color",
+                    "description": "default color: #edebeb"
+                },
+                "gauge_widthscale": {
+                    "display_name": "gauge thickness",
+                    "description": "0-200"
+                },
+                "min_value": {
+                    "display_name": "minimum values",
+                    "description": "numbers only"
+                },
+                "max_value": {
+                    "display_name": "maximum value",
+                    "description": "the minimum value over"
+                }
+            }
+        },
+        "pointer": {
+            "display_name": "pointer",
+            "settings": {
+                "title": {
+                    "display_name": "title",
+                    "description": "up to 100 characters long"
+                },
+                "direction": {
+                    "display_name": "direction",
+                    "description": " up to 2000 characters <br> angle."
+                },
+                "value_text": {
+                    "display_name": "value text",
+                    "description": "up to 2000 characters"
+                },
+                "units": {
+                    "display_name": "unit",
+                    "description": "up to 20 characters long"
+                },
+                "circle_color": {
+                    "display_name": "circle color",
+                    "description": "default color: #ff9900"
+                },
+                "pointer_color": {
+                    "display_name": "pointer color",
+                    "description": "default color: #fff"
+                }
+            }
+        },
+        "picture": {
+            "display_name": "image",
+            "settings": {
+                "src": {
+                    "display_name": "image URL",
+                    "description": "up to 2000 characters"
+                },
+                "number": {
+                    "display_name": "update frequency",
+                    "description": "leave blank if you do not want to update the frequency"
+                }
+            }
+        },
+        "indicator": {
+            "display_name": "indicator lights",
+            "settings": {
+                "title": {
+                    "display_name": "title",
+                    "description": "up to 100 characters long"
+                },
+                "value": {
+                    "display_name": "value",
+                    "description": "up to 2000 characters"
+                },
+                "on_text": {
+                    "display_name": "ON when the text",
+                    "description": "up to 2000 characters"
+                },
+                "off_text": {
+                    "display_name": "OFF when the text",
+                    "description": "up to 500 characters long"
+                }
+            }
+        },
+        "google_map": {
+            "display_name": "Google Map",
+            "settings": {
+                "lat": {
+                    "display_name": "latitude",
+                    "description": "up to 2000 characters"
+                },
+                "lon": {
+                    "display_name": "longitude",
+                    "description": "up to 2000 characters"
+                },
+                "blocks": {
+                    "display_name": "height (number of blocks)",
+                    "description": "1 block 60 pixels. Up to 20 blocks "
+                }
+            }
+        },
+        "html": {
+            "display_name": "HTML",
+            "settings": {
+                "html": {
+                    "display_name": "HTML",
+                    "description": "up to 2000 characters <br> HTML string or javascript can be used. "
+                },
+                "height": {
+                    "display_name": "block height",
+                    "description": "1 block 60 pixels. Up to 20 blocks "
+                }
+            }
+        }
+    }
+}
