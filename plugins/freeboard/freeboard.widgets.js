@@ -423,13 +423,13 @@
             display_name: _t('gauge.settings.title.display_name'),
             validate: "optional,maxSize[100]",
             type: "text",
-            display_name: _t('gauge.settings..description')
+            display_name: _t('gauge.settings.title.description')
         }, {
             name: "value",
             display_name: _t('gauge.settings.value.display_name'),
             validate: "optional,maxSize[2000]",
             type: "calculated",
-            display_name: _t('gauge.settings..description')
+            display_name: _t('gauge.settings.value.description')
         }, {
             name: "shape",
             display_name: _t('gauge.settings.shape.display_name'),
@@ -478,14 +478,14 @@
             type: "color",
             validate: "required,custom[hexcolor]",
             default_value: "#a9d70b",
-            display_name: _t('gauge.settings.gause_lower_color.description')
+            display_name: _t('gauge.settings.gauge_lower_color.description')
         }, {
             name: "gauge_color",
             display_name: _t('gauge.settings.gauge_color.display_name'),
             type: "color",
             validate: "required,custom[hexcolor]",
             default_value: "#edebeb",
-            display_name: _t('gauge.settings.gouge_color.description')
+            display_name: _t('gauge.settings.gauge_color.description')
         }, {
             name: "gauge_widthscale",
             display_name: _t('gauge.settings.gauge_widthscale.display_name'),
@@ -780,7 +780,7 @@
 
     freeboard.loadWidgetPlugin({
         type_name: "picture",
-        display_name: _t('picture.display_name')
+        display_name: _t('picture.display_name'),
         fill_size: true,
         settings: [{
             name: "src",
@@ -1005,23 +1005,23 @@
 
     freeboard.loadWidgetPlugin({
         type_name: "google_map",
-        display_name: _t('google_map.display_value'),
+        display_name: _t('google_map.display_name'),
         fill_size: true,
         settings: [{
             name: "lat",
-            display_name: _t('google_map.settings.lat.display_value'),
+            display_name: _t('google_map.settings.lat.display_name'),
             validate: "optional,maxSize[2000]",
             type: "calculated",
             description: _t('google_map.settings.lat.description')
         }, {
             name: "lon",
-            display_name: _t('google_map.settings.lon.display_value'),
+            display_name: _t('google_map.settings.lon.display_name'),
             validate: "optional,maxSize[2000]",
             type: "calculated",
             description: _t('google_map.settings.lon.description')
         }, {
             name: "blocks",
-            display_name: _t('google_map.settings.blocks.display_value'),
+            display_name: _t('google_map.settings.blocks.display_name'),
             validate: "required,custom[integer],min[4],max[20]",
             type: "number",
             style: "width:100px",

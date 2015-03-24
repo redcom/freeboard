@@ -165,7 +165,7 @@
                 "use_proxy_name": "proxy server attempts",
                 "use_proxy_description": "The first direct connection, if it fails, it will attempt to JSONP connection If this also fails, you can use a proxy server will be able to solve many of the API connection trouble by using . <a href='https://github.com/Freeboard/thingproxy' target='_blank'> details </a> ",
                 "method": "method",
-                "body_description": ". To. The request body normally used during POST method up to 2000 characters",
+                "body_description": "To. The request body normally used during POST method up to 2000 characters",
                 "header_name_name": "name",
                 "header_name_description": "Up to 500 characters",
                 "header_value_name": "value",
@@ -203,10 +203,10 @@
             },
             "node_js": {
                 "name": "Node.js (Socket.io)",
-                "description": "I will streaming <a from node.js server using href='http://socket.io/', target='_blank'> Socket.io </a> the data source in real time. ",
+                "description": "I will streaming <a href='http://socket.io/', target='_blank'> Socket.io </a> the data source in real time. ",
                 "settings": {
                     "url_name": "DNS host name",
-                    "url_description": "up to 1000 characters (optional) If you want to use a custom namespace, add the last name space of URL <br> example:. Http: // localhost / chat",
+                    "url_description": "up to 1000 characters (optional) If you want to use a custom namespace, add the last name space of URL <br> example:. http://localhost/chat",
                     "events_name": "events",
                     "events_description": "Please specify the event name to be added to the data source. ",
                     "events_options_1": "event name",
@@ -222,26 +222,26 @@
                 "settings": {
                     "url": {
                         "display_name": "DNS host name",
-                        "description": "up to 1000 characters < br > MQTT broker server's DNS host name. Example < br >: location.hostname "
+                        "description": "up to 1000 characters <br> MQTT broker server's DNS host name. Example <br>: location.hostname "
                     },
                     "port": {
-                        "display_name": "port number"
+                        "display_name": "Port number"
                     },
                     "clientID": {
-                        "display_name": "client ID",
-                        "description": "up to 23 characters < br > any of client ID string"
+                        "display_name": "Client ID",
+                        "description": "up to 23 characters <br> any of client ID string"
                     },
                     "topic": {
-                        "display_name": "topic",
-                        "Please set the description ':' up to 500 characters, < br > subscribe to topic names. < Br > example: my/topic "
+                        "display_name": "Topic",
+                        "description": "up to 500 characters, <br> subscribe to topic names. <br> example: my/topic "
                     },
                     "username": {
                         "display_name": "(optional) user name",
-                        "the description if you do not have ':' up to 100 characters and < br > blank. "
+                        "description": " up to 100 characters and <br> blank. "
                     },
                     "password": {
                         "display_name": "(optional) password",
-                        "the description if you do not have ':' up to 100 characters and < br > blank. "
+                        "description": "up to 100 characters and <br> blank. "
                     },
                     "reconnect": {
                         "display_name": "auto-reconnect",
@@ -255,61 +255,61 @@
         "title": "Widget",
         "suffix": "second",
         "text_widget": {
-            "display_name": "text",
+            "display_name": "Text",
             "settings": {
                 "title": {
-                    "display_name": "title",
+                    "display_name": "Title",
                     "description": "up to 100 characters long"
                 },
                 "size": {
-                    "display_name": "size",
+                    "display_name": "Size",
                     "options": {
                         "regular": "regular",
                         "big": "big"
                     }
                 },
                 "value": {
-                    "display_name": "value",
+                    "display_name": "Value",
                     "description": "up to 2000 characters"
                 },
                 "sparkline": {
-                    "including display_name": "Sparklines"
+                    "display_name": "Sparklines"
                 },
                 "animate": {
-                    "display_name": "value changes in animation"
+                    "display_name": "Value changes in animation"
                 },
                 "units": {
-                    "display_name": "unit",
+                    "display_name": "Unit",
                     "description": "up to 20 characters long"
                 }
             }
         },
         "sparkline": {
-            "display_name": "sparklinchart",
+            "display_name": "Sparklinchart",
             "settings": {
                 "title": {
-                    "display_name": "title",
+                    "display_name": "Title",
                     "description": "up to 100 characters long"
                 },
                 "value": {
-                    "display_name": "value",
+                    "display_name": "Value",
                     "description": "up to 500 characters long"
                 }
             }
         },
         "gauge": {
-            "display_name": "language",
+            "display_name": "Language",
             "settings": {
                 "title": {
-                    "display_name": "title",
+                    "display_name": "Title",
                     "description": "up to 100 characters long"
                 },
                 "value": {
-                    "display_name": "value",
+                    "display_name": "Value",
                     "description": "up to 2000 characters"
                 },
                 "shape": {
-                    "display_name": "type",
+                    "display_name": "Type",
                     "options": {
                         "value_0": "half",
                         "vale_1": "fans",
@@ -317,94 +317,94 @@
                     }
                 },
                 "units": {
-                    "display_name": "unit",
+                    "display_name": "Unit",
                     "description": "up to 20 characters long"
                 },
                 "value_fontcolor": {
-                    "display_name": "value font color",
+                    "display_name": "Value font color",
                     "description": "default color: #d3d4d4"
                 },
                 "gauge_upper_color": {
-                    "display_name": "gauge color Upper",
+                    "display_name": "Gauge color Upper",
                     "description": "default color: #ff0000"
                 },
                 "gauge_mid_color": {
-                    "display_name": "gauge color Mid",
+                    "display_name": "Gauge color Mid",
                     "description": "default color: #f9c802"
                 },
                 "gauge_lower_color": {
-                    "display_name": "gauge color Lower",
+                    "display_name": "Gauge color Lower",
                     "description": "default color: #a9d70b"
                 },
                 "gauge_color": {
-                    "display_name": "gauge background color",
+                    "display_name": "Gauge background color",
                     "description": "default color: #edebeb"
                 },
                 "gauge_widthscale": {
-                    "display_name": "gauge thickness",
+                    "display_name": "Gauge thickness",
                     "description": "0-200"
                 },
                 "min_value": {
-                    "display_name": "minimum values",
+                    "display_name": "Minimum values",
                     "description": "numbers only"
                 },
                 "max_value": {
-                    "display_name": "maximum value",
+                    "display_name": "Maximum value",
                     "description": "the minimum value over"
                 }
             }
         },
         "pointer": {
-            "display_name": "pointer",
+            "display_name": "Pointer",
             "settings": {
                 "title": {
-                    "display_name": "title",
+                    "display_name": "Title",
                     "description": "up to 100 characters long"
                 },
                 "direction": {
-                    "display_name": "direction",
+                    "display_name": "Direction",
                     "description": " up to 2000 characters <br> angle."
                 },
                 "value_text": {
-                    "display_name": "value text",
+                    "display_name": "Value text",
                     "description": "up to 2000 characters"
                 },
                 "units": {
-                    "display_name": "unit",
+                    "display_name": "Unit",
                     "description": "up to 20 characters long"
                 },
                 "circle_color": {
-                    "display_name": "circle color",
+                    "display_name": "Circle color",
                     "description": "default color: #ff9900"
                 },
                 "pointer_color": {
-                    "display_name": "pointer color",
+                    "display_name": "Pointer color",
                     "description": "default color: #fff"
                 }
             }
         },
         "picture": {
-            "display_name": "image",
+            "display_name": "Image",
             "settings": {
                 "src": {
-                    "display_name": "image URL",
+                    "display_name": "Image URL",
                     "description": "up to 2000 characters"
                 },
                 "number": {
-                    "display_name": "update frequency",
+                    "display_name": "Update frequency",
                     "description": "leave blank if you do not want to update the frequency"
                 }
             }
         },
         "indicator": {
-            "display_name": "indicator lights",
+            "display_name": "Indicator lights",
             "settings": {
                 "title": {
-                    "display_name": "title",
+                    "display_name": "Title",
                     "description": "up to 100 characters long"
                 },
                 "value": {
-                    "display_name": "value",
+                    "display_name": "Value",
                     "description": "up to 2000 characters"
                 },
                 "on_text": {
@@ -421,15 +421,15 @@
             "display_name": "Google Map",
             "settings": {
                 "lat": {
-                    "display_name": "latitude",
+                    "display_name": "Latitude",
                     "description": "up to 2000 characters"
                 },
                 "lon": {
-                    "display_name": "longitude",
+                    "display_name": "Longitude",
                     "description": "up to 2000 characters"
                 },
                 "blocks": {
-                    "display_name": "height (number of blocks)",
+                    "display_name": "Height (number of blocks)",
                     "description": "1 block 60 pixels. Up to 20 blocks "
                 }
             }
@@ -442,7 +442,7 @@
                     "description": "up to 2000 characters <br> HTML string or javascript can be used. "
                 },
                 "height": {
-                    "display_name": "block height",
+                    "display_name": "Block height",
                     "description": "1 block 60 pixels. Up to 20 blocks "
                 }
             }

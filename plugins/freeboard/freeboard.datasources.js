@@ -982,7 +982,7 @@
     freeboard.loadDatasourcePlugin({
         type_name: "mqtt",
         display_name: _t('mqtt.display_name'),
-        description: _t('mqtt.description')
+        description: _t('mqtt.description'),
         external_scripts: ["plugins/thirdparty/mqttws31.js"],
         settings: [{
             name: "url",
@@ -1002,14 +1002,14 @@
             display_name: _t('mqtt.settings.clientID.display_name'),
             validate: "required,maxSize[23]",
             type: "text",
-            description: _t('mqtt.settings.clientID.description')
+            description: _t('mqtt.settings.clientID.description'),
             default_value: "SensorCorpus"
         }, {
             name: "topic",
             display_name: _t('mqtt.settings.topic.display_name'),
             validate: "required,maxSize[500]",
             type: "text",
-            description: _t('mqtt.settings.topic.description')
+            description: _t('mqtt.settings.topic.description'),
             default_value: ""
         }, {
             name: "username",
@@ -1027,7 +1027,7 @@
             name: "reconnect",
             display_name: _t('mqtt.settings.reconnect.display_name'),
             type: "boolean",
-            description: _t('mqtt.settings.reconnect.description')
+            description: _t('mqtt.settings.reconnect.description'),
             default_value: true
         }],
         newInstance: function(settings, newInstanceCallback, updateCallback) {
